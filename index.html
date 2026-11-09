@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#0B4DB5">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>TezPost Cargo</title>
 <style>
   :root{
@@ -270,6 +273,10 @@ function renderList(){
         <p>Yuk yuborishdan oldin "Deklaratsiya yaratish" tugmasi orqali trek-kodni qo'shing.</p></div>`;
 }
 renderList();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
 </script>
 </body>
 </html>
