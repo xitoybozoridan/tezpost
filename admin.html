@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08204F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="admin-manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>TezPost Admin</title>
+<style>
+  :root{
+    --navy:#08204F; --navy2:#0B2C6B; --blue:#0B4DB5; --blue-soft:#E8F0FD;
+    --orange:#FF7A00; --orange-dark:#E56A00; --orange-soft:#FFF1E3;
+    --bg:#F2F6FC; --card:#FFFFFF; --text:#0E1B3D; --muted:#6B7A99; --line:#DCE5F4; --danger:#D92D20;
+    --shadow:0 6px 22px rgba(11,77,181,.10);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%}
+  body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+  button,input,select{font:inherit;color:inherit}
+  button{cursor:pointer}
+  .screen{display:none;min-height:100vh;max-width:620px;margin:0 auto;position:relative}
+  .screen.active{display:block;animation:in .28s ease both}
+  @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .hero{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--navy2) 0%,var(--navy) 100%);border-radius:0 0 30px 30px;padding:calc(env(safe-area-inset-top) + 16px) 18px 18px;box-shadow:0 12px 30px rgba(5,20,60,.3);color:#fff}
+  .hero::before{content:"";position:absolute;width:220px;height:220px;border-radius:50%;right:-70px;top:-90px;background:radial-gradient(circle,rgba(255,122,0,.45),rgba(255,122,0,0) 70%)}
+  .hero>*{position:relative;z-index:1}
+  .top{display:flex;align-items:center;gap:12px}
+  .logo{width:46px;height:46px;border-radius:15px;background:#fff;display:grid;place-items:center;flex:none;overflow:hidden}
+  .logo img{width:40px;height:40px;display:block}
+  .top h1{margin:0;font-size:21px;letter-spacing:-.2px}
+  .top small{display:block;color:rgba(255,255,255,.75);font-size:13px;margin-top:1px}
+  .iconbtn{margin-left:auto;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+  .iconbtn+.iconbtn{margin-left:8px}
+  .iconbtn svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .iconbtn.spin svg{animation:spin .8s linear infinite}
+
+  .search{margin-top:16px;position:relative}
+  .search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:22px;height:22px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round}
+  .search input{width:100%;height:56px;border-radius:28px;border:0;outline:none;background:#fff;color:var(--text);font-size:18px;padding:0 48px 0 50px;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+  .search input::placeholder{color:#9AA7C4}
+  .search .x{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;background:none;color:var(--muted);font-size:26px;display:none}
+  .search .x.show{display:block}
+
+  .tabs{display:grid;grid-template-columns:1fr 1fr;background:rgba(255,255,255,.12);border-radius:18px;padding:4px;margin-top:14px}
+  .tabs button{border:0;background:none;padding:11px 6px;border-radius:14px;font-weight:700;font-size:15px;color:rgba(255,255,255,.8)}
+  .tabs button.on{background:#fff;color:var(--navy)}
+
+  .wrap{padding:18px 16px calc(env(safe-area-inset-bottom) + 40px)}
+  .info{margin:0 4px 12px;color:var(--muted);font-size:14px;font-weight:600}
+
+  .empty{background:var(--card);border-radius:26px;padding:30px 22px;text-align:center;box-shadow:var(--shadow)}
+  .empty b{display:block;font-size:18px}
+  .empty p{margin:6px 0 0;color:var(--muted);font-size:15px;line-height:1.45}
+  .skel{height:96px;border-radius:22px;margin-bottom:12px;background:linear-gradient(90deg,#E6EDF9 25%,#F3F7FD 50%,#E6EDF9 75%);background-size:200% 100%;animation:sh 1.2s infinite}
+  @keyframes sh{to{background-position:-200% 0}}
+
+  /* mijoz kartasi */
+  .cust{background:linear-gradient(135deg,#FFF6EC,#fff);border:1.5px solid #FFD9B0;border-radius:24px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);text-align:left;width:100%}
+  .code{flex:none;background:var(--orange);color:#fff;font-weight:800;font-size:19px;letter-spacing:.5px;padding:10px 14px;border-radius:16px;box-shadow:0 6px 14px rgba(255,122,0,.35)}
+  .cust .mid{min-width:0;flex:1}
+  .cust b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cust a{color:var(--blue);font-weight:600;text-decoration:none;font-size:15px}
+  .cust .cnt{flex:none;text-align:center;background:var(--blue-soft);color:var(--blue);border-radius:14px;padding:6px 12px}
+  .cust .cnt b{font-size:20px}
+  .cust .cnt span{font-size:12px;font-weight:600}
+
+  /* yuk kartasi */
+  .item{background:var(--card);border-radius:24px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow);animation:in .3s ease both}
+  .item .row1{display:flex;align-items:center;gap:10px;justify-content:space-between}
+  .trk{font-weight:800;font-size:18px;letter-spacing:.6px;word-break:break-all;background:none;border:0;padding:0;text-align:left}
+  .who{flex:none;background:var(--orange-soft);color:#B24F00;font-weight:800;font-size:14px;padding:5px 11px;border-radius:999px;border:0}
+  .who small{font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .chip{background:var(--blue-soft);color:var(--blue);font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px}
+  .note-line{margin-top:8px;font-size:14px;color:#44527a}
+  .row3{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+  .when{font-size:13px;color:var(--muted)}
+  .stsel{position:relative}
+  .stsel select{appearance:none;-webkit-appearance:none;border:0;outline:none;font-size:13px;font-weight:700;padding:8px 30px 8px 12px;border-radius:999px}
+  .stsel::after{content:"";position:absolute;right:12px;top:50%;width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-70%) rotate(45deg);pointer-events:none}
+  .stsel.new{color:var(--blue)} .stsel.new select{background:var(--blue-soft)}
+  .stsel.china{color:#B24F00} .stsel.china select{background:var(--orange-soft)}
+  .stsel.transit{color:#8A6500} .stsel.transit select{background:#FFF4CC}
+  .stsel.uz{color:#127A45} .stsel.uz select{background:#E3F6EC}
+  .stsel.done{color:#fff} .stsel.done select{background:#127A45}
+
+  /* kirish */
+  .login{margin:-14px 18px 30px;position:relative;z-index:2;background:var(--card);border-radius:30px;padding:24px 20px;box-shadow:0 14px 34px rgba(11,77,181,.16);max-width:560px}
+  .login h2{margin:0 0 4px;font-size:26px;letter-spacing:-.4px}
+  .login p{margin:0 0 18px;color:var(--muted);font-size:15px}
+  .field{display:block;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:11px 16px 12px;margin-bottom:12px;position:relative}
+  .field:focus-within{border-color:var(--blue);box-shadow:0 0 0 4px rgba(11,77,181,.12)}
+  .field>span{display:block;font-size:13px;font-weight:600;color:var(--muted)}
+  .field input{width:100%;border:0;background:transparent;outline:none;font-size:19px;padding:4px 44px 0 0}
+  .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:42px;height:42px;border:0;background:none;display:grid;place-items:center}
+  .eye svg{width:22px;height:22px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .msg{min-height:20px;margin:2px 4px 12px;color:var(--danger);font-size:14px;font-weight:600}
+  .btn{width:100%;height:58px;border:0;border-radius:29px;background:linear-gradient(180deg,#FF9322,#FF7A00 60%,#F26A00);color:#fff;font-size:19px;font-weight:700;box-shadow:0 10px 24px rgba(255,122,0,.45),inset 0 1px 0 rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;gap:10px}
+  .btn[disabled]{opacity:.75}
+  .btn .sp{width:20px;height:20px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+  .setup{margin:18px 18px 0;background:#FFF4CC;color:#8A6500;border-radius:16px;padding:12px 14px;font-size:14px;font-weight:600}
+
+  .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:22px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:40;width:max-content;max-width:90vw;text-align:center;box-shadow:0 10px 24px rgba(5,20,60,.35)}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast.bad{background:var(--danger)}
+</style>
+</head>
+<body>
+
+<!-- ===== KIRISH ===== -->
+<main id="login" class="screen">
+  <section class="hero" style="padding-bottom:44px">
+    <div class="top">
+      <div class="logo"><img alt="" src="icon-192.png"></div>
+      <div><h1>TezPost Admin</h1><small>Faqat xodimlar uchun</small></div>
+    </div>
+  </section>
+  <div id="setupWarn" class="setup" style="display:none">Server hali ulanmagan. Ilova sozlamalarini tekshiring.</div>
+  <div class="login">
+    <h2>Admin kirishi</h2>
+    <p>Admin parolni kiriting</p>
+    <label class="field"><span>Parol</span>
+      <input id="lPass" type="password" autocomplete="current-password" placeholder="••••••••">
+      <button type="button" class="eye" aria-label="Ko'rsatish" onclick="toggleEye(this)"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </label>
+    <div class="msg" id="lMsg"></div>
+    <button class="btn" id="lBtn" onclick="doLogin()">Kirish</button>
+  </div>
+</main>
+
+<!-- ===== ASOSIY ===== -->
+<main id="main" class="screen">
+  <section class="hero">
+    <div class="top">
+      <div class="logo"><img alt="" src="icon-192.png"></div>
+      <div><h1>TezPost Admin</h1><small id="subline">Yuklar va mijozlar</small></div>
+      <button class="iconbtn" id="refBtn" aria-label="Yangilash" onclick="refresh(true)"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg></button>
+      <button class="iconbtn" aria-label="Chiqish" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg></button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" placeholder="Mijoz kodi (TP1001) yoki trek-kod" autocomplete="off" autocapitalize="characters" enterkeyhint="search">
+      <button class="x" id="qx" aria-label="Tozalash" onclick="clearQ()">×</button>
+    </div>
+    <div class="tabs">
+      <button id="tCargo" class="on" onclick="setTab('cargo')">Yuklar</button>
+      <button id="tCust" onclick="setTab('cust')">Mijozlar</button>
+    </div>
+  </section>
+  <div class="wrap"><div id="out"></div></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script>
+/* ====== SOZLAMALAR ====== */
+const CONFIG = { url: (window.TP_CONFIG||{}).url || "", key: (window.TP_CONFIG||{}).key || "" };
+const CONFIGURED = !!(CONFIG.url && CONFIG.key);
+const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"O'zbekistonda", done:"Topshirildi"};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } },
+  set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k) }catch(e){} }
+};
+
+async function rpc(name, args){
+  let res;
+  try{
+    res = await fetch(CONFIG.url + "/rest/v1/rpc/" + name, {
+      method: "POST",
+      headers: { "apikey": CONFIG.key, "Content-Type": "application/json" },
+      body: JSON.stringify(args || {})
+    });
+  }catch(e){ const err = new Error("Internet yo'q yoki server javob bermayapti"); err.offline = true; throw err; }
+  let data = null; try{ data = await res.json() }catch(e){}
+  if(!res.ok){
+    const msg = (data && data.message) || "Xatolik yuz berdi";
+    const err = new Error(msg);
+    err.session = /Sessiya tugagan|invalid input syntax for type uuid/i.test(msg);
+    throw err;
+  }
+  return data;
+}
+
+let token = store.get("tpa_token");
+let tab = "cargo";
+let seq = 0;
+
+function toast(msg, bad){
+  const t = $("toast"); t.textContent = msg; t.classList.toggle("bad", !!bad); t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("show"), 2400);
+}
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active", s.id===id));
+  window.scrollTo({top:0,left:0,behavior:"instant"});
+}
+function toggleEye(btn){ const i = btn.parentElement.querySelector("input"); i.type = i.type === "password" ? "text" : "password"; }
+
+/* ====== Kirish ====== */
+let busy = false;
+async function doLogin(){
+  if(busy) return;
+  const msg = $("lMsg"); msg.textContent = "";
+  if(!CONFIGURED){ msg.textContent = "Server hali ulanmagan"; return; }
+  const pass = $("lPass").value;
+  if(!pass){ msg.textContent = "Parolni kiriting"; return; }
+  const btn = $("lBtn"); busy = true; btn.disabled = true; btn.innerHTML = '<span class="sp"></span> Kuting…';
+  try{
+    const r = await rpc("admin_login", {p_password:pass});
+    if(r && r.error){ msg.textContent = r.error; return; }
+    token = r.token; store.set("tpa_token", token);
+    $("lPass").value = "";
+    enter();
+  }catch(e){ msg.textContent = e.message; }
+  finally{ busy = false; btn.disabled = false; btn.textContent = "Kirish"; }
+}
+$("lPass").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+
+function forceLogout(){ token = null; store.del("tpa_token"); show("login"); }
+async function logout(){
+  const t = token;
+  try{ if(t) await rpc("admin_logout", {p_token:t}); }catch(e){}
+  forceLogout(); toast("Chiqdingiz");
+}
+function handleErr(e){
+  if(e.session){ forceLogout(); toast("Qaytadan kiring", true); }
+  else toast(e.message, true);
+}
+function enter(){ show("main"); search(); }
+
+/* ====== Qidiruv ====== */
+let timer = null;
+$("q").addEventListener("input", ()=>{
+  $("qx").classList.toggle("show", !!$("q").value);
+  clearTimeout(timer); timer = setTimeout(search, 320);
+});
+$("q").addEventListener("keydown", e=>{ if(e.key==="Enter"){ clearTimeout(timer); search(); $("q").blur(); } });
+function clearQ(){ $("q").value = ""; $("qx").classList.remove("show"); search(); $("q").focus(); }
+function setTab(t){
+  tab = t;
+  $("tCargo").classList.toggle("on", t==="cargo");
+  $("tCust").classList.toggle("on", t==="cust");
+  search();
+}
+function openCustomer(code){
+  $("q").value = code; $("qx").classList.add("show");
+  setTab("cargo"); window.scrollTo({top:0,behavior:"smooth"});
+}
+async function refresh(manual){
+  const b = $("refBtn"); b.classList.add("spin");
+  await search(); b.classList.remove("spin");
+  if(manual) toast("Yangilandi");
+}
+
+const BOXSVG = "";
+function when(iso){
+  const d = new Date(iso);
+  return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear()+", "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+function fmtPhone(p){
+  p = String(p||"");
+  return "+998 " + [p.slice(3,5), p.slice(5,8), p.slice(8,10), p.slice(10,12)].filter(Boolean).join(" ");
+}
+function custCard(c, clickable){
+  return `<${clickable?'button':'div'} class="cust" ${clickable?`onclick="openCustomer('${esc(c.code)}')"`:''}>
+    <div class="code">${esc(c.code)}</div>
+    <div class="mid"><b>${esc(c.name)}</b><a href="tel:+${esc(c.phone)}" onclick="event.stopPropagation()">${esc(fmtPhone(c.phone))}</a></div>
+    <div class="cnt"><b>${Number(c.cargo_count)||0}</b><br><span>yuk</span></div>
+  </${clickable?'button':'div'}>`;
+}
+function cargoCard(d){
+  const opts = Object.keys(STATUS).map(k=>`<option value="${k}" ${d.status===k?"selected":""}>${STATUS[k]}</option>`).join("");
+  return `<div class="item" id="d${d.id}">
+    <div class="row1"><button class="trk" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button>
+      <button class="who" onclick="openCustomer('${esc(d.customer_code)}')">${esc(d.customer_code)}</button></div>
+    <div style="margin-top:6px;font-size:15px;font-weight:600">${esc(d.customer_name)} <a style="color:var(--blue);text-decoration:none;font-weight:600" href="tel:+${esc(d.customer_phone)}">${esc(fmtPhone(d.customer_phone))}</a></div>
+    <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div>
+    ${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}
+    <div class="row3"><span class="when">${when(d.created_at)}</span>
+      <span class="stsel ${esc(d.status)}" id="s${d.id}"><select onchange="setStatus(${d.id},this)" data-prev="${esc(d.status)}">${opts}</select></span></div>
+  </div>`;
+}
+function copyTrack(t){
+  try{ navigator.clipboard.writeText(t); toast("Trek-kod nusxalandi"); }catch(e){}
+}
+async function setStatus(id, sel){
+  const prev = sel.dataset.prev, val = sel.value;
+  try{
+    await rpc("admin_set_status", {p_token:token, p_id:id, p_status:val});
+    sel.dataset.prev = val; $("s"+id).className = "stsel " + val; toast("Holat: " + STATUS[val]);
+  }catch(e){ sel.value = prev; handleErr(e); }
+}
+
+async function search(){
+  if(!token || !CONFIGURED) return;
+  const my = ++seq;
+  const q = $("q").value.trim();
+  const out = $("out");
+  if(!out.children.length) out.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+  try{
+    if(tab === "cust"){
+      const list = await rpc("admin_customers", {p_token:token, p_q:q});
+      if(my !== seq) return;
+      $("subline").textContent = "Mijozlar: " + list.length;
+      out.innerHTML = list.length ? `<div class="info">Mijozlar: ${list.length} ta. Bosib, yuklarini ko'ring</div>` + list.map(c=>custCard(c,true)).join("")
+        : `<div class="empty"><b>Mijoz topilmadi</b><p>${q?"Boshqa so'z bilan qidirib ko'ring.":"Hali hech kim ro'yxatdan o'tmagan."}</p></div>`;
+    } else {
+      const r = await rpc("admin_search", {p_token:token, p_q:q});
+      if(my !== seq) return;
+      const cs = r.customers || [], ds = r.declarations || [];
+      $("subline").textContent = "Yuklar: " + ds.length;
+      let html = "";
+      if(cs.length) html += `<div class="info">Mijoz${cs.length>1?"lar":""}</div>` + cs.map(c=>custCard(c,cs.length>1)).join("");
+      html += `<div class="info">${q?"Topilgan yuklar":"So'nggi yuklar"}: ${ds.length} ta</div>`;
+      html += ds.length ? ds.map(cargoCard).join("")
+        : `<div class="empty"><b>Yuk topilmadi</b><p>${q?"Mijoz kodi (masalan TP1001), ism, telefon yoki trek-kod bilan qidiring.":"Hali deklaratsiya qo'shilmagan."}</p></div>`;
+      out.innerHTML = html;
+    }
+  }catch(e){ if(my === seq){ out.innerHTML = ""; handleErr(e); } }
+}
+
+/* ====== Boshlash ====== */
+if(!CONFIGURED) $("setupWarn").style.display = "block";
+if(token) enter(); else show("login");
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>
