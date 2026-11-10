@@ -88,6 +88,7 @@
   .stsel.china{color:#B24F00} .stsel.china select{background:var(--orange-soft)}
   .stsel.transit{color:#8A6500} .stsel.transit select{background:#FFF4CC}
   .stsel.uz{color:#127A45} .stsel.uz select{background:#E3F6EC}
+  .stsel.pickup{color:#0A6670} .stsel.pickup select{background:#D9F1F4}
   .stsel.done{color:#fff} .stsel.done select{background:#127A45}
 
   /* ommaviy tanlash */
@@ -121,6 +122,41 @@
   .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:22px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:40;width:max-content;max-width:90vw;text-align:center;box-shadow:0 10px 24px rgba(5,20,60,.35)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .toast.bad{background:var(--danger)}
+
+  /* ---------- IXCHAM ko'rinish ---------- */
+  .hero{padding:calc(env(safe-area-inset-top) + 10px) 14px 12px;border-radius:0 0 24px 24px}
+  .top{gap:10px}.logo{width:38px;height:38px;border-radius:12px}.logo img{width:33px;height:33px}
+  .top h1{font-size:17px}.top small{font-size:12px}
+  .iconbtn{width:38px;height:38px;border-radius:12px}.iconbtn svg{width:19px;height:19px}
+  .search{margin-top:10px}.search svg{left:14px;width:19px;height:19px}
+  .search input{height:46px;border-radius:23px;font-size:16px;padding:0 42px 0 44px}
+  .search .x{width:34px;height:34px;font-size:22px}
+  .tabs{margin-top:10px;border-radius:15px;padding:3px}.tabs button{padding:8px 6px;font-size:14px;border-radius:12px}
+  .wrap{padding:12px 12px calc(env(safe-area-inset-bottom) + 30px)}
+  .info{font-size:12px;margin:0 4px 8px}
+  .empty{border-radius:20px;padding:22px 18px}.empty b{font-size:16px}.empty p{font-size:13px}
+  .skel{height:72px;border-radius:18px;margin-bottom:9px}
+  .cust{padding:9px 12px;border-radius:18px;margin-bottom:9px;gap:10px}
+  .code{font-size:15px;padding:7px 11px;border-radius:12px}
+  .cust b{font-size:15px}.cust a{font-size:13px}
+  .cust .cnt{padding:4px 10px;border-radius:11px}.cust .cnt b{font-size:16px}.cust .cnt span{font-size:11px}
+  .item{padding:11px 12px;border-radius:18px;margin-bottom:9px}
+  .trk{font-size:15px;letter-spacing:.4px}
+  .who{font-size:12px;padding:4px 9px}
+  .chips{margin-top:7px;gap:5px}.chip{font-size:12px;padding:3px 8px}
+  .note-line{font-size:13px;margin-top:6px}
+  .row3{margin-top:9px}.when{font-size:12px}
+  .stsel select{font-size:12px;padding:6px 26px 6px 10px}.stsel::after{right:10px}
+  .bulk{padding:8px 12px;border-radius:16px;margin-bottom:9px}
+  .chk{font-size:14px;gap:10px}.chk input{width:24px;height:24px;border-radius:8px}
+  .chk input:checked::after{width:6px;height:11px}
+  #bar{padding:10px 12px calc(env(safe-area-inset-bottom) + 10px)}
+  #bar .btn{height:48px;font-size:16px;border-radius:24px}
+  .login{margin:-12px 14px 24px;padding:18px 16px;border-radius:24px}
+  .login h2{font-size:21px}.login p{font-size:13px;margin-bottom:12px}
+  .field{padding:8px 14px 9px;border-radius:15px;margin-bottom:10px}.field>span{font-size:12px}.field input{font-size:16px}
+  .btn{height:48px;border-radius:24px;font-size:16px}
+  .toast{font-size:14px;padding:11px 18px;border-radius:18px;bottom:76px}
 </style>
 </head>
 <body>
@@ -168,7 +204,7 @@
   <div class="wrap"><div id="out"></div></div>
 </main>
 
-<div id="bar"><button class="btn" id="bulkBtn" onclick="bulkDone()">Topshirish</button></div>
+<div id="bar"><button class="btn" id="bulkBtn" onclick="bulkDone()">Tasdiqlash</button></div>
 <div class="toast" id="toast"></div>
 
 <script src="config.js"></script>
@@ -176,7 +212,7 @@
 /* ====== SOZLAMALAR ====== */
 const CONFIG = { url: (window.TP_CONFIG||{}).url || "", key: (window.TP_CONFIG||{}).key || "" };
 const CONFIGURED = !!(CONFIG.url && CONFIG.key);
-const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"O'zbekistonda", done:"Topshirildi"};
+const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"O'zbekistonda", pickup:"Topshirish punktida", done:"Tasdiqlangan"};
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -293,7 +329,7 @@ function custCard(c, clickable){
 }
 function cargoCard(d){
   const opts = Object.keys(STATUS).map(k=>`<option value="${k}" ${d.status===k?"selected":""}>${STATUS[k]}</option>`).join("");
-  const pick = (d.status==="uz" && canPick) ? `<label class="chk pick"><input type="checkbox" data-id="${d.id}" onchange="togglePick(${d.id},this)"></label>` : "";
+  const pick = ((d.status==="uz"||d.status==="pickup") && canPick) ? `<label class="chk pick"><input type="checkbox" data-id="${d.id}" onchange="togglePick(${d.id},this)"></label>` : "";
   return `<div class="item" id="d${d.id}">
     <div class="row1">${pick}<button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button>
       <button class="who" onclick="openCustomer('${esc(d.customer_code)}')">${esc(d.customer_code)}</button></div>
@@ -320,7 +356,7 @@ const sel = new Set(); let canPick = false;
 function updateBar(){
   const n = sel.size, bar = $("bar");
   bar.classList.toggle("show", n > 0);
-  $("bulkBtn").textContent = "Tanlanganlarni topshirish (" + n + " ta)";
+  $("bulkBtn").textContent = "Tasdiqlash (" + n + " ta)";
   const all = $("selAll"), boxes = document.querySelectorAll(".pick input");
   if(all) all.checked = boxes.length > 0 && n === boxes.length;
 }
@@ -339,11 +375,11 @@ function toggleAll(cb){
 }
 async function bulkDone(){
   const ids = [...sel]; if(!ids.length) return;
-  if(!confirm(ids.length + " ta yuk topshirilsinmi?")) return;
+  if(!confirm(ids.length + " ta yuk tasdiqlansinmi (mijozga topshirildi)?")) return;
   const b = $("bulkBtn"); b.disabled = true;
   try{
-    const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:"uz"});
-    toast("Topshirildi: " + (r && r.count != null ? r.count : ids.length) + " ta");
+    const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:["uz","pickup"]});
+    toast("Tasdiqlandi: " + (r && r.count != null ? r.count : ids.length) + " ta");
     sel.clear(); await search();
   }catch(e){ handleErr(e); }
   b.disabled = false;
@@ -369,11 +405,11 @@ async function search(){
       const cs = r.customers || [], ds = r.declarations || [];
       $("subline").textContent = "Yuklar: " + ds.length;
       sel.clear(); canPick = q !== "";
-      const uzCount = ds.filter(d=>d.status==="uz").length;
+      const uzCount = ds.filter(d=>d.status==="uz"||d.status==="pickup").length;
       let html = "";
       if(cs.length) html += `<div class="info">Mijoz${cs.length>1?"lar":""}</div>` + cs.map(c=>custCard(c,cs.length>1)).join("");
       html += `<div class="info">${q?"Topilgan yuklar":"So'nggi yuklar"}: ${ds.length} ta</div>`;
-      if(canPick && uzCount) html += `<div class="bulk"><label class="chk"><input type="checkbox" id="selAll" onchange="toggleAll(this)">Hammasini tanlash</label><span class="when">O'zbekistonda: ${uzCount} ta</span></div>`;
+      if(canPick && uzCount) html += `<div class="bulk"><label class="chk"><input type="checkbox" id="selAll" onchange="toggleAll(this)">Hammasini tanlash</label><span class="when">Topshirishga tayyor: ${uzCount} ta</span></div>`;
       html += ds.length ? ds.map(cargoCard).join("")
         : `<div class="empty"><b>Yuk topilmadi</b><p>${q?"Mijoz kodi (masalan TP1001), ism, telefon yoki trek-kod bilan qidiring.":"Hali deklaratsiya qo'shilmagan."}</p></div>`;
       out.innerHTML = html;

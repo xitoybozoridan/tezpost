@@ -75,6 +75,7 @@
   .st.china{background:var(--orange-soft);color:#B24F00}
   .st.transit{background:#FFF4CC;color:#8A6500}
   .st.uz{background:#E3F6EC;color:#127A45}
+  .st.pickup{background:#D9F1F4;color:#0A6670}
   .st.done{background:#127A45;color:#fff}
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
   .chip{background:var(--orange-soft);color:#B24F00;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px}
@@ -188,6 +189,64 @@
   .toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,20px);background:var(--blue-deep);color:#fff;padding:14px 22px;border-radius:22px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:40;width:max-content;max-width:90vw;text-align:center;box-shadow:0 10px 24px rgba(5,47,122,.35)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .toast.bad{background:var(--danger)}
+
+  /* ---------- IXCHAM ko'rinish ---------- */
+  .pad-nav{padding-bottom:calc(env(safe-area-inset-bottom) + 70px)}
+  .hero{padding:calc(env(safe-area-inset-top) + 12px) 14px 16px;border-radius:0 0 26px 26px}
+  .brand{padding:7px 12px;border-radius:18px}
+  .brand img{max-width:230px}
+  .hello{margin:10px 4px 0;font-size:13px}.hello b{font-size:15px}
+  .punkt{margin-top:10px;padding:8px 10px;gap:10px;border-radius:16px}
+  .pin{width:38px;height:38px;border-radius:12px}.pin svg{width:20px;height:20px}
+  .punkt-text small{font-size:11px}.punkt-text b{font-size:15px;margin-top:1px}
+  .bell{width:38px;height:38px;border-radius:12px}.bell svg{width:20px;height:20px}
+  .cta{margin-top:12px;height:50px;border-radius:25px;font-size:16px;gap:10px}
+  .cta .plus{width:28px;height:28px;font-size:22px}
+  .section{padding:18px 14px 14px}
+  .section-head{margin-bottom:10px}.section-head h2{font-size:18px}
+  .count{min-width:24px;height:24px;font-size:12px;border-radius:12px}
+  .empty{border-radius:22px;padding:22px 18px}.empty svg{width:72px;height:72px}.empty b{font-size:16px}.empty p{font-size:13px}
+  .skel{height:70px;border-radius:18px;margin-bottom:10px}
+  .item{padding:11px 12px;border-radius:18px;margin-bottom:9px;gap:10px}
+  .item .ic{width:38px;height:38px;border-radius:12px}.item .ic svg{width:21px;height:21px}
+  .item .trk{font-size:15px;letter-spacing:.4px}
+  .st{font-size:11px;padding:3px 9px}
+  .chips{gap:5px;margin-top:6px}.chip{font-size:12px;padding:3px 8px}
+  .item .when{margin-top:7px;font-size:12px}.note-line{font-size:13px;margin-top:4px}
+  .auth-card{margin:-16px 14px 24px;padding:16px 16px 18px;border-radius:24px}
+  .tabs{padding:4px;margin-bottom:14px;border-radius:15px}.tabs button{padding:9px 6px;font-size:14px;border-radius:12px}
+  .auth-card h1{font-size:21px}.auth-card p.sub{font-size:13px;margin-bottom:12px}
+  .field{padding:8px 14px 9px;border-radius:15px;margin-bottom:10px}
+  .field>span{font-size:12px}.field input,.field select,.field textarea{font-size:16px;padding:3px 0 0}
+  .phone-wrap .pre{font-size:16px;padding-top:3px}
+  .auth-card .btn-save{height:48px;border-radius:24px;font-size:16px}
+  .p-hero{padding:calc(env(safe-area-inset-top) + 20px) 14px 22px;border-radius:0 0 26px 26px}
+  .avatar{width:70px;height:70px;font-size:27px;margin-bottom:10px;border-width:3px}
+  .p-hero h1{font-size:21px}.p-hero .ph{font-size:14px;margin-top:4px}
+  .stats{margin-top:12px}.stat{padding:7px 16px;min-width:100px;border-radius:14px}.stat b{font-size:18px}.stat span{font-size:12px}
+  .menu{margin:16px 14px 0;border-radius:20px}
+  .menu button{padding:11px 14px;font-size:15px;gap:12px}
+  .menu .mi{width:34px;height:34px;border-radius:11px}.menu .mi svg{width:18px;height:18px}
+  .ver{font-size:12px;margin:16px 0}
+  .nav .in{border-radius:20px 20px 0 0;padding:5px 12px calc(env(safe-area-inset-bottom) + 5px)}
+  .nav button{font-size:11px;gap:2px;padding:5px 0}.nav button svg{width:22px;height:22px}
+  .nav button.on::after{top:-5px;width:28px;height:3px}
+  .bar{padding:calc(env(safe-area-inset-top) + 4px) 14px 4px}.link{font-size:16px;padding:8px 0}
+  h1.title{font-size:25px;margin:4px 16px 12px}
+  .form{padding:0 14px 110px}
+  .pcard{padding:14px;border-radius:20px;margin-bottom:12px}
+  .phead{margin-bottom:11px;gap:10px}.badge{width:28px;height:28px;border-radius:10px;font-size:14px}.phead h3{font-size:16px}
+  .rm{font-size:12px;padding:5px 10px;border-radius:10px}
+  .lbl{font-size:12px;margin:0 4px 6px}
+  .stepper{gap:8px;margin-bottom:11px}.stepper button{width:44px;height:44px;border-radius:14px;font-size:22px}
+  .stepper input{height:44px;border-radius:14px;font-size:18px}
+  .add{height:46px;border-radius:16px;font-size:15px}.add span{font-size:22px}
+  .area-lbl{font-size:14px;margin:6px 4px 8px}
+  textarea{min-height:90px;font-size:15px !important}
+  .savebar{padding:12px 14px calc(env(safe-area-inset-bottom) + 10px)}
+  .btn-save{height:50px;border-radius:25px;font-size:16px}
+  .sheet{padding:16px 14px calc(env(safe-area-inset-bottom) + 14px);border-radius:24px 24px 0 0}.sheet h3{font-size:18px}.sheet .cancel{font-size:14px;padding:10px}
+  .toast{font-size:14px;padding:11px 18px;border-radius:18px;bottom:86px}
 </style>
 </head>
 <body>
@@ -313,7 +372,7 @@ const CONFIG = {
   productTypes: ["Kiyim","Poyabzal","Elektronika","Aksessuarlar","Uy-ro'zg'or buyumlari","Kosmetika","O'yinchoqlar","Avto ehtiyot qismlar","Boshqa"]
 };
 const CONFIGURED = !!(CONFIG.url && CONFIG.key);
-const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"O'zbekistonda", done:"Topshirildi"};
+const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"O'zbekistonda", pickup:"Topshirish punktida", done:"Tasdiqlangan"};
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
