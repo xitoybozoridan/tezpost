@@ -20,7 +20,7 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;min-height:100%}
   body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-  button,input,select{font:inherit;color:inherit}
+  button,input,select,textarea{font:inherit;color:inherit}
   button{cursor:pointer}
   .screen{display:none;min-height:100vh;max-width:620px;margin:0 auto;position:relative}
   .screen.active{display:block;animation:in .28s ease both}
@@ -47,7 +47,7 @@
   .search .x{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;background:none;color:var(--muted);font-size:26px;display:none}
   .search .x.show{display:block}
 
-  .tabs{display:grid;grid-template-columns:1fr 1fr;background:rgba(255,255,255,.12);border-radius:18px;padding:4px;margin-top:14px}
+  .tabs{display:grid;grid-template-columns:1fr 1fr 1fr;background:rgba(255,255,255,.12);border-radius:18px;padding:4px;margin-top:14px}
   .tabs button{border:0;background:none;padding:11px 6px;border-radius:14px;font-weight:700;font-size:15px;color:rgba(255,255,255,.8)}
   .tabs button.on{background:#fff;color:var(--navy)}
 
@@ -157,6 +157,36 @@
   .field{padding:8px 14px 9px;border-radius:15px;margin-bottom:10px}.field>span{font-size:12px}.field input{font-size:16px}
   .btn{height:48px;border-radius:24px;font-size:16px}
   .toast{font-size:14px;padding:11px 18px;border-radius:18px;bottom:76px}
+
+  /* ---------- Chat ---------- */
+  .tabs button{position:relative}
+  .tbdg{display:none;margin-left:5px;min-width:18px;height:18px;border-radius:9px;background:var(--danger);color:#fff;font-size:11px;font-weight:700;padding:0 5px;vertical-align:1px;align-items:center;justify-content:center}
+  .tbdg.show{display:inline-flex}
+  .crow{width:100%;display:flex;align-items:center;gap:10px;background:var(--card);border:0;border-radius:18px;padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow);text-align:left}
+  .crow .code{font-size:13px;padding:6px 9px}
+  .crow .mid{min-width:0;flex:1}
+  .crow b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .crow .pv{display:block;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .crow.unr .pv{color:var(--text);font-weight:700}
+  .crow .rt{flex:none;text-align:right;font-size:11px;color:var(--muted)}
+  .crow .dot{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:10px;background:var(--orange);color:#fff;font-weight:800;font-size:11px;margin-top:4px;padding:0 6px}
+  #thread.active{display:flex;flex-direction:column;height:100vh;height:100dvh}
+  .th-top{flex:none;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;background:var(--navy);color:#fff}
+  .th-top .bk{width:36px;height:36px;border:0;border-radius:11px;background:rgba(255,255,255,.14);display:grid;place-items:center;flex:none}
+  .th-top .bk svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .th-top .code{font-size:13px;padding:5px 9px;border-radius:10px;box-shadow:none}
+  .th-top b{display:block;font-size:15px}
+  .th-top a{color:#B9D0FF;font-size:12px;text-decoration:none}
+  .msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:7px}
+  .b{max-width:80%;padding:8px 12px 6px;border-radius:16px;font-size:14px;line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap}
+  .b.me{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:5px}
+  .b.cu{align-self:flex-start;background:#fff;box-shadow:var(--shadow);border-bottom-left-radius:5px}
+  .b .tm{font-size:10px;opacity:.6;margin-top:2px;text-align:right}
+  .composer{flex:none;display:flex;gap:8px;align-items:flex-end;padding:8px 12px calc(env(safe-area-inset-bottom) + 8px);background:#fff;box-shadow:0 -6px 20px rgba(11,77,181,.08)}
+  #msgIn{flex:1;border:1.5px solid var(--line);border-radius:21px;padding:10px 14px;font-size:15px;resize:none;max-height:110px;outline:none;height:42px;background:#F7FAFF;line-height:1.3}
+  #msgIn:focus{border-color:var(--blue)}
+  .sendbtn{width:42px;height:42px;border-radius:50%;border:0;background:var(--orange);display:grid;place-items:center;flex:none}
+  .sendbtn svg{width:20px;height:20px;fill:#fff}
 </style>
 </head>
 <body>
@@ -199,9 +229,24 @@
     <div class="tabs">
       <button id="tCargo" class="on" onclick="setTab('cargo')">Yuklar</button>
       <button id="tCust" onclick="setTab('cust')">Mijozlar</button>
+      <button id="tChat" onclick="setTab('chat')">Chatlar<span class="tbdg" id="tBadge"></span></button>
     </div>
   </section>
   <div class="wrap"><div id="out"></div></div>
+</main>
+
+<!-- ===== SUHBAT ===== -->
+<main id="thread" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="closeThread()" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="code" id="thCode"></div>
+    <div style="min-width:0"><b id="thName"></b><a id="thPhone" href="#"></a></div>
+  </div>
+  <div class="msgs" id="msgs"></div>
+  <div class="composer">
+    <textarea id="msgIn" rows="1" maxlength="1000" placeholder="Javob yozing..." oninput="autoGrow(this)"></textarea>
+    <button class="sendbtn" onclick="sendMsg()" aria-label="Yuborish"><svg viewBox="0 0 24 24"><path d="M3.4 20.4l17.4-7.6a.9.9 0 0 0 0-1.6L3.4 3.6a.9.9 0 0 0-1.3 1l1.9 6.2 9 1.2-9 1.2-1.9 6.2a.9.9 0 0 0 1.3 1z"/></svg></button>
+  </div>
 </main>
 
 <div id="bar"><button class="btn" id="bulkBtn" onclick="bulkDone()">Tasdiqlash</button></div>
@@ -285,7 +330,7 @@ function handleErr(e){
   if(e.session){ forceLogout(); toast("Qaytadan kiring", true); }
   else toast(e.message, true);
 }
-function enter(){ show("main"); search(); }
+function enter(){ show("main"); search(); pollBadge(); }
 
 /* ====== Qidiruv ====== */
 let timer = null;
@@ -299,6 +344,7 @@ function setTab(t){
   tab = t;
   $("tCargo").classList.toggle("on", t==="cargo");
   $("tCust").classList.toggle("on", t==="cust");
+  $("tChat").classList.toggle("on", t==="chat");
   search();
 }
 function openCustomer(code){
@@ -351,6 +397,57 @@ async function setStatus(id, sel){
   }catch(e){ sel.value = prev; handleErr(e); }
 }
 
+/* ====== Chat ====== */
+function hm(iso){ const d = new Date(iso); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function autoGrow(t){ t.style.height = "42px"; t.style.height = Math.min(t.scrollHeight, 110) + "px"; }
+function setBadge(list){
+  const n = list.reduce((a,c)=>a + Number(c.unread||0), 0), b = $("tBadge");
+  b.textContent = n > 99 ? "99+" : n; b.classList.toggle("show", n > 0);
+}
+function chatRow(c){
+  const un = Number(c.unread)||0;
+  return `<button class="crow ${un?"unr":""}" onclick="openThread(${c.id})">
+    <div class="code">${esc(c.code)}</div>
+    <div class="mid"><b>${esc(c.name)}</b><span class="pv">${c.last_from_admin?"Siz: ":""}${esc(c.last_body||"")}</span></div>
+    <div class="rt">${esc(hm(c.last_at))}${un?`<br><span class="dot">${un}</span>`:""}</div></button>`;
+}
+let thId = null, thLast = 0, thMsgs = [], thTimer = null;
+function renderThread(stick){
+  const box = $("msgs"), near = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
+  box.innerHTML = thMsgs.map(m=>`<div class="b ${m.from_admin?"me":"cu"}"><div class="tx">${esc(m.body)}</div><div class="tm">${hm(m.created_at)}</div></div>`).join("");
+  if(stick || near) box.scrollTop = box.scrollHeight;
+}
+async function pollThread(first){
+  if(!thId || !token) return;
+  try{
+    const r = await rpc("admin_chat_open", {p_token:token, p_customer_id:thId, p_after:thLast});
+    if(first){ const c = r.customer; $("thCode").textContent = c.code; $("thName").textContent = c.name; const a = $("thPhone"); a.textContent = fmtPhone(c.phone); a.href = "tel:+" + c.phone; }
+    const m = r.messages || [];
+    if(m.length){ thMsgs = thMsgs.concat(m); thLast = m[m.length-1].id; }
+    if(m.length || first) renderThread(first || m.some(x=>!x.from_admin));
+  }catch(e){ handleErr(e); }
+}
+function openThread(id){
+  thId = id; thLast = 0; thMsgs = []; $("msgs").innerHTML = ""; $("thCode").textContent = ""; $("thName").textContent = ""; $("thPhone").textContent = "";
+  show("thread"); pollThread(true);
+  clearInterval(thTimer);
+  thTimer = setInterval(()=>{ if(!document.hidden && $("thread").classList.contains("active")) pollThread(); }, 4000);
+}
+function closeThread(){ clearInterval(thTimer); thId = null; show("main"); search(); }
+async function sendMsg(){
+  const ta = $("msgIn"), t = ta.value.trim();
+  if(!t || !thId) return;
+  ta.value = ""; autoGrow(ta);
+  try{ await rpc("admin_chat_send", {p_token:token, p_customer_id:thId, p_body:t}); await pollThread(); $("msgs").scrollTop = $("msgs").scrollHeight; }
+  catch(e){ ta.value = t; autoGrow(ta); handleErr(e); }
+}
+$("msgIn").addEventListener("keydown", e=>{ if(e.key==="Enter" && !e.shiftKey && window.matchMedia("(hover:hover)").matches){ e.preventDefault(); sendMsg(); } });
+async function pollBadge(){
+  if(!token || !CONFIGURED || document.hidden || !$("main").classList.contains("active")) return;
+  try{ const list = await rpc("admin_chats", {p_token:token, p_q:""}); setBadge(list); if(tab==="chat" && !$("q").value.trim()){ $("out").innerHTML = list.length ? list.map(chatRow).join("") : $("out").innerHTML; } }catch(e){}
+}
+setInterval(pollBadge, 15000);
+
 /* ====== Ommaviy topshirish ====== */
 const sel = new Set(); let canPick = false;
 function updateBar(){
@@ -392,7 +489,14 @@ async function search(){
   const out = $("out");
   if(!out.children.length) out.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   try{
-    if(tab === "cust"){
+    if(tab === "chat"){
+      const list = await rpc("admin_chats", {p_token:token, p_q:q});
+      if(my !== seq) return;
+      sel.clear(); updateBar(); setBadge(list);
+      $("subline").textContent = "Chatlar: " + list.length;
+      out.innerHTML = list.length ? list.map(chatRow).join("")
+        : `<div class="empty"><b>Xabar yo'q</b><p>${q?"Boshqa so'z bilan qidirib ko'ring.":"Mijozlar yozganda shu yerda ko'rinadi."}</p></div>`;
+    } else if(tab === "cust"){
       const list = await rpc("admin_customers", {p_token:token, p_q:q});
       if(my !== seq) return;
       sel.clear(); updateBar();

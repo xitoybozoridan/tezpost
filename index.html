@@ -123,7 +123,7 @@
   /* ---------- Pastki menyu ---------- */
   .nav{position:fixed;left:0;right:0;bottom:0;z-index:8;display:none}
   .nav.show{display:block}
-  .nav .in{max-width:520px;margin:0 auto;background:#fff;border-radius:26px 26px 0 0;box-shadow:0 -8px 28px rgba(11,77,181,.14);display:grid;grid-template-columns:1fr 1fr 1fr;padding:8px 14px calc(env(safe-area-inset-bottom) + 8px)}
+  .nav .in{max-width:520px;margin:0 auto;background:#fff;border-radius:26px 26px 0 0;box-shadow:0 -8px 28px rgba(11,77,181,.14);display:grid;grid-template-columns:repeat(4,1fr);padding:8px 14px calc(env(safe-area-inset-bottom) + 8px)}
   .nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;color:var(--muted);font-size:13px;font-weight:600;position:relative}
   .nav button svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
   .nav button.on{color:var(--blue)}
@@ -264,6 +264,24 @@
   .trow .ti svg{width:21px;height:21px;fill:var(--orange-dark)}
   .trow b{font-size:16px}.trow small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
   .trow .pr{margin-left:auto;font-size:18px;font-weight:800;color:var(--blue)}
+
+  /* ---------- Yordam chati ---------- */
+  #chat.active{display:flex;flex-direction:column;height:100vh;height:100dvh}
+  .chat-top{display:flex;align-items:center;gap:6px;padding:calc(env(safe-area-inset-top) + 6px) 12px 8px;background:#fff;box-shadow:0 4px 16px rgba(11,77,181,.08);flex:none}
+  .chat-top .link{padding:6px 4px}
+  .chat-top h2{margin:0;font-size:17px}.chat-top small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+  .msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:7px;-webkit-overflow-scrolling:touch}
+  .b{max-width:80%;padding:8px 12px 6px;border-radius:16px;font-size:14px;line-height:1.4;word-wrap:break-word;overflow-wrap:anywhere;white-space:pre-wrap}
+  .b.me{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:5px}
+  .b.adm{align-self:flex-start;background:#fff;box-shadow:var(--shadow);border-bottom-left-radius:5px}
+  .b .tm{font-size:10px;opacity:.6;margin-top:2px;text-align:right}
+  .composer{display:flex;gap:8px;align-items:flex-end;padding:8px 12px calc(env(safe-area-inset-bottom) + 8px);background:#fff;box-shadow:0 -6px 20px rgba(11,77,181,.08);flex:none}
+  #msgIn{flex:1;border:1.5px solid var(--line);border-radius:21px;padding:10px 14px;font-size:15px !important;resize:none;max-height:110px;outline:none;min-height:42px !important;height:42px;background:#F7FAFF;line-height:1.3}
+  #msgIn:focus{border-color:var(--blue)}
+  .sendbtn{width:42px;height:42px;border-radius:50%;border:0;background:var(--orange);display:grid;place-items:center;flex:none;box-shadow:0 5px 12px rgba(255,122,0,.4)}
+  .sendbtn svg{width:20px;height:20px;fill:#fff}
+  .nav button .bdg{position:absolute;top:0;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;display:none;place-items:center;padding:0 4px}
+  .nav button .bdg.show{display:grid}
 </style>
 </head>
 <body>
@@ -336,6 +354,19 @@
   </div>
 </main>
 
+<!-- ===== YORDAM CHATI ===== -->
+<main id="chat" class="screen">
+  <div class="chat-top">
+    <button class="link back" onclick="closeChat()" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div><h2>Yordam</h2><small>TezPost qo'llab-quvvatlash</small></div>
+  </div>
+  <div class="msgs" id="msgs"></div>
+  <div class="composer">
+    <textarea id="msgIn" rows="1" maxlength="1000" placeholder="Xabar yozing..." oninput="autoGrow(this)"></textarea>
+    <button class="sendbtn" onclick="sendChat()" aria-label="Yuborish"><svg viewBox="0 0 24 24"><path d="M3.4 20.4l17.4-7.6a.9.9 0 0 0 0-1.6L3.4 3.6a.9.9 0 0 0-1.3 1l1.9 6.2 9 1.2-9 1.2-1.9 6.2a.9.9 0 0 0 1.3 1z"/></svg></button>
+  </div>
+</main>
+
 <!-- ===== PROFIL ===== -->
 <main id="profile" class="screen pad-nav">
   <section class="p-hero">
@@ -379,6 +410,7 @@
 <nav class="nav" id="nav"><div class="in">
   <button id="navHome" class="on" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19z"/></svg>Asosiy</button>
   <button id="navLoads" onclick="go('loads')"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>Yuklarim</button>
+  <button id="navChat" onclick="openChat()"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 8.5h7M8.5 11.5h4.5"/></svg>Yordam<span class="bdg" id="chatBadge"></span></button>
   <button id="navProfile" onclick="go('profile')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>Profil</button>
 </div></nav>
 
@@ -462,6 +494,7 @@ function show(id){
   $("nav").classList.toggle("show", id==="home" || id==="profile" || id==="loads");
   $("navHome").classList.toggle("on", id==="home");
   $("navLoads").classList.toggle("on", id==="loads");
+  $("navChat").classList.toggle("on", id==="chat");
   $("navProfile").classList.toggle("on", id==="profile");
   window.scrollTo({top:0,left:0,behavior:"instant"});
 }
@@ -530,7 +563,7 @@ async function submitAuth(){
 function enterApp(){
   $("helloName").textContent = (me && me.name || "").split(" ")[0];
   $("punktName").textContent = CONFIG.punkt;
-  renderList(); show("home"); loadList();
+  renderList(); show("home"); loadList(); checkUnread();
 }
 function forceLogout(){
   token = null; me = null; declarations = [];
@@ -559,6 +592,48 @@ function renderProfile(){
   $("pPhone").textContent = me ? fmtPhone(me.phone) : "";
   $("pCount").textContent = declarations.length;
 }
+
+/* ====== Yordam chati ====== */
+let chatLast = 0, chatMsgs = [], chatTimer = null;
+function hm(iso){ const d = new Date(iso); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function autoGrow(t){ t.style.height = "42px"; t.style.height = Math.min(t.scrollHeight, 110) + "px"; }
+function renderChat(stick){
+  const box = $("msgs"), near = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
+  box.innerHTML = '<div class="b adm"><div class="tx">Assalomu alaykum! TezPost yordam xizmati. Savolingizni yozing, imkon qadar tez javob beramiz.</div></div>'
+    + chatMsgs.map(m=>`<div class="b ${m.from_admin?"adm":"me"}"><div class="tx">${esc(m.body)}</div><div class="tm">${hm(m.created_at)}</div></div>`).join("");
+  if(stick || near) box.scrollTop = box.scrollHeight;
+}
+async function pollChat(first){
+  if(!token || !CONFIGURED) return;
+  try{
+    const r = await rpc("chat_list", {p_token:token, p_after:chatLast}) || [];
+    if(r.length){ chatMsgs = chatMsgs.concat(r); chatLast = r[r.length-1].id; }
+    if(r.length || first) renderChat(first || r.some(m=>!m.from_admin));
+  }catch(e){ if(e.session) handleErr(e); }
+}
+function openChat(){
+  chatMsgs = []; chatLast = 0; $("chatBadge").classList.remove("show");
+  show("chat"); renderChat(true); pollChat(true);
+  clearInterval(chatTimer);
+  chatTimer = setInterval(()=>{ if(!document.hidden && $("chat").classList.contains("active")) pollChat(); }, 4000);
+}
+function closeChat(){ clearInterval(chatTimer); show("home"); checkUnread(); }
+async function sendChat(){
+  const ta = $("msgIn"), t = ta.value.trim();
+  if(!t) return;
+  ta.value = ""; autoGrow(ta);
+  try{ await rpc("chat_send", {p_token:token, p_body:t}); await pollChat(); $("msgs").scrollTop = $("msgs").scrollHeight; }
+  catch(e){ ta.value = t; autoGrow(ta); handleErr(e); }
+}
+$("msgIn").addEventListener("keydown", e=>{ if(e.key==="Enter" && !e.shiftKey && window.matchMedia("(hover:hover)").matches){ e.preventDefault(); sendChat(); } });
+async function checkUnread(){
+  if(!token || !CONFIGURED || $("chat").classList.contains("active")) return;
+  try{
+    const r = await rpc("chat_unread", {p_token:token}), n = (r && r.count) || 0, b = $("chatBadge");
+    b.textContent = n > 9 ? "9+" : n; b.classList.toggle("show", n > 0);
+  }catch(e){}
+}
+setInterval(()=>{ if(!document.hidden) checkUnread(); }, 20000);
 
 /* ====== Tariflar ====== */
 const TARIFFS = [{name:"Avto", price:"6.5$", days:"14-18 kun"}];
