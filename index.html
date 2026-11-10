@@ -123,7 +123,7 @@
   /* ---------- Pastki menyu ---------- */
   .nav{position:fixed;left:0;right:0;bottom:0;z-index:8;display:none}
   .nav.show{display:block}
-  .nav .in{max-width:520px;margin:0 auto;background:#fff;border-radius:26px 26px 0 0;box-shadow:0 -8px 28px rgba(11,77,181,.14);display:grid;grid-template-columns:1fr 1fr;padding:8px 14px calc(env(safe-area-inset-bottom) + 8px)}
+  .nav .in{max-width:520px;margin:0 auto;background:#fff;border-radius:26px 26px 0 0;box-shadow:0 -8px 28px rgba(11,77,181,.14);display:grid;grid-template-columns:1fr 1fr 1fr;padding:8px 14px calc(env(safe-area-inset-bottom) + 8px)}
   .nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;color:var(--muted);font-size:13px;font-weight:600;position:relative}
   .nav button svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
   .nav button.on{color:var(--blue)}
@@ -319,7 +319,6 @@
     <h2>Tezkor kirish</h2>
     <div class="qrow">
       <button class="qcard" onclick="openTariffs()"><span class="qi"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span><b>Tariflar</b></button>
-      <button class="qcard" onclick="openLoads()"><span class="qi"><svg viewBox="0 0 24 24"><path d="M12 2.5l8.5 4.7v9.6L12 21.5l-8.5-4.7V7.2zM12 12L4.6 8m7.4 4l7.4-4M12 12v8.6" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg></span><b>Yuklarim</b></button>
     </div>
   </section>
 
@@ -330,11 +329,8 @@
 </main>
 
 <!-- ===== YUKLARIM ===== -->
-<main id="loads" class="screen">
-  <div class="bar">
-    <button class="link back" onclick="show('home')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Orqaga</button>
-  </div>
-  <div class="section" style="padding-top:4px">
+<main id="loads" class="screen pad-nav">
+  <div class="section" style="padding-top:calc(env(safe-area-inset-top) + 18px)">
     <div class="section-head"><h2>Yuklarim</h2><span class="count zero" id="count">0</span></div>
     <div id="allList"></div>
   </div>
@@ -382,6 +378,7 @@
 <!-- ===== Pastki menyu ===== -->
 <nav class="nav" id="nav"><div class="in">
   <button id="navHome" class="on" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19z"/></svg>Asosiy</button>
+  <button id="navLoads" onclick="go('loads')"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>Yuklarim</button>
   <button id="navProfile" onclick="go('profile')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>Profil</button>
 </div></nav>
 
@@ -462,15 +459,16 @@ function toast(msg, bad){
 /* ====== Ekranlar ====== */
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active", s.id===id));
-  $("nav").classList.toggle("show", id==="home" || id==="profile");
+  $("nav").classList.toggle("show", id==="home" || id==="profile" || id==="loads");
   $("navHome").classList.toggle("on", id==="home");
+  $("navLoads").classList.toggle("on", id==="loads");
   $("navProfile").classList.toggle("on", id==="profile");
   window.scrollTo({top:0,left:0,behavior:"instant"});
 }
-function go(id){ if(id==="profile") renderProfile(); show(id); if(id==="home") loadList(); }
+function go(id){ if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); }
 function openDecl(){ resetForm(); show("decl"); }
 function closeDecl(){ show("home"); }
-function openLoads(){ show("loads"); loadList(); }
+function openLoads(){ go("loads"); }
 
 /* ====== Kirish / ro'yxatdan o'tish ====== */
 function setMode(m){
