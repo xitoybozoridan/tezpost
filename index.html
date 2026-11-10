@@ -248,6 +248,7 @@
   .sheet{padding:16px 14px calc(env(safe-area-inset-bottom) + 14px);border-radius:24px 24px 0 0}.sheet h3{font-size:18px}.sheet .cancel{font-size:14px;padding:10px}
   .toast{font-size:14px;padding:11px 18px;border-radius:18px;bottom:86px}
 
+  .all{margin-left:auto;background:none;border:0;color:var(--blue);font-weight:700;font-size:13px;padding:4px 0}
   /* ---------- Tezkor kirish + tariflar ---------- */
   .quick{padding:14px 14px 0}
   .quick h2{margin:0 0 8px;font-size:16px}
@@ -318,13 +319,25 @@
     <h2>Tezkor kirish</h2>
     <div class="qrow">
       <button class="qcard" onclick="openTariffs()"><span class="qi"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span><b>Tariflar</b></button>
+      <button class="qcard" onclick="openLoads()"><span class="qi"><svg viewBox="0 0 24 24"><path d="M12 2.5l8.5 4.7v9.6L12 21.5l-8.5-4.7V7.2zM12 12L4.6 8m7.4 4l7.4-4M12 12v8.6" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg></span><b>Yuklarim</b></button>
     </div>
   </section>
 
   <section class="section">
-    <div class="section-head"><h2>Deklaratsiyalarim</h2><span class="count zero" id="count">0</span></div>
+    <div class="section-head"><h2>So'nggi deklaratsiya</h2><button class="all" id="allBtn" onclick="openLoads()" style="display:none">Barchasi ›</button></div>
     <div id="declList"></div>
   </section>
+</main>
+
+<!-- ===== YUKLARIM ===== -->
+<main id="loads" class="screen">
+  <div class="bar">
+    <button class="link back" onclick="show('home')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Orqaga</button>
+  </div>
+  <div class="section" style="padding-top:4px">
+    <div class="section-head"><h2>Yuklarim</h2><span class="count zero" id="count">0</span></div>
+    <div id="allList"></div>
+  </div>
 </main>
 
 <!-- ===== PROFIL ===== -->
@@ -457,6 +470,7 @@ function show(id){
 function go(id){ if(id==="profile") renderProfile(); show(id); if(id==="home") loadList(); }
 function openDecl(){ resetForm(); show("decl"); }
 function closeDecl(){ show("home"); }
+function openLoads(){ show("loads"); loadList(); }
 
 /* ====== Kirish / ro'yxatdan o'tish ====== */
 function setMode(m){
@@ -665,23 +679,27 @@ function when(iso){
   if(d.toDateString() === n.toDateString()) return "Bugun, " + hm;
   return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear()+", "+hm;
 }
+function itemHtml(d){
+  return `<div class="item"><div class="ic">${BOX}</div><div class="body">
+    <div class="top"><div class="trk">${esc(d.track)}</div><span class="st ${esc(d.status)}">${esc(STATUS[d.status]||d.status)}</span></div>
+    <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div>
+    ${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}
+    <div class="when">${when(d.created_at)}</div></div></div>`;
+}
 function renderList(loading){
   const all = declarations;
   const c = $("count"); c.textContent = all.length; c.classList.toggle("zero", !all.length);
-  if(loading && !all.length){ $("declList").innerHTML = '<div class="skel"></div><div class="skel"></div>'; return; }
-  $("declList").innerHTML = all.length
-    ? all.map(d=>`<div class="item"><div class="ic">${BOX}</div><div class="body">
-        <div class="top"><div class="trk">${esc(d.track)}</div><span class="st ${esc(d.status)}">${esc(STATUS[d.status]||d.status)}</span></div>
-        <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div>
-        ${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}
-        <div class="when">${when(d.created_at)}</div></div></div>`).join("")
-    : `<div class="empty">
+  $("allBtn").style.display = all.length > 1 ? "block" : "none";
+  if(loading && !all.length){ $("declList").innerHTML = $("allList").innerHTML = '<div class="skel"></div><div class="skel"></div>'; return; }
+  const empty = `<div class="empty">
         <svg viewBox="0 0 96 96" fill="none"><circle cx="48" cy="48" r="44" fill="#E8F0FD"/>
           <path d="M48 20l24 13.5v27L48 74 24 60.5v-27z" fill="#fff" stroke="#0B4DB5" stroke-width="3" stroke-linejoin="round"/>
           <path d="M24 33.5L48 47l24-13.5M48 47v27" stroke="#0B4DB5" stroke-width="3" stroke-linejoin="round"/>
           <path d="M48 47l24-13.5v10L48 57z" fill="#FF7A00" opacity=".9"/></svg>
         <b>Hozircha deklaratsiya yo'q</b>
         <p>Yuk yuborishdan oldin "Deklaratsiya yaratish" tugmasi orqali trek-kodni qo'shing.</p></div>`;
+  $("declList").innerHTML = all.length ? itemHtml(all[0]) : empty;
+  $("allList").innerHTML = all.length ? all.map(itemHtml).join("") : empty;
 }
 async function loadList(){
   if(!token || !CONFIGURED) return;
@@ -693,7 +711,7 @@ async function loadList(){
   renderList();
   if($("profile").classList.contains("active")) renderProfile();
 }
-document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token && $("home").classList.contains("active")) loadList(); });
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token && ($("home").classList.contains("active") || $("loads").classList.contains("active"))) loadList(); });
 
 /* ====== Boshlash ====== */
 if(!CONFIGURED) $("setupWarn").style.display = "block";
