@@ -90,6 +90,18 @@
   .stsel.uz{color:#127A45} .stsel.uz select{background:#E3F6EC}
   .stsel.done{color:#fff} .stsel.done select{background:#127A45}
 
+  /* ommaviy tanlash */
+  .bulk{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border-radius:20px;padding:12px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .chk{display:flex;align-items:center;gap:12px;font-weight:700;font-size:16px}
+  .chk input{appearance:none;-webkit-appearance:none;width:28px;height:28px;border-radius:9px;border:2px solid #B9C7E4;background:#fff;flex:none;display:grid;place-items:center;margin:0}
+  .chk input:checked{background:#127A45;border-color:#127A45}
+  .chk input:checked::after{content:"";width:7px;height:13px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+  .item.picked{outline:2.5px solid #127A45}
+  .item .pick{margin-right:2px}
+  #bar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);background:linear-gradient(180deg,rgba(242,246,252,0),var(--bg) 35%);display:none}
+  #bar.show{display:block}
+  #bar .btn{max-width:588px;margin:0 auto;background:linear-gradient(180deg,#22A862,#127A45);box-shadow:0 10px 24px rgba(18,122,69,.45)}
+
   /* kirish */
   .login{margin:-14px 18px 30px;position:relative;z-index:2;background:var(--card);border-radius:30px;padding:24px 20px;box-shadow:0 14px 34px rgba(11,77,181,.16);max-width:560px}
   .login h2{margin:0 0 4px;font-size:26px;letter-spacing:-.4px}
@@ -156,6 +168,7 @@
   <div class="wrap"><div id="out"></div></div>
 </main>
 
+<div id="bar"><button class="btn" id="bulkBtn" onclick="bulkDone()">Topshirish</button></div>
 <div class="toast" id="toast"></div>
 
 <script src="config.js"></script>
@@ -280,8 +293,9 @@ function custCard(c, clickable){
 }
 function cargoCard(d){
   const opts = Object.keys(STATUS).map(k=>`<option value="${k}" ${d.status===k?"selected":""}>${STATUS[k]}</option>`).join("");
+  const pick = (d.status==="uz" && canPick) ? `<label class="chk pick"><input type="checkbox" data-id="${d.id}" onchange="togglePick(${d.id},this)"></label>` : "";
   return `<div class="item" id="d${d.id}">
-    <div class="row1"><button class="trk" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button>
+    <div class="row1">${pick}<button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button>
       <button class="who" onclick="openCustomer('${esc(d.customer_code)}')">${esc(d.customer_code)}</button></div>
     <div style="margin-top:6px;font-size:15px;font-weight:600">${esc(d.customer_name)} <a style="color:var(--blue);text-decoration:none;font-weight:600" href="tel:+${esc(d.customer_phone)}">${esc(fmtPhone(d.customer_phone))}</a></div>
     <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div>
@@ -301,6 +315,40 @@ async function setStatus(id, sel){
   }catch(e){ sel.value = prev; handleErr(e); }
 }
 
+/* ====== Ommaviy topshirish ====== */
+const sel = new Set(); let canPick = false;
+function updateBar(){
+  const n = sel.size, bar = $("bar");
+  bar.classList.toggle("show", n > 0);
+  $("bulkBtn").textContent = "Tanlanganlarni topshirish (" + n + " ta)";
+  const all = $("selAll"), boxes = document.querySelectorAll(".pick input");
+  if(all) all.checked = boxes.length > 0 && n === boxes.length;
+}
+function togglePick(id, cb){
+  if(cb.checked) sel.add(id); else sel.delete(id);
+  $("d"+id).classList.toggle("picked", cb.checked);
+  updateBar();
+}
+function toggleAll(cb){
+  document.querySelectorAll(".pick input").forEach(x=>{
+    const id = Number(x.dataset.id); x.checked = cb.checked;
+    if(cb.checked) sel.add(id); else sel.delete(id);
+    $("d"+id).classList.toggle("picked", cb.checked);
+  });
+  updateBar();
+}
+async function bulkDone(){
+  const ids = [...sel]; if(!ids.length) return;
+  if(!confirm(ids.length + " ta yuk topshirilsinmi?")) return;
+  const b = $("bulkBtn"); b.disabled = true;
+  try{
+    const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:"uz"});
+    toast("Topshirildi: " + (r && r.count != null ? r.count : ids.length) + " ta");
+    sel.clear(); await search();
+  }catch(e){ handleErr(e); }
+  b.disabled = false;
+}
+
 async function search(){
   if(!token || !CONFIGURED) return;
   const my = ++seq;
@@ -311,6 +359,7 @@ async function search(){
     if(tab === "cust"){
       const list = await rpc("admin_customers", {p_token:token, p_q:q});
       if(my !== seq) return;
+      sel.clear(); updateBar();
       $("subline").textContent = "Mijozlar: " + list.length;
       out.innerHTML = list.length ? `<div class="info">Mijozlar: ${list.length} ta. Bosib, yuklarini ko'ring</div>` + list.map(c=>custCard(c,true)).join("")
         : `<div class="empty"><b>Mijoz topilmadi</b><p>${q?"Boshqa so'z bilan qidirib ko'ring.":"Hali hech kim ro'yxatdan o'tmagan."}</p></div>`;
@@ -319,12 +368,16 @@ async function search(){
       if(my !== seq) return;
       const cs = r.customers || [], ds = r.declarations || [];
       $("subline").textContent = "Yuklar: " + ds.length;
+      sel.clear(); canPick = q !== "";
+      const uzCount = ds.filter(d=>d.status==="uz").length;
       let html = "";
       if(cs.length) html += `<div class="info">Mijoz${cs.length>1?"lar":""}</div>` + cs.map(c=>custCard(c,cs.length>1)).join("");
       html += `<div class="info">${q?"Topilgan yuklar":"So'nggi yuklar"}: ${ds.length} ta</div>`;
+      if(canPick && uzCount) html += `<div class="bulk"><label class="chk"><input type="checkbox" id="selAll" onchange="toggleAll(this)">Hammasini tanlash</label><span class="when">O'zbekistonda: ${uzCount} ta</span></div>`;
       html += ds.length ? ds.map(cargoCard).join("")
         : `<div class="empty"><b>Yuk topilmadi</b><p>${q?"Mijoz kodi (masalan TP1001), ism, telefon yoki trek-kod bilan qidiring.":"Hali deklaratsiya qo'shilmagan."}</p></div>`;
       out.innerHTML = html;
+      updateBar();
     }
   }catch(e){ if(my === seq){ out.innerHTML = ""; handleErr(e); } }
 }
