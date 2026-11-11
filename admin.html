@@ -582,15 +582,16 @@ applyView(curView());
 let soundOn = true; try{ soundOn = localStorage.getItem("tp_sound") !== "0"; }catch(e){}
 let actx = null, rcv = [], rcvMiss = [], inflight = new Set(), kbOn = false;
 function audio(){ try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); if(actx.state === "suspended") actx.resume(); }catch(e){} }
-function beep(ok){
+function beep(kind){
   if(!soundOn) return; audio(); if(!actx) return;
-  const tone = (f, t0, d) => { const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f; o.type = "sine"; g.gain.value = .25; o.connect(g); g.connect(actx.destination); o.start(actx.currentTime + t0); o.stop(actx.currentTime + t0 + d); };
-  if(ok) tone(1040, 0, .12); else { tone(240, 0, .16); tone(240, .22, .16); }
+  if(kind===true) kind="ok"; if(kind===false) kind="dup";
+  const tone=(f,t0,d,type,vol)=>{ const o=actx.createOscillator(), g=actx.createGain(), t=actx.currentTime+t0; o.type=type||"sine"; o.frequency.value=f; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||.3,t+.01); g.gain.exponentialRampToValueAtTime(0.0001,t+d); o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+.02); };
+  if(kind==="ok"){ tone(880,0,.14,"sine",.35); tone(1320,.12,.28,"sine",.35); }                 // qabul qilindi: yoqimli "din-ding"
+  else if(kind==="dup"){ tone(520,0,.12,"square",.18); tone(390,.16,.12,"square",.18); tone(520,.32,.12,"square",.18); tone(390,.48,.18,"square",.18); } // allaqachon qabul qilingan: "pi-po-pi-po"
+  else if(kind==="miss"){ tone(140,0,.55,"sawtooth",.25); }                                                                   // topilmadi: past "bzzz"
+  else if(kind==="done"){ tone(660,0,.12,"sine",.3); tone(880,.11,.12,"sine",.3); tone(1180,.22,.3,"sine",.3); }              // topshirildi
 }
-function speak(text){
-  if(!soundOn || !window.speechSynthesis) return;
-  try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "uz-UZ"; u.rate = 1.05; speechSynthesis.speak(u); }catch(e){}
-}
+function speak(){}
 function toggleSound(){
   soundOn = !soundOn; try{ localStorage.setItem("tp_sound", soundOn ? "1" : "0"); }catch(e){}
   $("sndBtn").textContent = soundOn ? "🔊" : "🔇"; toast(soundOn ? "Ovoz yoqildi" : "Ovoz o'chirildi");
@@ -616,14 +617,14 @@ async function scanSubmit(){
   if(!kbOn) inp.focus();
   if(!v) return;
   const n = normTrack(v);
-  if(inflight.has(n) || rcv.some(x=>normTrack(x.track) === n)){ beep(false); speak("Takroran skanerlandi"); toast("Bu yuk ro'yxatda bor", true); return; }
+  if(inflight.has(n) || rcv.some(x=>normTrack(x.track) === n)){ beep("dup"); toast("Bu yuk ro'yxatda bor", true); return; }
   inflight.add(n);
   try{
     const d = await rpc("admin_find_track", {p_token:token, p_track:v});
-    if(!d){ rcvMiss.unshift(v); beep(false); speak("Yuk topilmadi"); toast("Topilmadi: " + v, true); }
-    else if(d.status === "pickup"){ beep(false); speak("Allaqachon qabul qilingan"); toast("Allaqachon punktda: " + d.track, true); }
-    else if(d.status === "done"){ beep(false); speak("Allaqachon topshirilgan"); toast("Allaqachon topshirilgan: " + d.track, true); }
-    else { d.checked = true; d.fresh = true; rcv.unshift(d); beep(true); speak("Topshirish punktiga qabul qilindi"); }
+    if(!d){ rcvMiss.unshift(v); beep("miss"); speak("Yuk topilmadi"); toast("Topilmadi: " + v, true); }
+    else if(d.status === "pickup"){ beep("dup"); toast("Allaqachon punktda: " + d.track, true); }
+    else if(d.status === "done"){ beep("dup"); toast("Allaqachon topshirilgan: " + d.track, true); }
+    else { d.checked = true; d.fresh = true; rcv.unshift(d); beep("ok"); }
     drawRcv();
   }catch(e){ handleErr(e); }
   inflight.delete(n);
@@ -656,7 +657,7 @@ async function applyReceive(){
   try{
     const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"pickup", p_from:["new","china","transit","uz"]});
     const n = (r && r.count != null) ? r.count : ids.length;
-    rcv = rcv.filter(x=>!x.checked); beep(true); speak(n + " ta yuk Topshirish punktiga qabul qilindi"); toast(n + " ta yuk qabul qilindi"); drawRcv();
+    rcv = rcv.filter(x=>!x.checked); beep("done"); toast(n + " ta yuk qabul qilindi"); drawRcv();
   }catch(e){ handleErr(e); }
   b.disabled = false; if(!kbOn) $("scanIn").focus();
 }
@@ -698,7 +699,7 @@ async function applyHandover(){
   try{
     const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:["pickup"]});
     const n = (r && r.count != null) ? r.count : ids.length;
-    beep(true); speak("Topshirildi"); toast(n + " ta yuk topshirildi (Tasdiqlangan)"); await hoFind();
+    beep("done"); toast(n + " ta yuk topshirildi (Tasdiqlangan)"); await hoFind();
   }catch(e){ handleErr(e); }
   b.disabled = false;
 }
