@@ -250,6 +250,11 @@
   .scanstat{font-size:12px}.hocust b{font-size:14px}
   .actbar .btn,#bar .btn{height:44px;font-size:15px}
   .th-top b{font-size:15px !important}
+
+  #receive.active,#handover.active{display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;right:0;width:100%;height:auto;min-height:0;margin:0 auto;z-index:20;background:var(--bg);overflow:hidden}
+  #receive .wrap,#handover .wrap{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:640px;margin:0 auto;padding-bottom:14px !important}
+  #receive .th-top,#handover .th-top{flex:none}
+  .actbar{position:static !important;flex:none;background:var(--bg);box-shadow:0 -6px 16px rgba(0,0,0,.08);padding:10px 14px calc(env(safe-area-inset-bottom) + 10px)}
 </style>
 </head>
 <body>
