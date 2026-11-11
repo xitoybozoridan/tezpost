@@ -266,6 +266,9 @@
   .trow .pr{margin-left:auto;font-size:18px;font-weight:800;color:var(--blue)}
 
   /* ---------- Yordam chati ---------- */
+  #decl.active{display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;right:0;width:100%;max-width:520px;height:auto;min-height:0;margin:0 auto;z-index:20;background:var(--bg);overflow:hidden}
+  #decl .form{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:16px}
+  #decl .savebar{position:static;flex:none}
   #chat.active{display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;right:0;width:100%;height:auto;min-height:0;margin:0 auto;z-index:20;background:var(--bg)}
   .chat-top{display:flex;align-items:center;gap:6px;padding:calc(env(safe-area-inset-top) + 6px) 12px 8px;background:#fff;box-shadow:0 4px 16px rgba(11,77,181,.08);flex:none}
   .chat-top .link{padding:6px 4px}
