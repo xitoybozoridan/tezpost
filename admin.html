@@ -285,6 +285,10 @@
   html[data-view=pc] #receive.active,html[data-view=pc] #handover.active{max-width:none}
   html[data-view=pc] .toast{bottom:30px}
   @media (max-width:760px){html[data-view=pc] #main .hero{display:block}html[data-view=pc] .search{width:auto;max-width:none}html[data-view=pc] .acts{grid-template-columns:1fr 1fr}}
+
+  .eyeb{flex:none;width:40px;height:40px;border-radius:13px;background:var(--blue-soft);display:grid;place-items:center;cursor:pointer}
+  .eyeb svg{width:22px;height:22px;stroke:var(--blue);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .eyeb.on{background:var(--blue)}.eyeb.on svg{stroke:#fff}
 </style>
 </head>
 <body>
@@ -508,6 +512,7 @@ function enter(){ show("main"); search(); pollBadge(); }
 /* ====== Qidiruv ====== */
 let timer = null;
 $("q").addEventListener("input", ()=>{
+  showCargo = false;
   $("qx").classList.toggle("show", !!$("q").value);
   clearTimeout(timer); timer = setTimeout(search, 320);
 });
@@ -539,11 +544,15 @@ function fmtPhone(p){
   p = String(p||"");
   return "+998 " + [p.slice(3,5), p.slice(5,8), p.slice(8,10), p.slice(10,12)].filter(Boolean).join(" ");
 }
-function custCard(c, clickable){
+let showCargo = false;
+const EYE_ON='<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', EYE_OFF='<path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.4 4.5-1M9.9 9.9a3 3 0 0 0 4.2 4.2"/>';
+function toggleCargo(e){ if(e) e.stopPropagation(); showCargo = !showCargo; search(); }
+function custCard(c, clickable, eye){
   return `<${clickable?'button':'div'} class="cust" ${clickable?`onclick="openCustomer('${esc(c.code)}')"`:''}>
     <div class="code">${esc(c.code)}</div>
     <div class="mid"><b>${esc(c.name)}</b><a href="tel:+${esc(c.phone)}" onclick="event.stopPropagation()">${esc(fmtPhone(c.phone))}</a></div>
     <div class="cnt"><b>${Number(c.cargo_count)||0}</b><br><span>yuk</span></div>
+    ${eye ? `<span class="eyeb ${eye==="open"?"on":""}" role="button" aria-label="Yuklarni ko'rsatish / yashirish" onclick="toggleCargo(event)"><svg viewBox="0 0 24 24">${eye==="open"?EYE_OFF:EYE_ON}</svg></span>` : ""}
   </${clickable?'button':'div'}>`;
 }
 function cargoCard(d){
@@ -855,7 +864,14 @@ async function search(){
       sel.clear(); canPick = q !== "";
       const uzCount = ds.filter(d=>d.status==="pickup").length;
       let html = "";
-      if(cs.length) html += `<div class="info">Mijoz${cs.length>1?"lar":""}</div>` + cs.map(c=>custCard(c,cs.length>1)).join("");
+      const qn = q.toUpperCase().replace(/\s/g,"");
+      const trackQ = qn && ds.some(d=>String(d.track).toUpperCase().includes(qn));
+      const single = cs.length === 1 && q && !trackQ;
+      if(cs.length) html += `<div class="info">Mijoz${cs.length>1?"lar":""}</div>` + cs.map(c=>custCard(c,cs.length>1, single ? (showCargo?"open":"closed") : null)).join("");
+      if(single && !showCargo){
+        out.innerHTML = html + `<div class="empty" style="padding:16px"><p style="margin:0">Yuklarini ko'rish uchun yuqoridagi 👁 tugmasini bosing.</p></div>`;
+        updateBar(); return;
+      }
       html += `<div class="info">${q?"Topilgan yuklar":"So'nggi yuklar"}: ${ds.length} ta</div>`;
       if(canPick && uzCount) html += `<div class="bulk"><label class="chk"><input type="checkbox" id="selAll" onchange="toggleAll(this)">Hammasini tanlash</label><span class="when">Topshirishga tayyor: ${uzCount} ta</span></div>`;
       html += ds.length ? ds.map(cargoCard).join("")
