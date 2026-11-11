@@ -294,6 +294,8 @@
   .cfilt input{width:100%;height:44px;border:1.5px solid var(--line);border-radius:14px;background:#fff;padding:0 14px 0 40px;font-size:15px;outline:none}
   .cfilt input:focus{border-color:var(--blue)}
   html[data-view=pc] .cfilt{max-width:520px}
+  .morebtn{display:block;width:100%;margin:8px 0 18px;height:46px;border:0;border-radius:15px;background:var(--blue-soft);color:var(--blue);font-weight:800;font-size:15px}
+  html[data-view=pc] .morebtn{max-width:320px}
 </style>
 </head>
 <body>
@@ -436,6 +438,7 @@
 
 <script src="config.js"></script>
 <script>
+try{ if(window.TP_CONFIG && TP_CONFIG.url){ const l=document.createElement("link"); l.rel="preconnect"; l.href=TP_CONFIG.url; l.crossOrigin=""; document.head.appendChild(l); } }catch(e){}
 /* ====== SOZLAMALAR ====== */
 const CONFIG = { url: (window.TP_CONFIG||{}).url || "", key: (window.TP_CONFIG||{}).key || "" };
 const CONFIGURED = !!(CONFIG.url && CONFIG.key);
@@ -502,11 +505,11 @@ async function doLogin(){
 }
 $("lPass").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
 
-function forceLogout(){ token = null; store.del("tpa_token"); show("login"); }
+function forceLogout(){ lsClear(); token = null; store.del("tpa_token"); show("login"); }
 async function logout(){
   const t = token;
   try{ if(t) await rpc("admin_logout", {p_token:t}); }catch(e){}
-  forceLogout(); toast("Chiqdingiz");
+  lsClear(); forceLogout(); toast("Chiqdingiz");
 }
 function handleErr(e){
   if(e.session){ forceLogout(); toast("Qaytadan kiring", true); }
@@ -583,10 +586,11 @@ function copyTrack(t){
 }
 async function setStatus(id, sel){
   const prev = sel.dataset.prev, val = sel.value;
+  sel.dataset.prev = val; $("s"+id).className = "stsel " + val;   // darhol ko'rsatamiz
   try{
     await rpc("admin_set_status", {p_token:token, p_id:id, p_status:val});
-    sel.dataset.prev = val; $("s"+id).className = "stsel " + val; toast("Holat: " + STATUS[val]);
-  }catch(e){ sel.value = prev; handleErr(e); }
+    lsClear(); toast("Holat: " + STATUS[val]);
+  }catch(e){ sel.value = prev; sel.dataset.prev = prev; $("s"+id).className = "stsel " + prev; handleErr(e); }
 }
 
 
@@ -673,11 +677,12 @@ function rcvDrop(id){ rcv = rcv.filter(x=>x.id !== id); drawRcv(); }
 async function applyReceive(){
   const ids = rcv.filter(x=>x.checked).map(x=>x.id); if(!ids.length) return;
   const b = $("rcvBtn"); b.disabled = true;
+  const backup = rcv.slice(); rcv = rcv.filter(x=>!x.checked); drawRcv(); beep("done");   // darhol tozalaymiz
   try{
     const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"pickup", p_from:["new","china","transit","uz"]});
     const n = (r && r.count != null) ? r.count : ids.length;
-    rcv = rcv.filter(x=>!x.checked); beep("done"); toast(n + " ta yuk qabul qilindi"); drawRcv();
-  }catch(e){ handleErr(e); }
+    lsClear(); toast(n + " ta yuk qabul qilindi");
+  }catch(e){ rcv = backup; drawRcv(); handleErr(e); }
   b.disabled = false; if(!kbOn) $("scanIn").focus();
 }
 
@@ -718,7 +723,7 @@ async function applyHandover(){
   try{
     const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:["pickup"]});
     const n = (r && r.count != null) ? r.count : ids.length;
-    beep("done"); toast(n + " ta yuk topshirildi (Tasdiqlangan)"); await hoFind();
+    lsClear(); beep("done"); toast(n + " ta yuk topshirildi (Tasdiqlangan)"); await hoFind();
   }catch(e){ handleErr(e); }
   b.disabled = false;
 }
@@ -840,11 +845,60 @@ async function bulkDone(){
   try{
     const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:["pickup"]});
     toast("Tasdiqlandi: " + (r && r.count != null ? r.count : ids.length) + " ta");
-    sel.clear(); await search();
+    lsClear(); sel.clear(); await search();
   }catch(e){ handleErr(e); }
   b.disabled = false;
 }
 
+/* ====== Qidiruv (tezkor: keshdan darhol, keyin yangilanadi) ====== */
+const mem = {};
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem("tp_c_"+k)); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem("tp_c_"+k, JSON.stringify(v)); }catch(e){} }
+function lsClear(){ try{ Object.keys(localStorage).filter(k=>k.startsWith("tp_c_")).forEach(k=>localStorage.removeItem(k)); }catch(e){} Object.keys(mem).forEach(k=>delete mem[k]); }
+async function swr(my, key, fetcher, render, persist){
+  let cached = mem[key] || (persist ? lsGet(key) : null);
+  if(cached && my === seq) render(cached);
+  const fresh = await fetcher(); if(my !== seq) return;
+  mem[key] = fresh; if(persist) lsSet(key, fresh);
+  if(!cached || JSON.stringify(fresh) !== JSON.stringify(cached)) render(fresh);
+}
+let cState = null;
+function renderCargo(r){
+  const q = $("q").value.trim(), out = $("out"); cState = r;
+  const cs = r.customers || [], ds = r.declarations || [], total = r.total != null ? r.total : ds.length;
+  $("subline").textContent = "Yuklar: " + total;
+  sel.clear(); canPick = q !== "";
+  const pickCount = ds.filter(d=>d.status==="pickup").length;
+  let html = "";
+  const qn = q.toUpperCase().replace(/\s/g,"");
+  const trackQ = qn && ds.some(d=>String(d.track).toUpperCase().includes(qn));
+  const single = cs.length === 1 && q && !trackQ;
+  if(cs.length) html += `<div class="info">Mijoz${cs.length>1?"lar":""}</div>` + cs.map(c=>custCard(c,cs.length>1, single ? (showCargo?"open":"closed") : null)).join("");
+  if(single && !showCargo){
+    out.innerHTML = html + `<div class="empty" style="padding:16px"><p style="margin:0">Yuklarini ko'rish uchun yuqoridagi 👁 tugmasini bosing.</p></div>`;
+    updateBar(); return;
+  }
+  if(single && showCargo) html += `<div class="cfilt"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="cf" placeholder="Shu mijozning yukini trek raqam bilan qidirish" autocomplete="off" autocapitalize="characters" oninput="cargoFilter()" value="${esc(cfVal)}"></div><div id="cfEmpty" class="info" style="display:none">Bunday trek raqamli yuk topilmadi</div>`;
+  html += `<div class="info">${q?"Topilgan yuklar":"So'nggi yuklar"}: ${total} ta</div>`;
+  if(canPick && pickCount) html += `<div class="bulk"><label class="chk"><input type="checkbox" id="selAll" onchange="toggleAll(this)">Hammasini tanlash</label><span class="when">Topshirishga tayyor: ${pickCount} ta</span></div>`;
+  html += ds.length ? ds.map(cargoCard).join("")
+    : `<div class="empty"><b>Yuk topilmadi</b><p>${q?"Mijoz kodi (masalan TP1001), ism, telefon yoki trek-kod bilan qidiring.":"Hali deklaratsiya qo'shilmagan."}</p></div>`;
+  if(ds.length < total) html += `<button class="morebtn" id="moreBtn" onclick="loadMore()">Yana ko'rsatish (${total - ds.length})</button>`;
+  out.innerHTML = html;
+  if(single && showCargo) cargoFilter();
+  updateBar();
+}
+async function loadMore(){
+  if(!cState) return; const b = $("moreBtn"); if(b){ b.disabled = true; b.textContent = "Yuklanmoqda..."; }
+  const q = $("q").value.trim(), key = "c|" + q + "|" + showCargo;
+  try{
+    const r = await rpc("admin_search", {p_token:token, p_q:q, p_limit:15, p_offset:cState.declarations.length});
+    if($("q").value.trim() !== q) return;
+    const seen = new Set(cState.declarations.map(d=>d.id));
+    const merged = {customers:cState.customers, declarations:cState.declarations.concat(r.declarations.filter(d=>!seen.has(d.id))), total:r.total};
+    mem[key] = merged; renderCargo(merged);
+  }catch(e){ handleErr(e); renderCargo(cState); }
+}
 async function search(){
   if(!token || !CONFIGURED) return;
   const my = ++seq;
@@ -853,43 +907,21 @@ async function search(){
   if(!out.children.length) out.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   try{
     if(tab === "chat"){
-      const list = await rpc("admin_chats", {p_token:token, p_q:q});
-      if(my !== seq) return;
-      sel.clear(); updateBar(); setBadge(list);
-      $("subline").textContent = "Chatlar: " + list.length;
-      out.innerHTML = list.length ? list.map(chatRow).join("")
-        : `<div class="empty"><b>Xabar yo'q</b><p>${q?"Boshqa so'z bilan qidirib ko'ring.":"Mijozlar yozganda shu yerda ko'rinadi."}</p></div>`;
+      await swr(my, "t|" + q, ()=>rpc("admin_chats", {p_token:token, p_q:q}), list=>{
+        sel.clear(); updateBar(); setBadge(list);
+        $("subline").textContent = "Chatlar: " + list.length;
+        out.innerHTML = list.length ? list.map(chatRow).join("")
+          : `<div class="empty"><b>Xabar yo'q</b><p>${q?"Boshqa so'z bilan qidirib ko'ring.":"Mijozlar yozganda shu yerda ko'rinadi."}</p></div>`;
+      }, q === "");
     } else if(tab === "cust"){
-      const list = await rpc("admin_customers", {p_token:token, p_q:q});
-      if(my !== seq) return;
-      sel.clear(); updateBar();
-      $("subline").textContent = "Mijozlar: " + list.length;
-      out.innerHTML = list.length ? `<div class="info">Mijozlar: ${list.length} ta. Bosib, yuklarini ko'ring</div>` + list.map(c=>custCard(c,true)).join("")
-        : `<div class="empty"><b>Mijoz topilmadi</b><p>${q?"Boshqa so'z bilan qidirib ko'ring.":"Hali hech kim ro'yxatdan o'tmagan."}</p></div>`;
+      await swr(my, "u|" + q, ()=>rpc("admin_customers", {p_token:token, p_q:q}), list=>{
+        sel.clear(); updateBar();
+        $("subline").textContent = "Mijozlar: " + list.length;
+        out.innerHTML = list.length ? `<div class="info">Mijozlar: ${list.length} ta. Bosib, yuklarini ko'ring</div>` + list.map(c=>custCard(c,true)).join("")
+          : `<div class="empty"><b>Mijoz topilmadi</b><p>${q?"Boshqa so'z bilan qidirib ko'ring.":"Hali hech kim ro'yxatdan o'tmagan."}</p></div>`;
+      }, q === "");
     } else {
-      const r = await rpc("admin_search", {p_token:token, p_q:q});
-      if(my !== seq) return;
-      const cs = r.customers || [], ds = r.declarations || [];
-      $("subline").textContent = "Yuklar: " + ds.length;
-      sel.clear(); canPick = q !== "";
-      const uzCount = ds.filter(d=>d.status==="pickup").length;
-      let html = "";
-      const qn = q.toUpperCase().replace(/\s/g,"");
-      const trackQ = qn && ds.some(d=>String(d.track).toUpperCase().includes(qn));
-      const single = cs.length === 1 && q && !trackQ;
-      if(cs.length) html += `<div class="info">Mijoz${cs.length>1?"lar":""}</div>` + cs.map(c=>custCard(c,cs.length>1, single ? (showCargo?"open":"closed") : null)).join("");
-      if(single && !showCargo){
-        out.innerHTML = html + `<div class="empty" style="padding:16px"><p style="margin:0">Yuklarini ko'rish uchun yuqoridagi 👁 tugmasini bosing.</p></div>`;
-        updateBar(); return;
-      }
-      if(single && showCargo) html += `<div class="cfilt"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="cf" placeholder="Shu mijozning yukini trek raqam bilan qidirish" autocomplete="off" autocapitalize="characters" oninput="cargoFilter()" value="${esc(cfVal)}"></div><div id="cfEmpty" class="info" style="display:none">Bunday trek raqamli yuk topilmadi</div>`;
-      html += `<div class="info">${q?"Topilgan yuklar":"So'nggi yuklar"}: ${ds.length} ta</div>`;
-      if(canPick && uzCount) html += `<div class="bulk"><label class="chk"><input type="checkbox" id="selAll" onchange="toggleAll(this)">Hammasini tanlash</label><span class="when">Topshirishga tayyor: ${uzCount} ta</span></div>`;
-      html += ds.length ? ds.map(cargoCard).join("")
-        : `<div class="empty"><b>Yuk topilmadi</b><p>${q?"Mijoz kodi (masalan TP1001), ism, telefon yoki trek-kod bilan qidiring.":"Hali deklaratsiya qo'shilmagan."}</p></div>`;
-      out.innerHTML = html;
-      if(single && showCargo) cargoFilter();
-      updateBar();
+      await swr(my, "c|" + q + "|" + showCargo, ()=>rpc("admin_search", {p_token:token, p_q:q, p_limit: showCargo ? 300 : 15, p_offset:0}), renderCargo, q === "");
     }
   }catch(e){ if(my === seq){ out.innerHTML = ""; handleErr(e); } }
 }
