@@ -744,7 +744,7 @@ function drawAddr(){
   if(!t){ box.innerHTML = H + '<div class="aempty">Manzil hali kiritilmagan. Tez orada qo\'shiladi.</div>'; return; }
   const rows = ADDR_ROWS.filter(r=>t[r[0]]);
   box.innerHTML = H +
-    `<div class="apills">${list.map((x,i)=>`<button class="apill ${i===addrSel?"on":""}" onclick="addrSel=${i};drawAddr()">${esc(x.name)}${x.info?`<small>${esc(x.info)}</small>`:""}</button>`).join("")}</div>`
+    `<div class="apills">${list.map((x,i)=>`<button class="apill ${i===addrSel?"on":""}" onclick="addrSel=${i};drawAddr()">${esc(x.name)}</button>`).join("")}</div>`
     + (rows.length
       ? `<div class="arows">${rows.map(r=>`<div class="arow"><div class="al"><b>${r[1]}</b><small>${r[2]}</small></div><div class="av">${esc(t[r[0]])}</div><button class="acp" aria-label="Nusxa olish" onclick="copyRow(this,'${r[0]}')">${COPY_SVG}</button></div>`).join("")}</div>
          <button class="btn-save btn-orange" onclick="copyAll(this)">Barchasini nusxa olish</button>`
