@@ -323,6 +323,9 @@
   [data-theme=dark] .add{background:#2C1F10}
 
   /* ---------- Xitoy manzili ---------- */
+  .acard{background:var(--card);border-radius:22px;padding:14px;box-shadow:var(--shadow)}
+  .acard h2{margin:0 0 10px;font-size:18px}
+  .acard .arows{box-shadow:none;background:transparent;padding:0;margin:6px 0 12px}
   .apills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:6px;padding-bottom:4px}
   .apills::-webkit-scrollbar{display:none}
   .apill{flex:none;border:0;border-radius:14px;padding:9px 14px;background:var(--blue-soft);color:var(--blue);font-weight:800;font-size:14px;text-align:left}
@@ -400,13 +403,16 @@
     <h2>Tezkor kirish</h2>
     <div class="qrow">
       <button class="qcard" onclick="openTariffs()"><span class="qi"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span><b>Tariflar</b></button>
-      <button class="qcard" onclick="openAddr()"><span class="qi"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span><b>Xitoy manzili</b></button>
     </div>
   </section>
 
   <section class="section">
     <div class="section-head"><h2>So'nggi deklaratsiya</h2><button class="all" id="allBtn" onclick="openLoads()" style="display:none">Barchasi ›</button></div>
     <div id="declList"></div>
+  </section>
+
+  <section class="section" style="padding-top:2px">
+    <div class="acard" id="addrCard"></div>
   </section>
 </main>
 
@@ -479,13 +485,6 @@
 </div></nav>
 
 <!-- ===== Pastdan chiqadigan oyna ===== -->
-<div class="sheet-back" id="addrBack" onclick="closeAddr()">
-  <div class="sheet" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
-    <h3>Xitoy manzilingiz</h3>
-    <div id="addrBody"></div>
-    <button class="cancel" onclick="closeAddr()">Yopish</button>
-  </div>
-</div>
 <div class="sheet-back" id="tariffBack" onclick="closeTariffs()">
   <div class="sheet" onclick="event.stopPropagation()">
     <h3>Cargo tariflari</h3>
@@ -569,7 +568,7 @@ function show(id){
   $("navProfile").classList.toggle("on", id==="profile");
   window.scrollTo({top:0,left:0,behavior:"instant"});
 }
-function go(id){ if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); }
+function go(id){ if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); if(id==="home") refreshAddr(); }
 function openDecl(){ resetForm(); show("decl"); }
 function closeDecl(){ show("home"); }
 function openLoads(){ go("loads"); }
@@ -633,7 +632,7 @@ async function submitAuth(){
 
 function enterApp(){
   $("helloName").textContent = (me && me.name || "").split(" ")[0];
-  renderList(); show("home"); loadList(); checkUnread();
+  renderList(); show("home"); loadList(); checkUnread(); refreshAddr();
 }
 function forceLogout(){
   token = null; me = null; declarations = [];
@@ -719,7 +718,7 @@ setInterval(()=>{ if(!document.hidden) checkUnread(); }, 20000);
 
 /* ====== Tariflar ====== */
 const TARIFFS = [{name:"Avto", info:"6.5$ (14-18 kun)"}];
-let addrs = null;
+let addrs = store.get("tp_addrs", null);
 async function loadAddrs(){
   try{ const r = await rpc("get_addresses", {p_token:token}); if(Array.isArray(r) && r.length){ addrs = r; store.set("tp_addrs", r); } }
   catch(e){ if(e.session) handleErr(e); }
@@ -741,10 +740,10 @@ async function copyText(t){
   try{ const ta = document.createElement("textarea"); ta.value = t; ta.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(ta); ta.select(); const ok = document.execCommand("copy"); ta.remove(); return ok; }catch(e){ return false; }
 }
 function drawAddr(){
-  const list = addrs || [], t = list[addrSel];
-  if(!t){ $("addrBody").innerHTML = '<div class="aempty">Manzil hali kiritilmagan. Tez orada qo\'shiladi.</div>'; return; }
+  const list = addrs || [], t = list[addrSel], box = $("addrCard"), H = "<h2>Xitoy manzilingiz</h2>";
+  if(!t){ box.innerHTML = H + '<div class="aempty">Manzil hali kiritilmagan. Tez orada qo\'shiladi.</div>'; return; }
   const rows = ADDR_ROWS.filter(r=>t[r[0]]);
-  $("addrBody").innerHTML =
+  box.innerHTML = H +
     `<div class="apills">${list.map((x,i)=>`<button class="apill ${i===addrSel?"on":""}" onclick="addrSel=${i};drawAddr()">${esc(x.name)}${x.info?`<small>${esc(x.info)}</small>`:""}</button>`).join("")}</div>`
     + (rows.length
       ? `<div class="arows">${rows.map(r=>`<div class="arow"><div class="al"><b>${r[1]}</b><small>${r[2]}</small></div><div class="av">${esc(t[r[0]])}</div><button class="acp" aria-label="Nusxa olish" onclick="copyRow(this,'${r[0]}')">${COPY_SVG}</button></div>`).join("")}</div>
@@ -761,12 +760,10 @@ async function copyAll(btn){
   const txt = ADDR_ROWS.filter(r=>t[r[0]]).map(r=>t[r[0]]).join("\n");
   if(await copyText(txt)) toast("Hammasi nusxa olindi"); else toast("Nusxa olib bo'lmadi", true);
 }
-function openAddr(){
-  addrSel = 0; $("addrBody").innerHTML = '<div class="skel"></div><div class="skel"></div>'; $("addrBack").classList.add("show");
-  if(addrs) drawAddr();
-  loadAddrs().then(()=>{ if($("addrBack").classList.contains("show")){ if(addrSel >= (addrs||[]).length) addrSel = 0; drawAddr(); } });
+function refreshAddr(){
+  if(addrs) drawAddr(); else $("addrCard").innerHTML = '<h2>Xitoy manzilingiz</h2><div class="skel"></div>';
+  loadAddrs().then(()=>{ if(addrSel >= (addrs||[]).length) addrSel = 0; drawAddr(); });
 }
-function closeAddr(){ $("addrBack").classList.remove("show"); }
 function closeTariffs(){ $("tariffBack").classList.remove("show"); }
 
 /* ====== Pastdan chiqadigan oyna ====== */
@@ -910,7 +907,8 @@ async function loadList(){
   renderList();
   if($("profile").classList.contains("active")) renderProfile();
 }
-document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token && ($("home").classList.contains("active") || $("loads").classList.contains("active"))) loadList(); });
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token && ($("home").classList.contains("active") || $("loads").classList.contains("active"))) loadList();
+  if(!document.hidden && token && $("home").classList.contains("active")) refreshAddr(); });
 
 /* ====== Boshlash ====== */
 if(!CONFIGURED) $("setupWarn").style.display = "block";
