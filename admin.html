@@ -187,6 +187,21 @@
   #msgIn:focus{border-color:var(--blue)}
   .sendbtn{width:42px;height:42px;border-radius:50%;border:0;background:var(--orange);display:grid;place-items:center;flex:none}
   .sendbtn svg{width:20px;height:20px;fill:#fff}
+
+  /* ---------- Sozlamalar ---------- */
+  .setrow{width:100%;display:flex;align-items:center;gap:12px;background:var(--card);border:0;border-radius:18px;padding:12px 14px;box-shadow:var(--shadow);text-align:left}
+  .setrow .si{width:40px;height:40px;border-radius:13px;background:var(--orange);display:grid;place-items:center;flex:none}
+  .setrow .si svg{width:21px;height:21px;fill:#fff}
+  .setrow .st{flex:1;min-width:0}.setrow .st b{display:block;font-size:16px}.setrow .st small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .setrow .ch{font-size:26px;color:var(--muted)}
+  .hint{background:#FFF4E5;color:#8A4B00;border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.45;margin-bottom:12px}
+  .tf{background:var(--card);border-radius:20px;padding:12px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .tf h3{margin:0 0 8px;font-size:15px;color:var(--blue)}
+  .tf .field{margin-bottom:8px}
+  .tf textarea{width:100%;border:0;outline:0;background:transparent;font-size:16px;resize:vertical;min-height:64px;padding:3px 0 0}
+  .tf .row2{display:flex;gap:8px;margin-top:4px}
+  .tf .btn{height:44px;font-size:15px;flex:1 1 0;width:auto;min-width:0}
+  .tf .btn.del{background:#FDECEC;color:#C62828;box-shadow:none;flex:0 0 auto;padding:0 20px}
 </style>
 </head>
 <body>
@@ -218,6 +233,7 @@
     <div class="top">
       <div class="logo"><img alt="" src="icon-192.png"></div>
       <div><h1>TezPost Admin</h1><small id="subline">Yuklar va mijozlar</small></div>
+      <button class="iconbtn" aria-label="Sozlamalar" onclick="show('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
       <button class="iconbtn" id="refBtn" aria-label="Yangilash" onclick="refresh(true)"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg></button>
       <button class="iconbtn" aria-label="Chiqish" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg></button>
     </div>
@@ -233,6 +249,34 @@
     </div>
   </section>
   <div class="wrap"><div id="out"></div></div>
+</main>
+
+<!-- ===== SOZLAMALAR ===== -->
+<main id="settings" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('main')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px">Sozlamalar</b>
+  </div>
+  <div class="wrap">
+    <button class="setrow" onclick="openAddrEdit()">
+      <span class="si"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span>
+      <span class="st"><b>Manzilni tahrirlash</b><small>Xitoy manzili va tariflar (mijozlar ilovada ko'radi)</small></span>
+      <span class="ch">›</span>
+    </button>
+  </div>
+</main>
+
+<!-- ===== MANZILNI TAHRIRLASH ===== -->
+<main id="addrEdit" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px">Manzilni tahrirlash</b>
+  </div>
+  <div class="wrap">
+    <div class="hint">Har bir tarif (Avto, Avia...) uchun alohida manzil kiritasiz. Mijoz ilovasida «Xitoy manzili» tugmasida ko'rinadi va nusxa oladi. Matnda <b>{kod}</b> yozsangiz, har bir mijozda uning kodi (TP1001) bilan almashadi.</div>
+    <div id="tfList"></div>
+    <button class="btn" style="background:linear-gradient(180deg,#FF9322,#FF7A00 60%,#F26A00)" onclick="addTariff()">+ Yangi tarif qo'shish</button>
+  </div>
 </main>
 
 <!-- ===== SUHBAT ===== -->
@@ -395,6 +439,43 @@ async function setStatus(id, sel){
     await rpc("admin_set_status", {p_token:token, p_id:id, p_status:val});
     sel.dataset.prev = val; $("s"+id).className = "stsel " + val; toast("Holat: " + STATUS[val]);
   }catch(e){ sel.value = prev; handleErr(e); }
+}
+
+/* ====== Sozlamalar: manzil va tariflar ====== */
+let tariffs = [];
+function tfCard(t, i){
+  const f = (k, label, ph) => `<label class="field"><span>${label}</span><input id="tf${i}_${k}" value="${esc(t[k]||"")}" placeholder="${ph}" maxlength="${k==="phone"?40:k==="zip"?20:k==="name"?30:k==="info"?60:120}"></label>`;
+  return `<div class="tf"><h3>${t.id?esc(t.name||"Tarif"):"Yangi tarif"}</h3>
+    ${f("name","Tarif nomi","Avto")}${f("info","Narx va muddat","6.5$ (14-18 kun)")}
+    ${f("receiver","Qabul qiluvchi (收件人)","masalan: {kod}")}${f("phone","Telefon (手机号)","13335957161")}${f("zip","Indeks (邮编)","322000")}
+    <label class="field"><span>Manzil (地址)</span><textarea id="tf${i}_address" maxlength="300" placeholder="浙江省金华市...">${esc(t.address||"")}</textarea></label>
+    <div class="row2"><button class="btn" onclick="saveTariff(${i},this)">Saqlash</button><button class="btn del" onclick="delTariff(${i})">O'chirish</button></div></div>`;
+}
+function drawTariffs(){ $("tfList").innerHTML = tariffs.length ? tariffs.map(tfCard).join("") : '<div class="empty"><b>Tarif yo\'q</b><p>«Yangi tarif qo\'shish» tugmasini bosing.</p></div>'; }
+async function openAddrEdit(){
+  show("addrEdit"); $("tfList").innerHTML = '<div class="skel"></div><div class="skel"></div>';
+  try{ tariffs = await rpc("admin_tariffs", {p_token:token}); drawTariffs(); }catch(e){ handleErr(e); }
+}
+function addTariff(){
+  tariffs.push({id:null,name:"",info:"",receiver:"",phone:"",zip:"",address:""}); drawTariffs();
+  const last = $("tfList").lastElementChild; if(last) last.scrollIntoView({behavior:"smooth", block:"center"});
+}
+async function saveTariff(i, btn){
+  const t = tariffs[i], v = k => $("tf"+i+"_"+k).value.trim();
+  if(!v("name")){ toast("Tarif nomini kiriting", true); return; }
+  btn.disabled = true;
+  try{
+    await rpc("admin_tariff_save", {p_token:token, p_id:t.id, p_name:v("name"), p_info:v("info"), p_receiver:v("receiver"), p_phone:v("phone"), p_zip:v("zip"), p_address:v("address")});
+    toast("Saqlandi"); tariffs = await rpc("admin_tariffs", {p_token:token}); drawTariffs();
+  }catch(e){ handleErr(e); }
+  btn.disabled = false;
+}
+async function delTariff(i){
+  const t = tariffs[i];
+  if(!t.id){ tariffs.splice(i,1); drawTariffs(); return; }
+  if(!confirm("«" + t.name + "» tarifi o'chirilsinmi?")) return;
+  try{ await rpc("admin_tariff_delete", {p_token:token, p_id:t.id}); toast("O'chirildi"); tariffs = await rpc("admin_tariffs", {p_token:token}); drawTariffs(); }
+  catch(e){ handleErr(e); }
 }
 
 /* ====== Chat ====== */
