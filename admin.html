@@ -202,6 +202,34 @@
   .tf .row2{display:flex;gap:8px;margin-top:4px}
   .tf .btn{height:44px;font-size:15px;flex:1 1 0;width:auto;min-width:0}
   .tf .btn.del{background:#FDECEC;color:#C62828;box-shadow:none;flex:0 0 auto;padding:0 20px}
+
+  /* ---------- Qabul / Topshirish ---------- */
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .act{height:46px;border:0;border-radius:15px;background:linear-gradient(180deg,#FF9322,#F26A00);color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 14px rgba(242,106,0,.4)}
+  .act svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .act.alt{background:#fff;color:var(--navy);box-shadow:0 6px 14px rgba(0,0,0,.18)}
+  .scanbox{background:var(--card);border-radius:20px;padding:12px;box-shadow:var(--shadow);margin-bottom:12px}
+  .scanbox .lbl{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:0 2px 8px}
+  .scanrow{display:flex;gap:8px}
+  .scanrow input{flex:1;min-width:0;height:52px;border:2px solid var(--blue);border-radius:15px;padding:0 14px;font-size:19px;font-weight:700;letter-spacing:.5px;outline:none;background:#F7FAFF}
+  .scanrow .kb{width:48px;height:52px;border:0;border-radius:15px;background:var(--blue-soft);display:grid;place-items:center;flex:none}
+  .scanrow .kb svg{width:24px;height:24px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .scanrow .kb.on{background:var(--blue)}.scanrow .kb.on svg{stroke:#fff}
+  .scanrow .go{height:52px;padding:0 16px;border:0;border-radius:15px;background:linear-gradient(180deg,#FF9322,#F26A00);color:#fff;font-weight:800;font-size:15px;flex:none}
+  .scanstat{display:flex;justify-content:space-between;gap:8px;margin:9px 2px 0;font-size:13px;font-weight:700;color:var(--muted)}
+  .scanstat .bad{color:#C62828}
+  .listhead{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:16px;padding:8px 12px;margin-bottom:9px;box-shadow:var(--shadow)}
+  .listhead .when{font-size:13px}
+  .rm{width:34px;height:34px;border:0;border-radius:11px;background:#FDECEC;color:#C62828;font-size:20px;line-height:1;flex:none}
+  .item.flash{animation:flash 1s ease}
+  @keyframes flash{0%{background:#D4F5E2}100%{background:var(--card)}}
+  .hocust{display:flex;align-items:center;gap:10px;background:var(--navy);color:#fff;border-radius:18px;padding:12px;margin-bottom:10px}
+  .hocust .code{box-shadow:none}
+  .hocust b{display:block;font-size:16px}.hocust a{color:#B9D0FF;font-size:13px;text-decoration:none}
+  .hoinfo{font-size:13px;color:var(--muted);margin:0 4px 10px;font-weight:600}
+  .actbar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);background:linear-gradient(180deg,rgba(242,246,252,0),var(--bg) 35%);display:none}
+  .actbar.show{display:block}
+  .actbar .btn{max-width:588px;margin:0 auto;background:linear-gradient(180deg,#22A862,#127A45);box-shadow:0 10px 24px rgba(18,122,69,.45)}
 </style>
 </head>
 <body>
@@ -242,6 +270,10 @@
       <input id="q" placeholder="Mijoz kodi (TP1001) yoki trek-kod" autocomplete="off" autocapitalize="characters" enterkeyhint="search">
       <button class="x" id="qx" aria-label="Tozalash" onclick="clearQ()">×</button>
     </div>
+    <div class="acts">
+      <button class="act" onclick="openReceive()"><svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8v8M11 8v8M15 8v8M18 8v8"/></svg>Qabul qilish</button>
+      <button class="act alt" onclick="openHandover()"><svg viewBox="0 0 24 24"><path d="M3.5 8.5L12 4l8.5 4.5v7L12 20l-8.5-4.5zM12 12l8.5-3.5M12 12v8M12 12L3.5 8.5"/></svg>Topshirish</button>
+    </div>
     <div class="tabs">
       <button id="tCargo" class="on" onclick="setTab('cargo')">Yuklar</button>
       <button id="tCust" onclick="setTab('cust')">Mijozlar</button>
@@ -249,6 +281,47 @@
     </div>
   </section>
   <div class="wrap"><div id="out"></div></div>
+</main>
+
+<!-- ===== QABUL QILISH ===== -->
+<main id="receive" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="closeRcv()" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Yuklarni qabul qilish</b>
+    <button class="bk" id="sndBtn" onclick="toggleSound()" aria-label="Ovoz" style="font-size:18px">🔊</button>
+  </div>
+  <div class="wrap" style="padding-bottom:110px">
+    <div class="scanbox">
+      <span class="lbl">Trek raqamni skaner qiling yoki kiriting</span>
+      <div class="scanrow">
+        <input id="scanIn" inputmode="none" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Trek raqam" enterkeyhint="done">
+        <button class="kb" id="kbBtn" onclick="toggleKb()" aria-label="Klaviatura"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M7 14h10"/></svg></button>
+        <button class="go" onclick="scanSubmit()">Qo'shish</button>
+      </div>
+      <div class="scanstat"><span id="rcvCnt">Skanerlandi: 0</span><span id="rcvMiss"></span></div>
+    </div>
+    <div id="rcvList"></div>
+  </div>
+  <div class="actbar" id="rcvBar"><button class="btn" id="rcvBtn" onclick="applyReceive()">Qabul qilish</button></div>
+</main>
+
+<!-- ===== TOPSHIRISH ===== -->
+<main id="handover" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="closeHo()" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Yuklarni topshirish</b>
+  </div>
+  <div class="wrap" style="padding-bottom:110px">
+    <div class="scanbox">
+      <span class="lbl">Mijoz kodi</span>
+      <div class="scanrow">
+        <input id="hoIn" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="TP1001" enterkeyhint="search" oninput="hoTyping()">
+        <button class="go" onclick="hoFind()">Topish</button>
+      </div>
+    </div>
+    <div id="hoBody"></div>
+  </div>
+  <div class="actbar" id="hoBar"><button class="btn" id="hoBtn" onclick="applyHandover()">Topshirish</button></div>
 </main>
 
 <!-- ===== SOZLAMALAR ===== -->
@@ -301,7 +374,7 @@
 /* ====== SOZLAMALAR ====== */
 const CONFIG = { url: (window.TP_CONFIG||{}).url || "", key: (window.TP_CONFIG||{}).key || "" };
 const CONFIGURED = !!(CONFIG.url && CONFIG.key);
-const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"O'zbekistonda", pickup:"Topshirish punktida", done:"Tasdiqlangan"};
+const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"Topshirish punktiga yetkazilmoqda", pickup:"Topshirish punktida", done:"Tasdiqlangan"};
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -419,7 +492,7 @@ function custCard(c, clickable){
 }
 function cargoCard(d){
   const opts = Object.keys(STATUS).map(k=>`<option value="${k}" ${d.status===k?"selected":""}>${STATUS[k]}</option>`).join("");
-  const pick = ((d.status==="uz"||d.status==="pickup") && canPick) ? `<label class="chk pick"><input type="checkbox" data-id="${d.id}" onchange="togglePick(${d.id},this)"></label>` : "";
+  const pick = (d.status==="pickup" && canPick) ? `<label class="chk pick"><input type="checkbox" data-id="${d.id}" onchange="togglePick(${d.id},this)"></label>` : "";
   return `<div class="item" id="d${d.id}">
     <div class="row1">${pick}<button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button>
       <button class="who" onclick="openCustomer('${esc(d.customer_code)}')">${esc(d.customer_code)}</button></div>
@@ -439,6 +512,131 @@ async function setStatus(id, sel){
     await rpc("admin_set_status", {p_token:token, p_id:id, p_status:val});
     sel.dataset.prev = val; $("s"+id).className = "stsel " + val; toast("Holat: " + STATUS[val]);
   }catch(e){ sel.value = prev; handleErr(e); }
+}
+
+/* ====== Qabul qilish (skaner) ====== */
+let soundOn = true; try{ soundOn = localStorage.getItem("tp_sound") !== "0"; }catch(e){}
+let actx = null, rcv = [], rcvMiss = [], inflight = new Set(), kbOn = false;
+function audio(){ try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); if(actx.state === "suspended") actx.resume(); }catch(e){} }
+function beep(ok){
+  if(!soundOn) return; audio(); if(!actx) return;
+  const tone = (f, t0, d) => { const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f; o.type = "sine"; g.gain.value = .25; o.connect(g); g.connect(actx.destination); o.start(actx.currentTime + t0); o.stop(actx.currentTime + t0 + d); };
+  if(ok) tone(1040, 0, .12); else { tone(240, 0, .16); tone(240, .22, .16); }
+}
+function speak(text){
+  if(!soundOn || !window.speechSynthesis) return;
+  try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "uz-UZ"; u.rate = 1.05; speechSynthesis.speak(u); }catch(e){}
+}
+function toggleSound(){
+  soundOn = !soundOn; try{ localStorage.setItem("tp_sound", soundOn ? "1" : "0"); }catch(e){}
+  $("sndBtn").textContent = soundOn ? "🔊" : "🔇"; toast(soundOn ? "Ovoz yoqildi" : "Ovoz o'chirildi");
+  if(soundOn){ beep(true); }
+}
+function toggleKb(){
+  kbOn = !kbOn; const i = $("scanIn"); i.setAttribute("inputmode", kbOn ? "text" : "none"); $("kbBtn").classList.toggle("on", kbOn);
+  i.blur(); setTimeout(()=>i.focus(), 50);
+}
+const normTrack = t => String(t||"").replace(/\s/g,"").toUpperCase();
+function openReceive(){
+  audio(); show("receive"); $("sndBtn").textContent = soundOn ? "🔊" : "🔇";
+  drawRcv(); setTimeout(()=>$("scanIn").focus(), 120);
+}
+function closeRcv(){
+  if(rcv.length && !confirm("Qabul qilinmagan yuklar ro'yxati o'chib ketadi. Chiqasizmi?")) return;
+  rcv = []; rcvMiss = []; show("main"); search();
+}
+$("scanIn").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); scanSubmit(); } });
+$("scanIn").addEventListener("blur", ()=>{ setTimeout(()=>{ if($("receive").classList.contains("active") && !kbOn && document.activeElement === document.body) $("scanIn").focus(); }, 150); });
+async function scanSubmit(){
+  const inp = $("scanIn"), v = inp.value.trim(); inp.value = "";
+  if(!kbOn) inp.focus();
+  if(!v) return;
+  const n = normTrack(v);
+  if(inflight.has(n) || rcv.some(x=>normTrack(x.track) === n)){ beep(false); speak("Takroran skanerlandi"); toast("Bu yuk ro'yxatda bor", true); return; }
+  inflight.add(n);
+  try{
+    const d = await rpc("admin_find_track", {p_token:token, p_track:v});
+    if(!d){ rcvMiss.unshift(v); beep(false); speak("Yuk topilmadi"); toast("Topilmadi: " + v, true); }
+    else if(d.status === "pickup"){ beep(false); speak("Allaqachon qabul qilingan"); toast("Allaqachon punktda: " + d.track, true); }
+    else if(d.status === "done"){ beep(false); speak("Allaqachon topshirilgan"); toast("Allaqachon topshirilgan: " + d.track, true); }
+    else { d.checked = true; d.fresh = true; rcv.unshift(d); beep(true); speak("Topshirish punktiga qabul qilindi"); }
+    drawRcv();
+  }catch(e){ handleErr(e); }
+  inflight.delete(n);
+}
+function rcvItem(d){
+  return `<div class="item ${d.fresh?"flash":""}" id="r${d.id}"><div class="row1">
+    <label class="chk pick"><input type="checkbox" ${d.checked?"checked":""} onchange="rcvTick(${d.id},this)"></label>
+    <button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button>
+    <button class="who" onclick="openCustomer('${esc(d.customer_code)}')">${esc(d.customer_code)}</button>
+    <button class="rm" aria-label="Olib tashlash" onclick="rcvDrop(${d.id})">×</button></div>
+    <div style="margin-top:6px;font-size:14px;font-weight:600">${esc(d.customer_name)} <span class="when">· ${esc(STATUS[d.status]||d.status)}</span></div>
+    <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div></div>`;
+}
+function drawRcv(){
+  const sel = rcv.filter(x=>x.checked).length;
+  $("rcvCnt").textContent = "Skanerlandi: " + rcv.length;
+  const m = $("rcvMiss"); m.innerHTML = rcvMiss.length ? `<span class="bad" onclick="alert('Topilmagan trek raqamlar:\\n\\n' + rcvMiss.join('\\n'))">Topilmadi: ${rcvMiss.length}</span>` : "";
+  $("rcvList").innerHTML = rcv.length
+    ? `<div class="listhead"><label class="chk"><input type="checkbox" id="rcvAll" ${sel===rcv.length?"checked":""} onchange="rcvAll(this)">Hammasini belgilash</label><span class="when">${sel} / ${rcv.length}</span></div>` + rcv.map(rcvItem).join("")
+    : `<div class="empty"><b>Hali yuk skanerlanmadi</b><p>Skaner bilan trek-kodni o'qing. Raqam avtomatik tushadi va yuk ro'yxatga qo'shiladi.</p></div>`;
+  rcv.forEach(x=>x.fresh = false);
+  $("rcvBtn").textContent = "Qabul qilish (" + sel + " ta)"; $("rcvBar").classList.toggle("show", sel > 0);
+}
+function rcvTick(id, cb){ const x = rcv.find(v=>v.id===id); if(x) x.checked = cb.checked; drawRcv(); }
+function rcvAll(cb){ rcv.forEach(x=>x.checked = cb.checked); drawRcv(); }
+function rcvDrop(id){ rcv = rcv.filter(x=>x.id !== id); drawRcv(); }
+async function applyReceive(){
+  const ids = rcv.filter(x=>x.checked).map(x=>x.id); if(!ids.length) return;
+  const b = $("rcvBtn"); b.disabled = true;
+  try{
+    const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"pickup", p_from:["new","china","transit","uz"]});
+    const n = (r && r.count != null) ? r.count : ids.length;
+    rcv = rcv.filter(x=>!x.checked); beep(true); speak(n + " ta yuk Topshirish punktiga qabul qilindi"); toast(n + " ta yuk qabul qilindi"); drawRcv();
+  }catch(e){ handleErr(e); }
+  b.disabled = false; if(!kbOn) $("scanIn").focus();
+}
+
+/* ====== Topshirish (mijoz kodi bo'yicha) ====== */
+let hoCust = null, hoItems = [], hoOther = 0, hoTimer = null;
+function openHandover(){ audio(); hoCust = null; hoItems = []; $("hoIn").value = ""; $("hoBody").innerHTML = ""; $("hoBar").classList.remove("show"); show("handover"); setTimeout(()=>$("hoIn").focus(), 120); }
+function closeHo(){ show("main"); search(); }
+$("hoIn").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoFind(); } });
+function hoTyping(){ clearTimeout(hoTimer); const v = $("hoIn").value.replace(/\s/g,""); if(/^(tp)?\d{4,}$/i.test(v)) hoTimer = setTimeout(hoFind, 450); }
+async function hoFind(keepMsg){
+  clearTimeout(hoTimer);
+  const v = $("hoIn").value.trim(); if(!v) return;
+  try{
+    const r = await rpc("admin_handover_list", {p_token:token, p_code:v});
+    if(!r){ hoCust = null; hoItems = []; $("hoBar").classList.remove("show"); $("hoBody").innerHTML = `<div class="empty"><b>Mijoz topilmadi</b><p>«${esc(v)}» kodli mijoz yo'q. Kodni tekshiring (masalan TP1001).</p></div>`; beep(false); return; }
+    hoCust = r.customer; hoOther = r.other; hoItems = r.items.map(x=>({...x, checked:false})); drawHo();
+  }catch(e){ handleErr(e); }
+}
+function drawHo(){
+  const c = hoCust; if(!c) return;
+  const sel = hoItems.filter(x=>x.checked).length;
+  $("hoBody").innerHTML =
+    `<div class="hocust"><div class="code">${esc(c.code)}</div><div style="min-width:0"><b>${esc(c.name)}</b><a href="tel:+${esc(c.phone)}">${esc(fmtPhone(c.phone))}</a></div></div>`
+    + `<div class="hoinfo">Topshirish punktida: ${hoItems.length} ta${hoOther ? " · Hali yetib kelmagan: " + hoOther + " ta" : ""}</div>`
+    + (hoItems.length
+      ? `<div class="listhead"><label class="chk"><input type="checkbox" ${sel===hoItems.length?"checked":""} onchange="hoAll(this)">Hammasini belgilash</label><span class="when">${sel} / ${hoItems.length}</span></div>`
+        + hoItems.map(d=>`<div class="item"><div class="row1"><label class="chk pick"><input type="checkbox" ${d.checked?"checked":""} onchange="hoTick(${d.id},this)"></label><button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button></div>
+            <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div>${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}</div>`).join("")
+      : `<div class="empty"><b>Topshiriladigan yuk yo'q</b><p>Bu mijozning yuklari hali topshirish punktiga qabul qilinmagan yoki hammasi topshirib bo'lingan.</p></div>`);
+  $("hoBtn").textContent = "Topshirish (" + sel + " ta)"; $("hoBar").classList.toggle("show", sel > 0);
+}
+function hoTick(id, cb){ const x = hoItems.find(v=>v.id===id); if(x) x.checked = cb.checked; drawHo(); }
+function hoAll(cb){ hoItems.forEach(x=>x.checked = cb.checked); drawHo(); }
+async function applyHandover(){
+  const ids = hoItems.filter(x=>x.checked).map(x=>x.id); if(!ids.length) return;
+  if(!confirm(hoCust.name + " (" + hoCust.code + ") ga " + ids.length + " ta yuk topshirilsinmi?")) return;
+  const b = $("hoBtn"); b.disabled = true;
+  try{
+    const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:["pickup"]});
+    const n = (r && r.count != null) ? r.count : ids.length;
+    beep(true); speak("Topshirildi"); toast(n + " ta yuk topshirildi (Tasdiqlangan)"); await hoFind();
+  }catch(e){ handleErr(e); }
+  b.disabled = false;
 }
 
 /* ====== Sozlamalar: manzil va tariflar ====== */
@@ -556,7 +754,7 @@ async function bulkDone(){
   if(!confirm(ids.length + " ta yuk tasdiqlansinmi (mijozga topshirildi)?")) return;
   const b = $("bulkBtn"); b.disabled = true;
   try{
-    const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:["uz","pickup"]});
+    const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:["pickup"]});
     toast("Tasdiqlandi: " + (r && r.count != null ? r.count : ids.length) + " ta");
     sel.clear(); await search();
   }catch(e){ handleErr(e); }
@@ -590,7 +788,7 @@ async function search(){
       const cs = r.customers || [], ds = r.declarations || [];
       $("subline").textContent = "Yuklar: " + ds.length;
       sel.clear(); canPick = q !== "";
-      const uzCount = ds.filter(d=>d.status==="uz"||d.status==="pickup").length;
+      const uzCount = ds.filter(d=>d.status==="pickup").length;
       let html = "";
       if(cs.length) html += `<div class="info">Mijoz${cs.length>1?"lar":""}</div>` + cs.map(c=>custCard(c,cs.length>1)).join("");
       html += `<div class="info">${q?"Topilgan yuklar":"So'nggi yuklar"}: ${ds.length} ta</div>`;

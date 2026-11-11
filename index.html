@@ -514,7 +514,7 @@ const CONFIG = {
   productTypes: ["Kiyim","Poyabzal","Elektronika","Aksessuarlar","Uy-ro'zg'or buyumlari","Kosmetika","O'yinchoqlar","Avto ehtiyot qismlar","Boshqa"]
 };
 const CONFIGURED = !!(CONFIG.url && CONFIG.key);
-const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"O'zbekistonda", pickup:"Topshirish punktida", done:"Tasdiqlangan"};
+const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"Topshirish punktiga yetkazilmoqda", pickup:"Topshirish punktida", done:"Tasdiqlangan"};
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
