@@ -347,6 +347,11 @@
   [data-theme=dark] .apill.on{background:#2F5BC4}
   [data-theme=dark] .acp.ok{background:#12301F}
   .morebtn{display:block;width:100%;margin:6px 0 14px;height:46px;border:0;border-radius:15px;background:var(--blue-soft);color:var(--blue);font-weight:800;font-size:15px}
+  .nbadge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:#E53935;color:#fff;font-size:11px;font-weight:800;display:none;place-items:center;padding:0 4px;border:2px solid #0B3A8F}
+  .nbadge.show{display:grid}
+  .nrow{background:var(--card);border-radius:16px;padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow);position:relative}
+  .nrow.unread{border-left:4px solid var(--orange)}
+  .nrow b{display:block;font-size:15px}.nrow p{margin:3px 0 0;font-size:13.5px;color:var(--muted)}.nrow .nt{font-size:11.5px;color:var(--muted);margin-top:4px}
 </style>
 <script>
 try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
@@ -395,8 +400,9 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
           <svg class="ic-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
           <svg class="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
         </button>
-        <button class="tbtn" aria-label="Bildirishnomalar" onclick="toast('Bildirishnomalar tez orada')">
+        <button class="tbtn" aria-label="Bildirishnomalar" onclick="openNotif()" style="position:relative">
           <svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+          <span class="nbadge" id="bellBadge"></span>
         </button>
       </div>
     </div>
@@ -490,6 +496,13 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
 </div></nav>
 
 <!-- ===== Pastdan chiqadigan oyna ===== -->
+<div class="sheet-back" id="notifBack" onclick="closeNotif()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <h3>Bildirishnomalar</h3>
+    <div id="notifBody" style="max-height:60vh;overflow-y:auto"></div>
+    <button class="cancel" onclick="closeNotif()">Yopish</button>
+  </div>
+</div>
 <div class="sheet-back" id="tariffBack" onclick="closeTariffs()">
   <div class="sheet" onclick="event.stopPropagation()">
     <h3>Cargo tariflari</h3>
@@ -642,7 +655,7 @@ function enterApp(){
 }
 function forceLogout(){
   token = null; me = null; declarations = [];
-  store.del("tp_token"); store.del("tp_me"); store.del("tp_decl");
+  store.del("tp_token"); store.del("tp_me"); store.del("tp_decl"); store.del("tp_notif");
   setMode("login"); show("auth");
 }
 async function logout(){
@@ -714,12 +727,26 @@ async function sendChat(){
 }
 $("msgIn").addEventListener("keydown", e=>{ if(e.key==="Enter" && !e.shiftKey && window.matchMedia("(hover:hover)").matches){ e.preventDefault(); sendChat(); } });
 async function checkUnread(){
-  if(!token || !CONFIGURED || $("chat").classList.contains("active")) return;
+  if(!token || !CONFIGURED) return;
   try{
-    const r = await rpc("chat_unread", {p_token:token}), n = (r && r.count) || 0, b = $("chatBadge");
-    b.textContent = n > 9 ? "9+" : n; b.classList.toggle("show", n > 0);
+    const r = await rpc("my_badges", {p_token:token}) || {}, n = r.chat || 0, m = r.notif || 0, b = $("chatBadge"), bb = $("bellBadge");
+    if(!$("chat").classList.contains("active")){ b.textContent = n > 9 ? "9+" : n; b.classList.toggle("show", n > 0); }
+    bb.textContent = m > 9 ? "9+" : m; bb.classList.toggle("show", m > 0);
   }catch(e){}
 }
+/* ====== Bildirishnomalar ====== */
+function drawNotif(list){
+  $("notifBody").innerHTML = list.length ? list.map(n=>`<div class="nrow ${n.unread?"unread":""}"><b>${esc(n.title)}</b>${n.body?`<p>${esc(n.body)}</p>`:""}<div class="nt">${when(n.created_at)}</div></div>`).join("")
+    : `<div class="empty"><b>Hozircha xabar yo'q</b><p>Yukingiz holati o'zgarganda shu yerda ko'rinadi.</p></div>`;
+}
+async function openNotif(){
+  const cached = store.get("tp_notif"); drawNotif(Array.isArray(cached) ? cached : []); $("notifBack").classList.add("show");
+  try{
+    const list = await rpc("notif_list", {p_token:token}) || []; store.set("tp_notif", list); drawNotif(list);
+    if(list.some(n=>n.unread)){ await rpc("notif_read_all", {p_token:token}); $("bellBadge").classList.remove("show"); }
+  }catch(e){ handleErr(e, e.offline); }
+}
+function closeNotif(){ $("notifBack").classList.remove("show"); checkUnread(); }
 setInterval(()=>{ if(!document.hidden) checkUnread(); }, 20000);
 
 /* ====== Tariflar ====== */
@@ -915,7 +942,7 @@ async function loadList(){
   if($("profile").classList.contains("active")) renderProfile();
 }
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token && ($("home").classList.contains("active") || $("loads").classList.contains("active"))) loadList();
-  if(!document.hidden && token && $("home").classList.contains("active")) refreshAddr(); });
+  if(!document.hidden && token && $("home").classList.contains("active")){ refreshAddr(); checkUnread(); } });
 
 /* ====== Boshlash ====== */
 if(!CONFIGURED) $("setupWarn").style.display = "block";

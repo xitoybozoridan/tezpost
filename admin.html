@@ -327,6 +327,7 @@
     <div class="top">
       <div class="logo"><img alt="" src="icon-192.png"></div>
       <div><h1>TezPost Admin</h1><small id="subline">Yuklar va mijozlar</small></div>
+      <button class="iconbtn" aria-label="Ommaviy yuklash" title="Trek-kodlarni ommaviy yuklash" onclick="openBulk()"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></button>
       <button class="iconbtn" id="viewBtn" aria-label="Ko'rinish: telefon / kompyuter" title="Telefon / kompyuter ko'rinishi" onclick="toggleView()"><svg id="viewIco" viewBox="0 0 24 24"></svg></button>
       <button class="iconbtn" aria-label="Sozlamalar" onclick="show('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
       <button class="iconbtn" id="refBtn" aria-label="Yangilash" onclick="refresh(true)"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg></button>
@@ -348,6 +349,30 @@
     </div>
   </section>
   <div class="wrap"><div id="out"></div></div>
+</main>
+
+<!-- ===== OMMAVIY YUKLASH ===== -->
+<main id="bulkup" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('main')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Ommaviy yuklash</b>
+  </div>
+  <div class="wrap" style="padding-bottom:30px">
+    <div class="scanbox">
+      <span class="lbl">Trek-kodlarni joylang (har biri yangi qatorda, yoki bo'sh joy / vergul bilan)</span>
+      <textarea id="bkText" rows="8" placeholder="JT5538773909130&#10;998976108701&#10;..." oninput="bkCount()" style="width:100%;border:2px solid var(--blue);border-radius:15px;padding:12px;font-size:15px;font-weight:600;outline:none;background:#F7FAFF;resize:vertical;font-family:inherit"></textarea>
+      <div class="scanstat"><span id="bkCnt">Trek-kod: 0</span><label style="color:var(--blue);font-weight:800;cursor:pointer">Fayl tanlash (.txt .csv .xlsx)<input type="file" id="bkFile" accept=".txt,.csv,.xlsx,.xls" style="display:none" onchange="bkFile(this)"></label></div>
+      <span class="lbl" style="margin-top:10px">Qaysi holatga o'tkazilsin</span>
+      <select id="bkStatus" class="field" style="width:100%;height:46px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;font-size:15px;font-weight:700;background:#fff">
+        <option value="china">Xitoy omborida</option>
+        <option value="transit">Yo'lda</option>
+        <option value="uz">Topshirish punktiga yetkazilmoqda</option>
+      </select>
+    </div>
+    <button class="btn" id="bkBtn" onclick="bkSend()" style="width:100%;max-width:420px;margin:0 auto;display:block">Yuklash</button>
+    <div id="bkRes"></div>
+    <div class="info" style="margin-top:14px;line-height:1.5">Faqat oldinga suriladi: masalan "Yo'lda" turgan yuk "Xitoy omborida"ga qaytmaydi. Tizimda hali yo'q trek-kodlar saqlab qo'yiladi va mijoz deklaratsiya qo'shgan zahoti holati avtomatik o'zgaradi.</div>
+  </div>
 </main>
 
 <!-- ===== QABUL QILISH ===== -->
@@ -600,6 +625,38 @@ function curView(){ let v=null; try{ v=localStorage.getItem("tp_view"); }catch(e
 function applyView(v){ document.documentElement.setAttribute("data-view", v); const i=document.getElementById("viewIco"); if(i) i.innerHTML = v==="pc" ? ICO_PH : ICO_PC; }
 function toggleView(){ const v = curView()==="pc" ? "phone" : "pc"; try{ localStorage.setItem("tp_view", v); }catch(e){} applyView(v); toast(v==="pc" ? "Kompyuter ko'rinishi" : "Telefon ko'rinishi"); }
 applyView(curView());
+
+
+/* ====== Ommaviy yuklash ====== */
+function bkParse(txt){ const set = new Set(); String(txt||"").split(/[\s,;|\t]+/).forEach(t=>{ t = t.replace(/[^A-Za-z0-9]/g,"").toUpperCase(); if(t.length >= 4 && t.length <= 60) set.add(t); }); return [...set]; }
+function openBulk(){ $("bkText").value = ""; $("bkRes").innerHTML = ""; bkCount(); show("bulkup"); }
+function bkCount(){ $("bkCnt").textContent = "Trek-kod: " + bkParse($("bkText").value).length; }
+function loadScript(src){ return new Promise((ok,no)=>{ const s=document.createElement("script"); s.src=src; s.onload=ok; s.onerror=()=>no(new Error("Excel o'qiydigan kutubxona yuklanmadi. Internetni tekshiring yoki ustunni nusxalab joylang")); document.head.appendChild(s); }); }
+async function bkFile(inp){
+  const f = inp.files[0]; inp.value = ""; if(!f) return;
+  try{
+    let text = "";
+    if(/\.(xlsx|xls)$/i.test(f.name)){
+      if(!window.XLSX) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js");
+      const wb = XLSX.read(await f.arrayBuffer(), {type:"array"});
+      wb.SheetNames.forEach(n=>{ XLSX.utils.sheet_to_json(wb.Sheets[n], {header:1, raw:false}).forEach(r=>{ (r||[]).forEach(c=>{ if(c != null) text += " " + c; }); }); });
+    } else text = await f.text();
+    $("bkText").value = ($("bkText").value ? $("bkText").value + "\n" : "") + bkParse(text).join("\n"); bkCount(); toast("Fayl o'qildi");
+  }catch(e){ toast(e.message || "Faylni o'qib bo'lmadi", true); }
+}
+async function bkSend(){
+  const list = bkParse($("bkText").value); if(!list.length){ toast("Trek-kod kiriting", true); return; }
+  if(list.length > 3000){ toast("Bir martada 3000 tagacha", true); return; }
+  const st = $("bkStatus").value, b = $("bkBtn"); b.disabled = true; b.textContent = "Yuklanmoqda...";
+  try{
+    const r = await rpc("admin_bulk_tracks", {p_token:token, p_tracks:list, p_status:st});
+    lsClear(); beep("done");
+    $("bkRes").innerHTML = `<div class="scanbox" style="margin-top:12px"><b style="font-size:16px">Tayyor: ${r.total} ta trek-kod</b>
+      <div class="hoinfo" style="margin:8px 0 0;font-size:14px;line-height:1.7">✅ Holati o'zgardi: <b>${r.updated}</b><br>⏭ Allaqachon shu holatda yoki oldinda: <b>${r.skipped}</b><br>🕓 Tizimda hali yo'q (saqlandi, mijoz qo'shganda avtomatik o'zgaradi): <b>${r.pending}</b></div></div>`;
+    $("bkText").value = ""; bkCount();
+  }catch(e){ handleErr(e); }
+  b.disabled = false; b.textContent = "Yuklash";
+}
 
 /* ====== Qabul qilish (skaner) ====== */
 let soundOn = true; try{ soundOn = localStorage.getItem("tp_sound") !== "0"; }catch(e){}
