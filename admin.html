@@ -351,6 +351,34 @@
   <div class="wrap"><div id="out"></div></div>
 </main>
 
+<!-- ===== EXCEL'DAN AJRATISH ===== -->
+<main id="xl" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Excel'dan ajratish</b>
+  </div>
+  <div class="wrap" style="padding-bottom:30px">
+    <div class="scanbox">
+      <span class="lbl">1. Excel faylni tanlang (.xlsx yoki .csv)</span>
+      <label class="btn" style="display:block;text-align:center;line-height:46px;height:46px;cursor:pointer;background:linear-gradient(180deg,#FF9322,#F26A00);box-shadow:none">Fayl tanlash<input type="file" id="xlFile" accept=".xlsx,.csv,.txt" style="display:none" onchange="xlLoad(this)"></label>
+      <div class="scanstat"><span id="xlInfo">Fayl tanlanmagan</span></div>
+      <div id="xlStep2" style="display:none">
+        <span class="lbl" style="margin-top:10px">2. Mijoz kodi qaysi ustunda?</span>
+        <select id="xlCol" class="field" onchange="xlRun()" style="width:100%;height:46px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;font-size:15px;font-weight:700;background:#fff"></select>
+        <span class="lbl" style="margin-top:10px">3. Mijoz kodi (bo'sh qoldirsangiz, hamma mijoz)</span>
+        <div class="scanrow"><input id="xlCode" inputmode="numeric" autocomplete="off" placeholder="41124" oninput="xlRun()" onkeydown="if(event.key==='Enter')xlRun()"></div>
+        <span class="lbl" style="margin-top:10px">4. Yuk holati qaysi ustunda?</span>
+        <select id="xlStatCol" class="field" onchange="xl.sel.clear();xlRun()" style="width:100%;height:46px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;font-size:15px;font-weight:700;background:#fff"></select>
+        <span class="lbl" style="margin-top:10px">Trek raqam qaysi ustunda? (faqat trek yuklab olish uchun)</span>
+        <select id="xlTrkCol" class="field" style="width:100%;height:46px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;font-size:15px;font-weight:700;background:#fff"></select>
+        <span class="lbl" style="margin-top:10px">5. Qaysi holatdagi yuklar kerak? (bir nechtasini tanlash mumkin, tanlamasangiz hammasi)</span>
+        <div id="xlChips" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+      </div>
+    </div>
+    <div id="xlRes"></div>
+  </div>
+</main>
+
 <!-- ===== OMMAVIY YUKLASH ===== -->
 <main id="bulkup" class="screen">
   <div class="th-top">
@@ -423,6 +451,11 @@
     <b style="font-size:17px">Sozlamalar</b>
   </div>
   <div class="wrap">
+    <button class="setrow" onclick="openXl()">
+      <span class="si"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13l4 5M13 13l-4 5"/></svg></span>
+      <span class="st"><b>Excel'dan mijozni ajratish</b><small>Katta Excel'dan bitta mijozning yuklarini ajratib, alohida fayl qilish</small></span>
+      <span class="ch">›</span>
+    </button>
     <button class="setrow" onclick="openBulk()">
       <span class="si"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></span>
       <span class="st"><b>Ommaviy yuklash</b><small>Trek-kodlarni ro'yxat yoki Excel bilan yuklash (Xitoy omborida / Yo'lda)</small></span>
@@ -631,6 +664,152 @@ function applyView(v){ document.documentElement.setAttribute("data-view", v); co
 function toggleView(){ const v = curView()==="pc" ? "phone" : "pc"; try{ localStorage.setItem("tp_view", v); }catch(e){} applyView(v); toast(v==="pc" ? "Kompyuter ko'rinishi" : "Telefon ko'rinishi"); }
 applyView(curView());
 
+
+
+/* ====== Excel'dan mijozni ajratish (internetsiz, kutubxonasiz) ====== */
+const xl = {head:[], rows:[], hit:[], name:"", sel:new Set()};
+async function zipRead(buf){
+  const u8 = new Uint8Array(buf), dv = new DataView(buf); let e = u8.length - 22;
+  while(e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+  if(e < 0) throw new Error("Bu Excel (.xlsx) fayl emas");
+  const n = dv.getUint16(e+10, true); let p = dv.getUint32(e+16, true); const files = {};
+  const td = new TextDecoder();
+  for(let i=0;i<n;i++){
+    const method = dv.getUint16(p+10,true), csz = dv.getUint32(p+20,true), nl = dv.getUint16(p+28,true), xl_ = dv.getUint16(p+30,true), cl = dv.getUint16(p+32,true), off = dv.getUint32(p+42,true);
+    const name = td.decode(u8.subarray(p+46, p+46+nl)); p += 46 + nl + xl_ + cl;
+    if(!/^xl\/(worksheets\/sheet\d+\.xml|sharedStrings\.xml|styles\.xml|workbook\.xml|_rels\/workbook\.xml\.rels)$/.test(name)) continue;
+    const ds = off + 30 + dv.getUint16(off+26,true) + dv.getUint16(off+28,true), raw = u8.subarray(ds, ds+csz);
+    let data = raw;
+    if(method === 8){ data = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer()); }
+    files[name] = td.decode(data);
+  }
+  return files;
+}
+const colNum = r => { let n = 0; for(const ch of r.replace(/[^A-Z]/g,"")) n = n*26 + ch.charCodeAt(0) - 64; return n - 1; };
+function xlsxDate(v){ const d = new Date(Math.round((v - 25569) * 86400000)); const z = x=>String(x).padStart(2,"0");
+  const t = d.getUTCHours()||d.getUTCMinutes()||d.getUTCSeconds() ? " " + z(d.getUTCHours()) + ":" + z(d.getUTCMinutes()) : "";
+  return z(d.getUTCDate()) + "." + z(d.getUTCMonth()+1) + "." + d.getUTCFullYear() + t; }
+function xlsxParse(files){
+  const dp = new DOMParser(), doc = x=>dp.parseFromString(x, "text/xml");
+  const sst = []; if(files["xl/sharedStrings.xml"]) doc(files["xl/sharedStrings.xml"]).querySelectorAll("si").forEach(si=>sst.push([...si.querySelectorAll("t")].map(t=>t.textContent).join("")));
+  // sana formatlari
+  const dateXf = new Set();
+  if(files["xl/styles.xml"]){
+    const sd = doc(files["xl/styles.xml"]), custom = {};
+    sd.querySelectorAll("numFmts numFmt").forEach(f=>custom[f.getAttribute("numFmtId")] = f.getAttribute("formatCode") || "");
+    [...sd.querySelectorAll("cellXfs xf")].forEach((xf,i)=>{ const id = xf.getAttribute("numFmtId"), n = +id;
+      if((n>=14&&n<=22)||(n>=45&&n<=47)||(custom[id] && /[dmyh]/i.test(custom[id].replace(/\[[^\]]*\]|"[^"]*"/g,"")) && !/0\.0|#/.test(custom[id]))) dateXf.add(i); });
+  }
+  const names = Object.keys(files).filter(k=>/worksheets\/sheet\d+\.xml$/.test(k)).sort((a,b)=>parseInt(a.match(/(\d+)\.xml/)[1]) - parseInt(b.match(/(\d+)\.xml/)[1]));
+  if(!names.length) throw new Error("Jadval topilmadi");
+  const sh = doc(files[names[0]]), rows = [];
+  sh.querySelectorAll("sheetData row").forEach(r=>{
+    const arr = [];
+    r.querySelectorAll("c").forEach(c=>{
+      const ref = c.getAttribute("r") || "", t = c.getAttribute("t"), v = c.querySelector("v"), s = +(c.getAttribute("s")||0); let val = "";
+      if(t === "s") val = sst[+v.textContent] ?? "";
+      else if(t === "inlineStr") val = [...c.querySelectorAll("t")].map(x=>x.textContent).join("");
+      else if(v){ val = v.textContent; if(t !== "str" && t !== "b" && t !== "e" && dateXf.has(s) && isFinite(val)) val = xlsxDate(+val); }
+      arr[colNum(ref)] = val;
+    });
+    const ri = +(r.getAttribute("r")||0) - 1; if(ri >= 0) rows[ri] = arr;
+  });
+  return Array.from(rows, r=>r || []);
+}
+function csvParse(text){
+  const first = text.split(/\r?\n/)[0] || "", d = (first.match(/;/g)||[]).length > (first.match(/,/g)||[]).length ? ";" : ((first.match(/\t/g)||[]).length > (first.match(/,/g)||[]).length ? "\t" : ",");
+  const rows = []; let row = [], cur = "", q = false;
+  for(let i=0;i<text.length;i++){ const ch = text[i];
+    if(q){ if(ch === '"'){ if(text[i+1] === '"'){ cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if(ch === '"') q = true; else if(ch === d){ row.push(cur); cur = ""; }
+    else if(ch === "\n"){ row.push(cur); rows.push(row); row = []; cur = ""; } else if(ch !== "\r") cur += ch; }
+  if(cur !== "" || row.length){ row.push(cur); rows.push(row); } return rows;
+}
+function openXl(){ xl.head = []; xl.rows = []; $("xlInfo").textContent = "Fayl tanlanmagan"; $("xlStep2").style.display = "none"; $("xlRes").innerHTML = ""; $("xlCode").value = ""; show("xl"); }
+async function xlLoad(inp){
+  const f = inp.files[0]; inp.value = ""; if(!f) return;
+  $("xlInfo").textContent = "O'qilmoqda..."; $("xlRes").innerHTML = "";
+  try{
+    let rows;
+    if(/\.xlsx$/i.test(f.name)) rows = xlsxParse(await zipRead(await f.arrayBuffer()));
+    else if(/\.(csv|txt)$/i.test(f.name)) rows = csvParse(await f.text());
+    else throw new Error("Faqat .xlsx yoki .csv fayl. Eski .xls bo'lsa, Excel'da «Boshqa nom bilan saqlash» → .xlsx qiling");
+    rows = rows.filter(r=>r.some(c=>String(c??"").trim() !== ""));
+    if(rows.length < 2) throw new Error("Faylda ma'lumot topilmadi");
+    // sarlavha qatori: dastlabki 10 qatordan eng ko'p to'lgani
+    let hi = 0, best = -1; rows.slice(0,10).forEach((r,i)=>{ const n = r.filter(c=>String(c??"").trim()!=="").length; if(n > best){ best = n; hi = i; } });
+    xl.head = Array.from(rows[hi], c=>String(c??"").trim()); xl.rows = rows.slice(hi+1); xl.name = f.name.replace(/\.[^.]+$/,"");
+    const cols = Math.max(xl.head.length, ...xl.rows.slice(0,200).map(r=>r.length));
+    for(let i=0;i<cols;i++) if(!xl.head[i]) xl.head[i] = "Ustun " + (i+1);
+    let ci = xl.head.findIndex(h=>/mijoz\s*kod|клиент|customer|client\s*(id|code|kod)|kod/i.test(h)); if(ci < 0) ci = 0;
+    $("xlCol").innerHTML = xl.head.map((h,i)=>`<option value="${i}" ${i===ci?"selected":""}>${esc(h)}</option>`).join("");
+    let si = xl.head.findIndex(h=>/holat|status|статус|state/i.test(h)); if(si < 0) si = Math.min(1, cols-1);
+    $("xlStatCol").innerHTML = '<option value="-1">— holat bo\'yicha ajratmaslik —</option>' + xl.head.map((h,i)=>`<option value="${i}" ${i===si?"selected":""}>${esc(h)}</option>`).join("");
+    let ti = xl.head.findIndex(h=>/trek|track|трек|tracking/i.test(h)); if(ti < 0) ti = 0;
+    $("xlTrkCol").innerHTML = xl.head.map((h,i)=>`<option value="${i}" ${i===ti?"selected":""}>${esc(h)}</option>`).join("");
+    xl.sel.clear();
+    $("xlInfo").textContent = f.name + " · " + xl.rows.length + " ta qator";
+    $("xlStep2").style.display = "block"; xlRun(); $("xlCode").focus();
+  }catch(e){ $("xlInfo").textContent = "Fayl tanlanmagan"; toast(e.message || "Faylni o'qib bo'lmadi", true); }
+}
+const xlNorm = v => String(v ?? "").trim().replace(/\s+/g,"").replace(/\.0+$/,"").toUpperCase();
+function xlChip(v){ if(xl.sel.has(v)) xl.sel.delete(v); else xl.sel.add(v); xlRun(); }
+function xlRun(){
+  const codeRaw = $("xlCode").value.trim(), code = xlNorm(codeRaw), res = $("xlRes");
+  if(!xl.rows.length){ res.innerHTML = ""; return; }
+  const ci = +$("xlCol").value, si = +$("xlStatCol").value;
+  const byCode = code ? xl.rows.filter(r=>xlNorm(r[ci]) === code) : xl.rows;
+  // holatlar ro'yxati (tanlangan mijoz bo'yicha, soni bilan)
+  const cnt = new Map();
+  if(si >= 0) byCode.forEach(r=>{ const v = String(r[si] ?? "").trim() || "(bo'sh)"; cnt.set(v, (cnt.get(v)||0) + 1); });
+  [...xl.sel].forEach(v=>{ if(!cnt.has(v)) xl.sel.delete(v); });
+  $("xlChips").innerHTML = si < 0 ? "" : [...cnt.entries()].sort((x,y)=>y[1]-x[1]).map(([v,n])=>{ const on = xl.sel.has(v);
+    return `<button type="button" data-v="${esc(v)}" onclick="xlChip(this.dataset.v)" style="border:1.5px solid var(--blue);border-radius:999px;padding:7px 12px;font-weight:700;font-size:13.5px;background:${on?"var(--blue)":"#fff"};color:${on?"#fff":"var(--blue)"}">${esc(v)} · ${n}</button>`; }).join("");
+  xl.hit = si >= 0 && xl.sel.size ? byCode.filter(r=>xl.sel.has(String(r[si] ?? "").trim() || "(bo'sh)")) : byCode;
+  if(!code && !xl.sel.size){ res.innerHTML = `<div class="info">Mijoz kodini yozing yoki holatni tanlang.</div>`; xl.hit = []; return; }
+  if(!xl.hit.length){ res.innerHTML = `<div class="empty"><b>Topilmadi</b><p>Bunday yuk yo'q. Ustunlarni va kodni tekshiring.</p></div>`; return; }
+  const cols = xl.head.length, show_ = xl.hit.slice(0, 100);
+  res.innerHTML = `<div class="listhead"><b>${xl.hit.length} ta yuk topildi</b><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:linear-gradient(180deg,#22A862,#127A45);color:#fff;font-weight:800" onclick="xlDownload()">Hammasi (Excel)</button><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:linear-gradient(180deg,#FF9322,#F26A00);color:#fff;font-weight:800" onclick="xlDownload(true)">Faqat trek raqam</button><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:var(--blue-soft);color:var(--blue);font-weight:800" onclick="xlCopy()">Nusxalash</button></span></div>
+    <div style="overflow-x:auto;background:var(--card);border-radius:16px;box-shadow:var(--shadow)"><table style="border-collapse:collapse;font-size:13px;width:100%">
+    <tr>${xl.head.map(h=>`<th style="text-align:left;padding:8px 10px;white-space:nowrap;background:var(--blue-soft);color:var(--blue)">${esc(h)}</th>`).join("")}</tr>
+    ${show_.map(r=>`<tr>${Array.from({length:cols},(_,i)=>`<td style="padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap">${esc(r[i] ?? "")}</td>`).join("")}</tr>`).join("")}</table></div>
+    ${xl.hit.length > 100 ? `<div class="info" style="margin-top:8px">Ko'rinishda dastlabki 100 ta. Yuklab olingan faylda hammasi bor.</div>` : ""}`;
+}
+/* xlsx yozish (siqmasdan, ZIP "store") */
+const CRC = (()=>{ const t = new Uint32Array(256); for(let n=0;n<256;n++){ let c = n; for(let k=0;k<8;k++) c = c & 1 ? 0xEDB88320 ^ (c>>>1) : c>>>1; t[n] = c>>>0; } return t; })();
+const crc32 = u8 => { let c = 0xFFFFFFFF; for(let i=0;i<u8.length;i++) c = CRC[(c ^ u8[i]) & 255] ^ (c>>>8); return (c ^ 0xFFFFFFFF)>>>0; };
+function zipWrite(files){
+  const te = new TextEncoder(), parts = [], cen = []; let off = 0;
+  for(const [name, str] of Object.entries(files)){
+    const nm = te.encode(name), data = te.encode(str), crc = crc32(data);
+    const lh = new DataView(new ArrayBuffer(30)); lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true); lh.setUint32(14,crc,true); lh.setUint32(18,data.length,true); lh.setUint32(22,data.length,true); lh.setUint16(26,nm.length,true);
+    parts.push(new Uint8Array(lh.buffer), nm, data);
+    const ch = new DataView(new ArrayBuffer(46)); ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true); ch.setUint16(8,0x0800,true); ch.setUint32(16,crc,true); ch.setUint32(20,data.length,true); ch.setUint32(24,data.length,true); ch.setUint16(28,nm.length,true); ch.setUint32(42,off,true);
+    cen.push(new Uint8Array(ch.buffer), nm); off += 30 + nm.length + data.length;
+  }
+  const csz = cen.reduce((a,b)=>a+b.length,0), end = new DataView(new ArrayBuffer(22)); end.setUint32(0,0x06054b50,true); end.setUint16(8,Object.keys(files).length,true); end.setUint16(10,Object.keys(files).length,true); end.setUint32(12,csz,true); end.setUint32(16,off,true);
+  return new Blob([...parts, ...cen, new Uint8Array(end.buffer)], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+const xe = v => String(v ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const colName = i => { let s = "", n = i + 1; while(n > 0){ const m = (n-1) % 26; s = String.fromCharCode(65+m) + s; n = Math.floor((n-1)/26); } return s; };
+function xlTracks(){ const ti = +$("xlTrkCol").value; return xl.hit.map(r=>String(r[ti] ?? "").trim()).filter(Boolean); }
+function xlCopy(){ const t = xlTracks().join("\n"); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>toast(xlTracks().length + " ta trek nusxalandi")).catch(()=>{ const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); toast(xlTracks().length + " ta trek nusxalandi"); }catch(e){ toast("Nusxalab bo'lmadi", true); } ta.remove(); }); }
+function xlDownload(only){
+  const ti = +$("xlTrkCol").value;
+  const all = only ? [[xl.head[ti]], ...xl.hit.map(r=>[r[ti]])] : [xl.head, ...xl.hit], cols = only ? 1 : xl.head.length;
+  const sheet = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'
+    + all.map((r,ri)=>`<row r="${ri+1}">` + Array.from({length:cols},(_,i)=>{ const v = r[i]; return v == null || v === "" ? "" : `<c r="${colName(i)}${ri+1}" t="inlineStr"><is><t xml:space="preserve">${xe(v)}</t></is></c>`; }).join("") + "</row>").join("")
+    + "</sheetData></worksheet>";
+  const blob = zipWrite({
+    "[Content_Types].xml": '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
+    "_rels/.rels": '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+    "xl/workbook.xml": '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Yuklar" sheetId="1" r:id="rId1"/></sheets></workbook>',
+    "xl/_rels/workbook.xml.rels": '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>',
+    "xl/worksheets/sheet1.xml": sheet });
+  const a = document.createElement("a"), code = $("xlCode").value.trim().replace(/[^\w-]/g,"");
+  a.href = URL.createObjectURL(blob); a.download = (only ? "trek-" : "") + (code ? "mijoz-" + code : "yuklar") + (xl.sel.size ? "-" + [...xl.sel].join("-").replace(/[^\wА-Яа-яЁёЎўҚқҒғҲҳ-]+/g,"_").slice(0,40) : "") + ".xlsx"; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000); toast("Fayl yuklab olindi");
+}
 
 /* ====== Ommaviy yuklash ====== */
 function bkParse(txt){ const set = new Set(); String(txt||"").split(/[\s,;|\t]+/).forEach(t=>{ t = t.replace(/[^A-Za-z0-9]/g,"").toUpperCase(); if(t.length >= 4 && t.length <= 60) set.add(t); }); return [...set]; }
