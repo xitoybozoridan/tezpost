@@ -296,6 +296,20 @@
   html[data-view=pc] .cfilt{max-width:520px}
   .morebtn{display:block;width:100%;margin:8px 0 18px;height:46px;border:0;border-radius:15px;background:var(--blue-soft);color:var(--blue);font-weight:800;font-size:15px}
   html[data-view=pc] .morebtn{max-width:320px}
+
+  .xgrid .xf{margin-top:10px}
+  .xsel{width:100%;height:46px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;font-size:15px;font-weight:700;background:#fff}
+  /* kompyuter: barcha ekranlar kengaytiriladi */
+  html[data-view=pc] #settings.screen,html[data-view=pc] #xl.screen,html[data-view=pc] #bulkup.screen,html[data-view=pc] #addrEdit.screen,html[data-view=pc] #thread.screen{max-width:1280px}
+  html[data-view=pc] #settings .wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:12px;align-items:start}
+  html[data-view=pc] #settings .setrow{margin:0}
+  html[data-view=pc] #xl .wrap,html[data-view=pc] #bulkup .wrap,html[data-view=pc] #addrEdit .wrap{max-width:1280px;margin:0 auto;padding:16px 24px 40px}
+  html[data-view=pc] .xgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 16px}
+  html[data-view=pc] .xgrid .xwide{grid-column:1 / -1}
+  html[data-view=pc] #xlRes table{font-size:12.5px;width:100%}
+  html[data-view=pc] #xlRes th,html[data-view=pc] #xlRes td{padding:6px 8px !important}
+  html[data-view=pc] #bulkup textarea{min-height:260px}
+  html[data-view=pc] #xl label.btn{max-width:320px}
 </style>
 </head>
 <body>
@@ -362,18 +376,18 @@
       <span class="lbl">1. Excel faylni tanlang (.xlsx yoki .csv)</span>
       <label class="btn" style="display:block;text-align:center;line-height:46px;height:46px;cursor:pointer;background:linear-gradient(180deg,#FF9322,#F26A00);box-shadow:none">Fayl tanlash<input type="file" id="xlFile" accept=".xlsx,.csv,.txt" style="display:none" onchange="xlLoad(this)"></label>
       <div class="scanstat"><span id="xlInfo">Fayl tanlanmagan</span></div>
-      <div id="xlStep2" style="display:none">
-        <span class="lbl" style="margin-top:10px">2. Mijoz kodi qaysi ustunda?</span>
-        <select id="xlCol" class="field" onchange="xlRun()" style="width:100%;height:46px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;font-size:15px;font-weight:700;background:#fff"></select>
-        <span class="lbl" style="margin-top:10px">3. Mijoz kodi (bo'sh qoldirsangiz, hamma mijoz)</span>
-        <div class="scanrow"><input id="xlCode" inputmode="numeric" autocomplete="off" placeholder="41124" oninput="xlRun()" onkeydown="if(event.key==='Enter')xlRun()"></div>
-        <span class="lbl" style="margin-top:10px">4. Yuk holati qaysi ustunda?</span>
-        <select id="xlStatCol" class="field" onchange="xl.sel.clear();xlRun()" style="width:100%;height:46px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;font-size:15px;font-weight:700;background:#fff"></select>
-        <span class="lbl" style="margin-top:10px">Trek raqam qaysi ustunda? (faqat trek yuklab olish uchun)</span>
-        <select id="xlTrkCol" class="field" style="width:100%;height:46px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;font-size:15px;font-weight:700;background:#fff"></select>
-        <span class="lbl" style="margin-top:10px">5. Qaysi holatdagi yuklar kerak? (bir nechtasini tanlash mumkin, tanlamasangiz hammasi)</span>
-        <div id="xlChips" style="display:flex;flex-wrap:wrap;gap:7px"></div>
-      </div>
+      <div id="xlStep2" style="display:none"><div class="xgrid">
+        <div class="xf"><span class="lbl">2. Mijoz kodi qaysi ustunda?</span>
+          <select id="xlCol" class="field xsel" onchange="xlRun()"></select></div>
+        <div class="xf"><span class="lbl">3. Mijoz kodi (bo'sh bo'lsa, hamma mijoz)</span>
+          <div class="scanrow"><input id="xlCode" inputmode="numeric" autocomplete="off" placeholder="41124" oninput="xlRun()" onkeydown="if(event.key==='Enter')xlRun()"></div></div>
+        <div class="xf"><span class="lbl">4. Yuk holati qaysi ustunda?</span>
+          <select id="xlStatCol" class="field xsel" onchange="xl.sel.clear();xlRun()"></select></div>
+        <div class="xf"><span class="lbl">Trek raqam qaysi ustunda?</span>
+          <select id="xlTrkCol" class="field xsel"></select></div>
+        <div class="xf xwide"><span class="lbl">5. Qaysi holatdagi yuklar kerak? (bir nechtasini tanlash mumkin, tanlamasangiz hammasi)</span>
+          <div id="xlChips" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
+      </div></div>
     </div>
     <div id="xlRes"></div>
   </div>
@@ -772,7 +786,7 @@ function xlRun(){
   res.innerHTML = `<div class="listhead"><b>${xl.hit.length} ta yuk topildi</b><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:linear-gradient(180deg,#22A862,#127A45);color:#fff;font-weight:800" onclick="xlDownload()">Hammasi (Excel)</button><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:linear-gradient(180deg,#FF9322,#F26A00);color:#fff;font-weight:800" onclick="xlDownload(true)">Faqat trek raqam</button><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:var(--blue-soft);color:var(--blue);font-weight:800" onclick="xlCopy()">Nusxalash</button></span></div>
     <div style="overflow-x:auto;background:var(--card);border-radius:16px;box-shadow:var(--shadow)"><table style="border-collapse:collapse;font-size:13px;width:100%">
     <tr>${xl.head.map(h=>`<th style="text-align:left;padding:8px 10px;white-space:nowrap;background:var(--blue-soft);color:var(--blue)">${esc(h)}</th>`).join("")}</tr>
-    ${show_.map(r=>`<tr>${Array.from({length:cols},(_,i)=>`<td style="padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap">${esc(r[i] ?? "")}</td>`).join("")}</tr>`).join("")}</table></div>
+    ${show_.map(r=>`<tr>${Array.from({length:cols},(_,i)=>`<td style="padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis" title="${esc(r[i] ?? "")}">${esc(r[i] ?? "")}</td>`).join("")}</tr>`).join("")}</table></div>
     ${xl.hit.length > 100 ? `<div class="info" style="margin-top:8px">Ko'rinishda dastlabki 100 ta. Yuklab olingan faylda hammasi bor.</div>` : ""}`;
 }
 /* xlsx yozish (siqmasdan, ZIP "store") */
