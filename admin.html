@@ -327,7 +327,7 @@
     <div class="top">
       <div class="logo"><img alt="" src="icon-192.png"></div>
       <div><h1>TezPost Admin</h1><small id="subline">Yuklar va mijozlar</small></div>
-      <button class="iconbtn" aria-label="Ommaviy yuklash" title="Trek-kodlarni ommaviy yuklash" onclick="openBulk()"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></button>
+      
       <button class="iconbtn" id="viewBtn" aria-label="Ko'rinish: telefon / kompyuter" title="Telefon / kompyuter ko'rinishi" onclick="toggleView()"><svg id="viewIco" viewBox="0 0 24 24"></svg></button>
       <button class="iconbtn" aria-label="Sozlamalar" onclick="show('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
       <button class="iconbtn" id="refBtn" aria-label="Yangilash" onclick="refresh(true)"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg></button>
@@ -354,7 +354,7 @@
 <!-- ===== OMMAVIY YUKLASH ===== -->
 <main id="bulkup" class="screen">
   <div class="th-top">
-    <button class="bk" onclick="show('main')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
     <b style="font-size:17px;flex:1">Ommaviy yuklash</b>
   </div>
   <div class="wrap" style="padding-bottom:30px">
@@ -423,6 +423,11 @@
     <b style="font-size:17px">Sozlamalar</b>
   </div>
   <div class="wrap">
+    <button class="setrow" onclick="openBulk()">
+      <span class="si"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></span>
+      <span class="st"><b>Ommaviy yuklash</b><small>Trek-kodlarni ro'yxat yoki Excel bilan yuklash (Xitoy omborida / Yo'lda)</small></span>
+      <span class="ch">›</span>
+    </button>
     <button class="setrow" onclick="openAddrEdit()">
       <span class="si"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span>
       <span class="st"><b>Manzilni tahrirlash</b><small>Xitoy manzili va tariflar (mijozlar ilovada ko'radi)</small></span>
