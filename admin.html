@@ -427,15 +427,7 @@ html[data-view=pc] #payments .wrap{max-width:900px}
   <div class="wrap" style="padding-bottom:30px">
     <div class="info" style="margin-bottom:8px">Kutilayotgan to'lovlar</div>
     <div id="payPend"></div>
-    <div class="scanbox" style="margin-top:14px">
-      <span class="lbl">Payme (onlayn to'lov)</span>
-      <div class="xgrid">
-        <div class="xf"><span class="lbl">Merchant ID (Payme kassasidan)</span><input id="pmMerchant" class="xsel" style="padding:0 12px" placeholder="Bo'sh = o'chirilgan" maxlength="60" autocomplete="off"></div>
-        <div class="xf"><span class="lbl">Rejim</span><label class="xsyc" style="margin:0;height:46px"><input type="checkbox" id="pmTest"> Test rejim (sinov uchun)</label></div>
-        <div class="xf xwide"><span class="lbl">Payme kassasiga yoziladigan Endpoint manzil</span><input id="pmUrl" class="xsel" style="padding:0 12px" readonly onclick="this.select()"></div>
-      </div>
-      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="savePayme()">Payme'ni saqlash</button>
-    </div>
+    <div class="scanbox" id="pmBox" style="margin-top:14px"></div>
     <div class="scanbox" style="margin-top:14px">
       <span class="lbl">To'lov rekvizitlari (mijoz to'lashda ko'radi)</span>
       <div class="xgrid">
@@ -807,11 +799,11 @@ applyView(curView());
 /* ====== Mijoz to'lovlari ====== */
 function setPayDot(n){ ["payDot","payDot2"].forEach(i=>{ const e = $(i); if(!e) return; e.textContent = n; e.classList.toggle("show", n > 0); e.style.display = n > 0 ? "grid" : "none"; }); }
 async function checkPay(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_payments", {p_token:token}); setPayDot((r.pending||[]).length); return r; }catch(e){} }
-async function openPayments(){ show("payments"); $("payPend").innerHTML = '<div class="skel"></div>'; await loadPayments(); }
+async function openPayments(){ pmPass = null; pmCfg = null; show("payments"); $("payPend").innerHTML = '<div class="skel"></div>'; await loadPayments(); }
 async function loadPayments(){
   try{
     const r = await rpc("admin_payments", {p_token:token}); setPayDot((r.pending||[]).length);
-    $("pmMerchant").value = r.payme_merchant || ""; $("pmTest").checked = !!r.payme_test; try{ $("pmUrl").value = new URL(window.TP_CONFIG.url).origin + "/functions/v1/payme"; }catch(e){}
+    pmHas = !!r.payme_pass; pmOn = !!r.payme_on; pmDraw();
     $("pyCard").value = r.card || ""; $("pyHolder").value = r.holder || ""; $("pyNote").value = r.note || "";
     $("payPend").innerHTML = (r.pending||[]).length ? r.pending.map(p=>`<div class="pbox"><div class="ph"><div><b>${esc(p.code)} · ${esc(p.name)}</b><small>${esc(p.phone||"")} · ${when(p.created_at)}</small></div><span class="pt">${somN(p.total)}</span></div>
       <table>${(p.tracks||[]).map(t=>`<tr><td>${esc(t.track)}</td><td class="r" style="font-weight:500">${kgf(t.kg)} kg</td><td class="r">${somN(t.amount)}</td></tr>`).join("")}</table>
@@ -823,8 +815,52 @@ async function payDecide(id, ok){
   if(!confirm(ok ? "Pul kartangizga tushganini tekshirdingizmi? Yuklar «To'langan» bo'ladi." : "To'lov kelmadi deb rad etiladi. Mijozga xabar boradi.")) return;
   try{ await rpc("admin_pay_decide", {p_token:token, p_id:id, p_ok:ok}); lsClear(); beep(ok ? "ok" : "dup"); toast(ok ? "To'lov tasdiqlandi" : "Rad etildi"); loadPayments(); }catch(e){ handleErr(e); }
 }
+let pmPass = null, pmCfg = null, pmHas = false, pmOn = false, pmMsg = "", pmChg = false;
+function pmDraw(){
+  const box = $("pmBox"); if(!box) return;
+  const I = (id, ph) => `<input id="${id}" type="password" class="xsel" style="padding:0 12px" placeholder="${ph}" autocomplete="new-password" maxlength="60">`;
+  const err = pmMsg ? `<div class="hoinfo" style="color:#C62828;margin:8px 0 0;font-weight:700">${esc(pmMsg)}</div>` : "";
+  const head = `<span class="lbl">🔒 Payme (onlayn to'lov)</span>`;
+  if(!pmHas){
+    box.innerHTML = head + `<div class="hoinfo" style="margin:2px 0 10px">Payme sozlamalarini himoyalash uchun parol o'rnating. Parolsiz Merchant ID ko'rinmaydi va o'zgartirib bo'lmaydi.</div>
+      <div class="xgrid"><div class="xf"><span class="lbl">Yangi parol (kamida 6 ta belgi)</span>${I("pmNew1","Yangi parol")}</div><div class="xf"><span class="lbl">Parolni takrorlang</span>${I("pmNew2","Takrorlang")}</div></div>${err}
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="pmSetPass(false)">Parolni o'rnatish</button>`;
+  }else if(pmPass === null){
+    box.innerHTML = head + `<div class="hoinfo" style="margin:2px 0 10px">Holati: <b>${pmOn ? "yoqilgan ✅" : "o'chirilgan"}</b>. Sozlamalarni ko'rish uchun parolni kiriting.</div>
+      <div class="xgrid"><div class="xf">${I("pmPass","Payme paroli")}</div></div>${err}
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="pmUnlock()">🔓 Ochish</button>`;
+  }else{
+    let ep = ""; try{ ep = new URL(window.TP_CONFIG.url).origin + "/functions/v1/payme"; }catch(e){}
+    box.innerHTML = head + `<div class="xgrid">
+        <div class="xf"><span class="lbl">Merchant ID (Payme kassasidan)</span><input id="pmMerchant" class="xsel" style="padding:0 12px" placeholder="Bo'sh = o'chirilgan" maxlength="60" autocomplete="off" value="${esc(pmCfg.merchant||"")}"></div>
+        <div class="xf"><span class="lbl">Rejim</span><label class="xsyc" style="margin:0;height:46px"><input type="checkbox" id="pmTest" ${pmCfg.test?"checked":""}> Test rejim (sinov uchun)</label></div>
+        <div class="xf xwide"><span class="lbl">Payme kassasiga yoziladigan Endpoint manzil</span><input class="xsel" style="padding:0 12px" readonly onclick="this.select()" value="${esc(ep)}"></div></div>${err}
+      <div style="display:flex;gap:8px;margin-top:10px"><button class="btn" style="flex:1;box-shadow:none" onclick="savePayme()">Saqlash</button><button class="btn" style="flex:0 0 auto;width:auto;padding:0 16px;box-shadow:none;background:#E8EEF8;color:#1A3E8F" onclick="pmLock()">🔒 Qulflash</button></div>
+      <button style="margin-top:10px;font-size:13.5px;background:none;border:0;color:var(--blue,#1A56DB);font-weight:800;padding:4px 0" onclick="pmChg=!pmChg;pmMsg='';pmDraw()">Parolni o'zgartirish</button>
+      ${pmChg ? `<div class="xgrid" style="margin-top:8px"><div class="xf">${I("pmOld","Eski parol")}</div><div class="xf">${I("pmNew1","Yangi parol")}</div></div><button class="btn" style="margin-top:8px;box-shadow:none" onclick="pmSetPass(true)">Parolni almashtirish</button>` : ""}`;
+  }
+}
+async function pmUnlock(){
+  const pw = $("pmPass").value; if(!pw) return;
+  try{ const r = await rpc("admin_payme_get", {p_token:token, p_pass:pw}); if(!r.ok){ pmMsg = r.msg; pmDraw(); return; } pmPass = pw; pmCfg = r; pmMsg = ""; pmDraw(); }catch(e){ handleErr(e); }
+}
+function pmLock(){ pmPass = null; pmCfg = null; pmChg = false; pmMsg = ""; pmDraw(); }
+async function pmSetPass(change){
+  const n1 = $("pmNew1").value, n2 = change ? n1 : $("pmNew2").value;
+  if(n1 !== n2){ pmMsg = "Parollar bir xil emas"; pmDraw(); return; }
+  try{
+    const r = await rpc("admin_payme_setpass", {p_token:token, p_old: change ? $("pmOld").value : "", p_new:n1});
+    if(!r.ok){ pmMsg = r.msg; pmDraw(); return; }
+    toast(change ? "Parol almashtirildi" : "Parol o'rnatildi. Endi uni eslab qoling"); pmHas = true; pmChg = false; pmMsg = ""; pmLock();
+  }catch(e){ handleErr(e); }
+}
 async function savePayme(){
-  try{ await rpc("admin_set_payme", {p_token:token, p_merchant:$("pmMerchant").value, p_test:$("pmTest").checked}); toast($("pmMerchant").value.trim() ? "Payme saqlandi" : "Payme o'chirildi"); }catch(e){ handleErr(e); }
+  try{
+    const m = $("pmMerchant").value.trim();
+    const r = await rpc("admin_set_payme", {p_token:token, p_merchant:m, p_test:$("pmTest").checked, p_pass:pmPass});
+    if(!r.ok){ pmMsg = r.msg; pmLock(); pmMsg = r.msg; pmDraw(); return; }
+    pmOn = !!m; toast(m ? "Payme saqlandi" : "Payme o'chirildi"); pmLock();
+  }catch(e){ handleErr(e); }
 }
 async function savePayInfo(){
   try{ await rpc("admin_set_pay_info", {p_token:token, p_card:$("pyCard").value, p_holder:$("pyHolder").value, p_note:$("pyNote").value}); toast("Rekvizitlar saqlandi"); }catch(e){ handleErr(e); }
