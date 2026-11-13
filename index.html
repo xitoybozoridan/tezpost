@@ -917,7 +917,7 @@ function itemHtml(d){
     <div class="top"><div class="trk">${esc(d.track)}</div><span class="st ${esc(d.status)}">${esc(STATUS[d.status]||d.status)}</span></div>
     <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div>
     ${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}
-    ${d.weight_kg != null ? `<div class="wline"><span>⚖ ${Math.round(d.weight_kg*1000)/1000} kg</span><span>${"$" + (Math.round(Number(d.amount)*100)/100).toFixed(2).replace(/\.00$/,"")}</span><span class="pd ${d.paid?"yes":"no"}">${d.paid?"To'langan":"To'lanmagan"}</span></div>` : ""}
+    ${d.weight_kg != null ? `<div class="wline"><span>⚖ ${Math.round(d.weight_kg*1000)/1000} kg</span><span>${Math.round(Number(d.amount)*Number(d.rate||0)).toLocaleString("en-US").replace(/,/g," ")} so'm</span><span class="pd ${d.paid?"yes":"no"}">${d.paid?"To'langan":"To'lanmagan"}</span></div>` : ""}
     <div class="when">${when(d.created_at)}</div></div></div>`;
 }
 let allShown = 15;

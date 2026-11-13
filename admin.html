@@ -398,6 +398,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
         <div style="flex:1;min-width:120px"><span class="lbl" style="margin:0 0 4px">Mijozga (sotish)</span><input id="rtSell" inputmode="decimal" class="xsel" style="padding:0 12px"></div>
         <div style="flex:1;min-width:120px"><span class="lbl" style="margin:0 0 4px">iPost'ga (sizdan)</span><input id="rtCost" inputmode="decimal" class="xsel" style="padding:0 12px"></div>
+        <div style="flex:1;min-width:140px"><span class="lbl" style="margin:0 0 4px">Dollar kursi (so'm)</span><input id="rtUsd" inputmode="numeric" class="xsel" style="padding:0 12px" placeholder="12000"></div>
         <button class="go" style="height:46px;padding:0 18px;border:0;border-radius:14px;background:linear-gradient(180deg,#FF9322,#F26A00);color:#fff;font-weight:800" onclick="saveRates()">Saqlash</button>
       </div>
       <div class="info" style="margin:8px 0 0">Yangi narx faqat keyin tortiladigan yuklarga ta'sir qiladi. Eski yuklar o'z narxida qoladi.</div>
@@ -696,11 +697,13 @@ function custCard(c, clickable, eye){
   </${clickable?'button':'div'}>`;
 }
 /* ====== Og'irlik, narx, to'lov ====== */
+const som = (usd, rate) => Math.round(Number(usd||0) * Number(rate||0)).toLocaleString("en-US").replace(/,/g," ") + " so'm";
+const somN = n => Math.round(Number(n||0)).toLocaleString("en-US").replace(/,/g," ") + " so'm";
 const money = n => "$" + (Math.round(Number(n||0)*100)/100).toFixed(2).replace(/\.00$/,"");
 const kgf = n => String(Math.round(Number(n||0)*1000)/1000);
 function wtHtml(d){
   if(d.weight_kg == null) return `<button class="chip wtc nowt" onclick="editWeight(${d.id})">⚖ Og'irlik kiriting</button>`;
-  return `<button class="chip wtc" onclick="editWeight(${d.id})">⚖ ${kgf(d.weight_kg)} kg · ${money(d.amount)}</button><button class="chip paidc ${d.paid?"yes":"no"}" onclick="togglePaid(${d.id})">${d.paid?"✓ To'langan":"To'lanmagan"}</button>`;
+  return `<button class="chip wtc" onclick="editWeight(${d.id})">⚖ ${kgf(d.weight_kg)} kg · ${som(d.amount, d.rate)}</button><button class="chip paidc ${d.paid?"yes":"no"}" onclick="togglePaid(${d.id})">${d.paid?"✓ To'langan":"To'lanmagan"}</button>`;
 }
 function findCargo(id){ return (cState && (cState.declarations||[]).find(x=>x.id===id)) || hoItems.find(x=>x.id===id) || rcv.find(x=>x.id===id) || null; }
 function paintWt(id){ const d = findCargo(id), el = $("wt"+id); if(d && el) el.innerHTML = wtHtml(d); if($("handover").classList.contains("active")) drawHo(); }
@@ -710,7 +713,7 @@ async function editWeight(id){
   const t = v.trim().replace(",", "."); if(t !== "" && !(isFinite(t) && +t >= 0)){ toast("Raqam kiriting", true); return; }
   try{
     const r = await rpc("admin_set_weight", {p_token:token, p_id:id, p_weight: t === "" ? null : +t});
-    Object.assign(d, {weight_kg:r.weight_kg, amount:r.amount, paid:r.paid}); lsClear(); paintWt(id); toast(t === "" ? "Og'irlik o'chirildi" : kgf(r.weight_kg) + " kg · " + money(r.amount));
+    Object.assign(d, {weight_kg:r.weight_kg, amount:r.amount, paid:r.paid, rate:r.rate}); lsClear(); paintWt(id); toast(t === "" ? "Og'irlik o'chirildi" : kgf(r.weight_kg) + " kg · " + som(r.amount, r.rate));
   }catch(e){ handleErr(e); }
 }
 async function togglePaid(id){
@@ -760,7 +763,7 @@ let rpPeriod = "month";
 function ymd(d){ return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
 async function openReport(){
   show("report");
-  try{ const r = await rpc("admin_rates", {p_token:token}); $("rtSell").value = r.sell; $("rtCost").value = r.cost; }catch(e){ handleErr(e); }
+  try{ const r = await rpc("admin_rates", {p_token:token}); $("rtSell").value = r.sell; $("rtCost").value = r.cost; $("rtUsd").value = r.usd; }catch(e){ handleErr(e); }
   drawPeriods(); loadReport();
 }
 function drawPeriods(){
@@ -768,9 +771,10 @@ function drawPeriods(){
   $("rpChips").innerHTML = P.map(([k,t])=>`<button class="${rpPeriod===k?"on":""}" onclick="rpPeriod='${k}';drawPeriods();loadReport()">${t}</button>`).join("");
 }
 async function saveRates(){
-  const sell = +$("rtSell").value.replace(",","."), cost = +$("rtCost").value.replace(",",".");
+  const sell = +$("rtSell").value.replace(",","."), cost = +$("rtCost").value.replace(",","."), usd = +String($("rtUsd").value).replace(/\s/g,"").replace(",",".");
   if(!isFinite(sell) || !isFinite(cost) || sell < 0 || cost < 0){ toast("Narxni raqam bilan kiriting", true); return; }
-  try{ await rpc("admin_set_rates", {p_token:token, p_sell:sell, p_cost:cost}); toast("Narxlar saqlandi: " + money(sell) + " / " + money(cost)); }catch(e){ handleErr(e); }
+  if(!isFinite(usd) || usd < 1){ toast("Dollar kursini kiriting (masalan 12000)", true); return; }
+  try{ await rpc("admin_set_rates", {p_token:token, p_sell:sell, p_cost:cost, p_usd:usd}); toast("Saqlandi: " + money(sell) + " / " + money(cost) + " · 1$ = " + somN(usd)); }catch(e){ handleErr(e); }
 }
 async function loadReport(){
   const now = new Date(); let from = null, to = null;
@@ -780,18 +784,18 @@ async function loadReport(){
   $("rpBody").innerHTML = '<div class="skel"></div><div class="skel"></div>';
   try{
     const r = await rpc("admin_report", {p_token:token, p_date_from:from, p_date_to:to});
-    const profit = Number(r.revenue) - Number(r.cost);
+    const profit = Number(r.revenue_uzs) - Number(r.cost_uzs);
     $("rpBody").innerHTML = `<div class="kpis">
-      <div class="kpi big"><small>Sof foyda</small><b>${money(profit)}</b></div>
+      <div class="kpi big"><small>Sof foyda</small><b>${somN(profit)}</b></div>
       <div class="kpi"><small>Jami og'irlik</small><b>${kgf(r.kg)} kg</b></div>
-      <div class="kpi"><small>Mijozlardan (sotish)</small><b>${money(r.revenue)}</b></div>
-      <div class="kpi"><small>iPost'ga to'lov</small><b>${money(r.cost)}</b></div>
-      <div class="kpi"><small>To'langan</small><b style="color:#127A45">${money(r.paid)}</b></div>
-      <div class="kpi ${Number(r.debt)?"warn":""}"><small>To'lanmagan (qarz)</small><b>${money(r.debt)}</b></div>
+      <div class="kpi"><small>Mijozlardan (sotish)</small><b>${somN(r.revenue_uzs)}</b></div>
+      <div class="kpi"><small>iPost'ga to'lov</small><b>${somN(r.cost_uzs)}</b></div>
+      <div class="kpi"><small>To'langan</small><b style="color:#127A45">${somN(r.paid_uzs)}</b></div>
+      <div class="kpi ${Number(r.debt_uzs)?"warn":""}"><small>To'lanmagan (qarz)</small><b>${somN(r.debt_uzs)}</b></div>
       <div class="kpi"><small>Og'irligi kiritilgan</small><b>${r.weighed} / ${r.cargos}</b></div></div>
       ${r.no_weight ? `<div class="info" style="margin-bottom:10px">Og'irligi kiritilmagan ${r.no_weight} ta yuk hisobga kirmagan. Og'irlikni yuk kartasidagi «⚖» tugmasi yoki Sozlamalar → «Excel'dan ajratish» orqali kiriting.</div>` : ""}
-      ${r.months.length ? `<div class="info">Oylar bo'yicha</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Oy</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Summa</th><th class="r">Foyda</th></tr>${r.months.map(m=>`<tr><td>${esc(m.month)}</td><td class="r">${m.cargos}</td><td class="r">${kgf(m.kg)}</td><td class="r">${money(m.revenue)}</td><td class="r"><b>${money(m.profit)}</b></td></tr>`).join("")}</table></div>` : ""}
-      ${r.debtors.length ? `<div class="info">Qarzdorlar (to'lanmagan yuklar)</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Mijoz</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Qarz</th></tr>${r.debtors.map(c=>`<tr style="cursor:pointer" onclick="openCustomer('${esc(c.code)}')"><td><b>${esc(c.code)}</b> ${esc(c.name)}</td><td class="r">${c.cargos}</td><td class="r">${kgf(c.kg)}</td><td class="r"><b style="color:#C62828">${money(c.debt)}</b></td></tr>`).join("")}</table></div>` : ""}`;
+      ${r.months.length ? `<div class="info">Oylar bo'yicha</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Oy</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Summa</th><th class="r">Foyda</th></tr>${r.months.map(m=>`<tr><td>${esc(m.month)}</td><td class="r">${m.cargos}</td><td class="r">${kgf(m.kg)}</td><td class="r">${somN(m.revenue_uzs)}</td><td class="r"><b>${somN(m.profit_uzs)}</b></td></tr>`).join("")}</table></div>` : ""}
+      ${r.debtors.length ? `<div class="info">Qarzdorlar (to'lanmagan yuklar)</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Mijoz</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Qarz</th></tr>${r.debtors.map(c=>`<tr style="cursor:pointer" onclick="openCustomer('${esc(c.code)}')"><td><b>${esc(c.code)}</b> ${esc(c.name)}</td><td class="r">${c.cargos}</td><td class="r">${kgf(c.kg)}</td><td class="r"><b style="color:#C62828">${somN(c.debt_uzs)}</b></td></tr>`).join("")}</table></div>` : ""}`;
   }catch(e){ $("rpBody").innerHTML = ""; handleErr(e); }
 }
 
@@ -1154,16 +1158,16 @@ function drawHo(){
         + hoItems.map(d=>`<div class="item"><div class="row1"><label class="chk pick"><input type="checkbox" ${d.checked?"checked":""} onchange="hoTick(${d.id},this)"></label><button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button></div>
             <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}<span id="wt${d.id}">${wtHtml(d)}</span></div>${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}</div>`).join("")
       : `<div class="empty"><b>Topshiriladigan yuk yo'q</b><p>Bu mijozning yuklari hali topshirish punktiga qabul qilinmagan yoki hammasi topshirib bo'lingan.</p></div>`);
-  const chosen = hoItems.filter(x=>x.checked), kg = chosen.reduce((a,x)=>a + Number(x.weight_kg||0), 0), due = chosen.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Number(x.amount||0), 0), nowt = chosen.filter(x=>x.weight_kg == null).length;
-  $("hoSum").innerHTML = sel ? `<span>${sel} ta · ${kgf(kg)} kg<br><span style="color:${due?"#C62828":"#127A45"}">${due ? "To'lov: " + money(due) : "Hammasi to'langan"}${nowt ? " · og'irliksiz: " + nowt : ""}</span></span>${due ? `<label><input type="checkbox" ${hoPaidOn?"checked":""} onchange="hoPaidOn=this.checked">To'lov olindi</label>` : ""}` : "";
+  const chosen = hoItems.filter(x=>x.checked), kg = chosen.reduce((a,x)=>a + Number(x.weight_kg||0), 0), due = chosen.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Math.round(Number(x.amount||0) * Number(x.rate||0)), 0), nowt = chosen.filter(x=>x.weight_kg == null).length;
+  $("hoSum").innerHTML = sel ? `<span>${sel} ta · ${kgf(kg)} kg<br><span style="color:${due?"#C62828":"#127A45"}">${due ? "To'lov: " + somN(due) : "Hammasi to'langan"}${nowt ? " · og'irliksiz: " + nowt : ""}</span></span>${due ? `<label><input type="checkbox" ${hoPaidOn?"checked":""} onchange="hoPaidOn=this.checked">To'lov olindi</label>` : ""}` : "";
   $("hoBtn").textContent = "Topshirish (" + sel + " ta)"; $("hoBar").classList.toggle("show", sel > 0);
 }
 function hoTick(id, cb){ const x = hoItems.find(v=>v.id===id); if(x) x.checked = cb.checked; drawHo(); }
 function hoAll(cb){ hoItems.forEach(x=>x.checked = cb.checked); drawHo(); }
 async function applyHandover(){
   const ids = hoItems.filter(x=>x.checked).map(x=>x.id); if(!ids.length) return;
-  const ch = hoItems.filter(x=>x.checked), due = ch.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Number(x.amount||0), 0);
-  if(!confirm(hoCust.name + " (" + hoCust.code + ") ga " + ids.length + " ta yuk topshirilsinmi?" + (due ? "\nTo'lov: " + money(due) + (hoPaidOn ? " (olindi deb belgilanadi)" : " (to'lanmagan qoladi)") : ""))) return;
+  const ch = hoItems.filter(x=>x.checked), due = ch.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Math.round(Number(x.amount||0) * Number(x.rate||0)), 0);
+  if(!confirm(hoCust.name + " (" + hoCust.code + ") ga " + ids.length + " ta yuk topshirilsinmi?" + (due ? "\nTo'lov: " + somN(due) + (hoPaidOn ? " (olindi deb belgilanadi)" : " (to'lanmagan qoladi)") : ""))) return;
   const b = $("hoBtn"); b.disabled = true;
   try{
     const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:["pickup"]});
