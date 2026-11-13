@@ -356,6 +356,24 @@
   .wline .pd{padding:3px 9px;border-radius:999px;font-size:12px}
   .wline .pd.yes{background:#DDF5E7;color:#127A45}.wline .pd.no{background:#FDECEC;color:#C62828}
   [data-theme=dark] .wline{color:#E8EEF9}
+.paybn{display:flex;align-items:center;gap:12px;border-radius:22px;padding:14px 16px;margin:0 0 14px;background:linear-gradient(180deg,#FF9322,#F26A00);color:#fff;box-shadow:0 8px 20px rgba(255,122,0,.35);border:0;width:100%;text-align:left}
+.paybn b{display:block;font-size:16px}.paybn small{display:block;opacity:.92;font-size:13.5px;margin-top:2px;font-weight:600}.paybn .go{margin-left:auto;font-weight:800;font-size:15px;white-space:nowrap}
+.paybn.wait{background:var(--blue-soft);color:var(--blue-deep);box-shadow:none}
+.payrow{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:13px 14px;margin-bottom:10px;box-shadow:var(--shadow);width:100%;border:0;text-align:left;color:inherit}
+.payrow .pc{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);flex:none;display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px}
+.payrow.on .pc{background:var(--blue);border-color:var(--blue)}
+.payrow .pt{flex:1;min-width:0}.payrow .pt b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.payrow .pt small{color:var(--muted);font-size:13px}
+.payrow .pa{font-weight:800;font-size:15.5px;white-space:nowrap}
+.payrow.wt{opacity:.7}.payrow.wt .pc{border-style:dashed}
+.paysub{margin:14px 4px 8px;font-size:13.5px;font-weight:700;color:var(--muted)}
+.payall{border:0;background:none;color:var(--blue);font-weight:800;font-size:14px;padding:4px 0}
+.paybig{text-align:center;margin:2px 0 12px}.paybig small{display:block;color:var(--muted);font-weight:700}.paybig b{font-size:30px;letter-spacing:-.5px}
+.paycard{background:var(--card);border-radius:18px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px}
+.paycard .cn{font-size:22px;font-weight:800;letter-spacing:1.5px;word-break:break-all}
+.paycard .ch{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:14px;margin-top:4px}
+.paycopy{border:0;background:var(--blue-soft);color:var(--blue);font-weight:800;border-radius:12px;padding:9px 14px;font-size:14px}
+.paynote{font-size:13.5px;color:var(--muted);line-height:1.5;margin:6px 2px 10px}
+#pay{flex-direction:column}
 </style>
 <script>
 try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
@@ -421,6 +439,7 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
     </div>
   </section>
 
+  <section class="section" style="padding-bottom:0"><div id="payBanH"></div></section>
   <section class="section">
     <div class="section-head"><h2>So'nggi deklaratsiya</h2><button class="all" id="allBtn" onclick="openLoads()" style="display:none">Barchasi ›</button></div>
     <div id="declList"></div>
@@ -435,6 +454,7 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
 <main id="loads" class="screen pad-nav">
   <div class="section" style="padding-top:calc(env(safe-area-inset-top) + 18px)">
     <div class="section-head"><h2>Yuklarim</h2><span class="count zero" id="count">0</span></div>
+    <div id="payBanL"></div>
     <div id="allList"></div>
   </div>
 </main>
@@ -491,6 +511,20 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
   <div class="savebar"><div class="in"><button class="btn-save" id="saveBtn" onclick="saveDecl()">Deklaratsiyani saqlash</button></div></div>
 </main>
 
+<!-- ===== TO'LOV ===== -->
+<main id="pay" class="screen">
+  <div class="bar">
+    <button class="link back" onclick="go('loads')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Orqaga</button>
+    <span></span>
+  </div>
+  <h1 class="title">To'lov</h1>
+  <div class="form" style="padding-bottom:130px">
+    <div class="paysub" style="margin-top:0;display:flex;justify-content:space-between;align-items:center"><span>To'lanadigan yuklar</span><button class="payall" onclick="payToggleAll()">Hammasini tanlash / bekor</button></div>
+    <div id="payList"></div>
+  </div>
+  <div class="savebar"><div class="in"><button class="btn-save" id="payBtn" onclick="openPaySheet()">To'lash</button></div></div>
+</main>
+
 <!-- ===== Pastki menyu ===== -->
 <nav class="nav" id="nav"><div class="in">
   <button id="navHome" class="on" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19z"/></svg>Asosiy</button>
@@ -505,6 +539,15 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
     <h3>Bildirishnomalar</h3>
     <div id="notifBody" style="max-height:60vh;overflow-y:auto"></div>
     <button class="cancel" onclick="closeNotif()">Yopish</button>
+  </div>
+</div>
+<div class="sheet-back" id="payBack" onclick="closePaySheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <h3>To'lov qilish</h3>
+    <div id="payBody"></div>
+    <div class="msg" id="payMsg"></div>
+    <button class="btn-save" id="payOk" onclick="payConfirm()">✓ To'lov qildim</button>
+    <button class="cancel" onclick="closePaySheet()">Bekor qilish</button>
   </div>
 </div>
 <div class="sheet-back" id="tariffBack" onclick="closeTariffs()">
@@ -917,8 +960,66 @@ function itemHtml(d){
     <div class="top"><div class="trk">${esc(d.track)}</div><span class="st ${esc(d.status)}">${esc(STATUS[d.status]||d.status)}</span></div>
     <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div>
     ${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}
-    ${d.weight_kg != null ? `<div class="wline"><span>⚖ ${Math.round(d.weight_kg*1000)/1000} kg</span><span>${Math.round(Number(d.amount)*Number(d.rate||0)).toLocaleString("en-US").replace(/,/g," ")} so'm</span><span class="pd ${d.paid?"yes":"no"}">${d.paid?"To'langan":"To'lanmagan"}</span></div>` : ""}
+    ${d.weight_kg != null ? `<div class="wline"><span>⚖ ${Math.round(d.weight_kg*1000)/1000} kg</span><span>${Math.round(Number(d.amount)*Number(d.rate||0)).toLocaleString("en-US").replace(/,/g," ")} so'm</span><span class="pd ${d.paid?"yes":"no"}">${d.paid?"To'langan":d.pay_pending?"Tekshirilmoqda":"To'lanmagan"}</span></div>` : ""}
     <div class="when">${when(d.created_at)}</div></div></div>`;
+}
+/* ====== To'lov ====== */
+const amtUzs = d => Math.round(Number(d.amount||0) * Number(d.rate||0));
+const fmtSom = n => Math.round(Number(n||0)).toLocaleString("en-US").replace(/,/g," ") + " so'm";
+let paySel = new Set(), payInfo = null, payBusy = false;
+const payDue  = () => declarations.filter(d=>d.weight_kg != null && !d.paid && !d.pay_pending);
+const payWait = () => declarations.filter(d=>!d.paid && d.pay_pending);
+function renderPayBanner(){
+  const due = payDue(), wait = payWait(); let h = "";
+  if(due.length) h = `<button class="paybn" onclick="openPay()"><span style="font-size:26px">💳</span><span><b>To'lov kutilmoqda</b><small>${due.length} ta yuk · ${fmtSom(due.reduce((a,d)=>a+amtUzs(d),0))}</small></span><span class="go">To'lash ›</span></button>`;
+  else if(wait.length) h = `<div class="paybn wait"><span style="font-size:24px">⏳</span><span><b>To'lov tekshirilmoqda</b><small>${wait.length} ta yuk · ${fmtSom(wait.reduce((a,d)=>a+amtUzs(d),0))}. Tasdiqlangach xabar keladi</small></span></div>`;
+  if($("payBanH")) $("payBanH").innerHTML = h; if($("payBanL")) $("payBanL").innerHTML = h;
+}
+function openPay(){ paySel = new Set(payDue().map(d=>d.id)); drawPay(); show("pay"); }
+function payTog(id){ if(paySel.has(id)) paySel.delete(id); else paySel.add(id); drawPay(); }
+function payToggleAll(){ const due = payDue(); if(paySel.size === due.length) paySel.clear(); else paySel = new Set(due.map(d=>d.id)); drawPay(); }
+function drawPay(){
+  const due = payDue(), wait = payWait();
+  [...paySel].forEach(id=>{ if(!due.find(d=>d.id===id)) paySel.delete(id); });
+  const row = (d, on, wt) => `<${wt?"div":"button"} class="payrow ${on?"on":""} ${wt?"wt":""}" ${wt?"":`onclick="payTog(${d.id})"`}><span class="pc">${on?"✓":""}</span><span class="pt"><b>${esc(d.track)}</b><small>${Math.round(d.weight_kg*1000)/1000} kg${wt?" · tekshirilmoqda":""}</small></span><span class="pa">${fmtSom(amtUzs(d))}</span></${wt?"div":"button"}>`;
+  $("payList").innerHTML = (due.length ? due.map(d=>row(d, paySel.has(d.id), false)).join("") : `<div class="empty"><b>To'lanadigan yuk yo'q</b><p>Hamma yuk to'langan yoki og'irligi hali kiritilmagan.</p></div>`)
+    + (wait.length ? `<div class="paysub">Tekshirilmoqda</div>` + wait.map(d=>row(d, false, true)).join("") : "");
+  const sel = due.filter(d=>paySel.has(d.id)), tot = sel.reduce((a,d)=>a+amtUzs(d),0), b = $("payBtn");
+  b.disabled = !sel.length; b.style.opacity = sel.length ? 1 : .5;
+  b.textContent = sel.length ? `${sel.length} ta yuk · ${fmtSom(tot)} to'lash` : "Yukni tanlang";
+}
+async function openPaySheet(){
+  const sel = payDue().filter(d=>paySel.has(d.id)); if(!sel.length) return;
+  const tot = sel.reduce((a,d)=>a+amtUzs(d),0);
+  $("payMsg").textContent = ""; $("payBody").innerHTML = '<div class="skel"></div>'; $("payBack").classList.add("show"); $("payOk").style.display = "none";
+  try{ payInfo = await rpc("my_pay_info", {p_token:token}); }catch(e){ closePaySheet(); handleErr(e, e.offline); return; }
+  if(!payInfo.card && !payInfo.payme){ $("payBody").innerHTML = `<div class="empty"><b>To'lov ma'lumoti hali kiritilmagan</b><p>Iltimos, chatda yozing, to'lov uchun karta raqamini beramiz.</p></div>`; return; }
+  const big = `<div class="paybig"><small>${sel.length} ta yuk uchun to'lov</small><b>${fmtSom(tot)}</b></div>`;
+  const online = payInfo.payme ? `<button class="btn-save" id="payOnline" onclick="payOnline()" style="margin-bottom:6px">💳 Payme orqali to'lash</button><div class="paynote" style="text-align:center">Payme ilovasida yoki kartangiz bilan to'laysiz. To'lov avtomatik qabul qilinadi.</div>` : "";
+  const card = payInfo.card ? `${payInfo.payme ? `<div class="paysub" style="text-align:center">Yoki kartaga o'tkazing</div>` : ""}
+    <div class="paycard"><div class="cn">${esc(payInfo.card)}</div><div class="ch"><span>${esc(payInfo.holder||"")}</span><button class="paycopy" onclick="payCopy('${esc(payInfo.card).replace(/\s/g,"")}',this)">Nusxalash</button></div></div>
+    <div class="paycard" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><b style="font-size:18px">${tot}</b><button class="paycopy" onclick="payCopy('${tot}',this)">Summani nusxalash</button></div>
+    <div class="paynote">${esc(payInfo.note || "Shu kartaga yuqoridagi summani o'tkazing, so'ng «To'lov qildim» tugmasini bosing. Admin tekshirib tasdiqlaydi.")}</div>` : "";
+  $("payBody").innerHTML = big + online + card;
+  $("payOk").style.display = payInfo.card ? "" : "none";
+}
+async function payOnline(){
+  if(payBusy) return; const ids = payDue().filter(d=>paySel.has(d.id)).map(d=>d.id); if(!ids.length) return;
+  payBusy = true; const b = $("payOnline"); b.disabled = true; b.textContent = "Ochilmoqda...";
+  try{ const r = await rpc("my_pay_online", {p_token:token, p_ids:ids}); window.location.href = r.url; return; }
+  catch(e){ $("payMsg").textContent = e.message || "Xatolik"; handleErr(e, e.offline); }
+  payBusy = false; b.disabled = false; b.textContent = "💳 Payme orqali to'lash";
+}
+async function payCopy(t, btn){ const ok = await copyText(t); const o = btn.textContent; btn.textContent = ok ? "Nusxalandi ✓" : "Nusxalab bo'lmadi"; setTimeout(()=>btn.textContent = o, 1500); }
+function closePaySheet(){ $("payBack").classList.remove("show"); }
+async function payConfirm(){
+  if(payBusy) return; const ids = payDue().filter(d=>paySel.has(d.id)).map(d=>d.id); if(!ids.length) return;
+  payBusy = true; const b = $("payOk"); b.disabled = true; b.textContent = "Yuborilmoqda...";
+  try{
+    await rpc("my_pay_request", {p_token:token, p_ids:ids});
+    closePaySheet(); toast("So'rov yuborildi. Tasdiqlangach xabar keladi"); go("loads");
+  }catch(e){ $("payMsg").textContent = e.message || "Xatolik"; handleErr(e, e.offline); }
+  payBusy = false; b.disabled = false; b.textContent = "✓ To'lov qildim";
 }
 let allShown = 15;
 function renderList(loading){
@@ -933,6 +1034,7 @@ function renderList(loading){
           <path d="M48 47l24-13.5v10L48 57z" fill="#FF7A00" opacity=".9"/></svg>
         <b>Hozircha deklaratsiya yo'q</b>
         <p>Yuk yuborishdan oldin "Deklaratsiya yaratish" tugmasi orqali trek-kodni qo'shing.</p></div>`;
+  renderPayBanner();
   $("declList").innerHTML = all.length ? itemHtml(all[0]) : empty;
   $("allList").innerHTML = all.length ? all.slice(0, allShown).map(itemHtml).join("") + (all.length > allShown ? `<button class="morebtn" onclick="allShown+=15;renderList()">Yana ko'rsatish (${all.length - allShown})</button>` : "") : empty;
 }

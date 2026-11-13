@@ -331,6 +331,16 @@
   html[data-view=pc] .hosum{max-width:420px;margin:0 auto 8px}
 .xsy{display:flex;flex-direction:column;gap:7px}.xsyrow{display:flex;align-items:center;gap:8px}.xsyl{flex:1;min-width:0;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xsyl span{color:var(--muted)}.xsya{color:var(--muted);font-weight:800}.xsyrow .xsel{flex:1.2;min-width:0}.xsyc{display:flex;align-items:center;gap:8px;margin-top:10px;font-weight:700;font-size:14px}.xsyc input{width:20px;height:20px}
 html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 18px}
+.paydot{position:absolute;top:3px;right:3px;min-width:17px;height:17px;border-radius:9px;background:#E53935;color:#fff;font-size:11px;font-weight:800;display:none;place-items:center;padding:0 4px;line-height:1}
+.paydot.show{display:grid}
+.pbox{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px;margin-bottom:12px}
+.pbox .ph{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pbox .ph b{font-size:16px}.pbox .ph small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.pbox .pt{font-size:20px;font-weight:800;white-space:nowrap}
+.pbox table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}.pbox td{padding:5px 0;border-top:1px solid var(--line)}.pbox td.r{text-align:right;font-weight:700}
+.pbox .pbtn{display:flex;gap:8px}.pbox .pbtn button{flex:1;height:44px;border:0;border-radius:13px;font-weight:800;font-size:15px}
+.pbox .ok{background:linear-gradient(180deg,#22A862,#127A45);color:#fff}.pbox .no{background:#FDECEC;color:#C62828}
+html[data-view=pc] #payments .wrap{max-width:900px}
 </style>
 </head>
 <body>
@@ -364,7 +374,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <div><h1>TezPost Admin</h1><small id="subline">Yuklar va mijozlar</small></div>
       
       <button class="iconbtn" id="viewBtn" aria-label="Ko'rinish: telefon / kompyuter" title="Telefon / kompyuter ko'rinishi" onclick="toggleView()"><svg id="viewIco" viewBox="0 0 24 24"></svg></button>
-      <button class="iconbtn" aria-label="Sozlamalar" onclick="show('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+      <button class="iconbtn" aria-label="Sozlamalar" onclick="show('settings');checkPay()" style="position:relative"><span class="paydot" id="payDot"></span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
       <button class="iconbtn" id="refBtn" aria-label="Yangilash" onclick="refresh(true)"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg></button>
       <button class="iconbtn" aria-label="Chiqish" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg></button>
     </div>
@@ -405,6 +415,36 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
     </div>
     <div class="pchips" id="rpChips"></div>
     <div id="rpBody"></div>
+  </div>
+</main>
+
+<!-- ===== MIJOZ TO'LOVLARI ===== -->
+<main id="payments" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Mijoz to'lovlari</b>
+  </div>
+  <div class="wrap" style="padding-bottom:30px">
+    <div class="info" style="margin-bottom:8px">Kutilayotgan to'lovlar</div>
+    <div id="payPend"></div>
+    <div class="scanbox" style="margin-top:14px">
+      <span class="lbl">Payme (onlayn to'lov)</span>
+      <div class="xgrid">
+        <div class="xf"><span class="lbl">Merchant ID (Payme kassasidan)</span><input id="pmMerchant" class="xsel" style="padding:0 12px" placeholder="Bo'sh = o'chirilgan" maxlength="60" autocomplete="off"></div>
+        <div class="xf"><span class="lbl">Rejim</span><label class="xsyc" style="margin:0;height:46px"><input type="checkbox" id="pmTest"> Test rejim (sinov uchun)</label></div>
+        <div class="xf xwide"><span class="lbl">Payme kassasiga yoziladigan Endpoint manzil</span><input id="pmUrl" class="xsel" style="padding:0 12px" readonly onclick="this.select()"></div>
+      </div>
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="savePayme()">Payme'ni saqlash</button>
+    </div>
+    <div class="scanbox" style="margin-top:14px">
+      <span class="lbl">To'lov rekvizitlari (mijoz to'lashda ko'radi)</span>
+      <div class="xgrid">
+        <div class="xf"><span class="lbl">Karta raqami</span><input id="pyCard" inputmode="numeric" class="xsel" style="padding:0 12px" placeholder="8600 0000 0000 0000" maxlength="30"></div>
+        <div class="xf"><span class="lbl">Karta egasi</span><input id="pyHolder" class="xsel" style="padding:0 12px" placeholder="ISM FAMILIYA" maxlength="60"></div>
+        <div class="xf xwide"><span class="lbl">Izoh (ixtiyoriy)</span><input id="pyNote" class="xsel" style="padding:0 12px" placeholder="Masalan: izohga mijoz kodini yozing" maxlength="300"></div>
+      </div>
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="savePayInfo()">Saqlash</button>
+    </div>
   </div>
 </main>
 
@@ -511,6 +551,11 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
     <b style="font-size:17px">Sozlamalar</b>
   </div>
   <div class="wrap">
+    <button class="setrow" onclick="openPayments()">
+      <span class="si" style="background:#127A45"><svg viewBox="0 0 24 24"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5zM3 9h18v2H3z"/></svg></span>
+      <span class="st"><b>Mijoz to'lovlari <span class="paydot show" id="payDot2" style="position:static;display:none;margin-left:6px;vertical-align:middle"></span></b><small>Karta rekvizitlari va mijozlar yuborgan to'lovlarni tasdiqlash</small></span>
+      <span class="ch">›</span>
+    </button>
     <button class="setrow" onclick="openReport()">
       <span class="si"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>
       <span class="st"><b>Hisobot va foyda</b><small>Kg, summa, iPost to'lovi, foyda, qarzdorlar va narxlar</small></span>
@@ -643,7 +688,8 @@ function handleErr(e){
   if(e.session){ forceLogout(); toast("Qaytadan kiring", true); }
   else toast(e.message, true);
 }
-function enter(){ show("main"); search(); pollBadge(); }
+function enter(){ show("main"); search(); pollBadge(); checkPay(); }
+setInterval(()=>{ if(!document.hidden) checkPay(); }, 30000);
 
 /* ====== Qidiruv ====== */
 let timer = null;
@@ -757,6 +803,32 @@ applyView(curView());
 
 
 
+
+/* ====== Mijoz to'lovlari ====== */
+function setPayDot(n){ ["payDot","payDot2"].forEach(i=>{ const e = $(i); if(!e) return; e.textContent = n; e.classList.toggle("show", n > 0); e.style.display = n > 0 ? "grid" : "none"; }); }
+async function checkPay(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_payments", {p_token:token}); setPayDot((r.pending||[]).length); return r; }catch(e){} }
+async function openPayments(){ show("payments"); $("payPend").innerHTML = '<div class="skel"></div>'; await loadPayments(); }
+async function loadPayments(){
+  try{
+    const r = await rpc("admin_payments", {p_token:token}); setPayDot((r.pending||[]).length);
+    $("pmMerchant").value = r.payme_merchant || ""; $("pmTest").checked = !!r.payme_test; try{ $("pmUrl").value = new URL(window.TP_CONFIG.url).origin + "/functions/v1/payme"; }catch(e){}
+    $("pyCard").value = r.card || ""; $("pyHolder").value = r.holder || ""; $("pyNote").value = r.note || "";
+    $("payPend").innerHTML = (r.pending||[]).length ? r.pending.map(p=>`<div class="pbox"><div class="ph"><div><b>${esc(p.code)} · ${esc(p.name)}</b><small>${esc(p.phone||"")} · ${when(p.created_at)}</small></div><span class="pt">${somN(p.total)}</span></div>
+      <table>${(p.tracks||[]).map(t=>`<tr><td>${esc(t.track)}</td><td class="r" style="font-weight:500">${kgf(t.kg)} kg</td><td class="r">${somN(t.amount)}</td></tr>`).join("")}</table>
+      <div class="pbtn"><button class="no" onclick="payDecide(${p.id},false)">✕ Kelmadi</button><button class="ok" onclick="payDecide(${p.id},true)">✓ Tushdi, tasdiqlash</button></div></div>`).join("")
+      : `<div class="empty"><b>Kutilayotgan to'lov yo'q</b><p>Mijoz to'lov qildim deb yuborsa, shu yerda chiqadi.</p></div>`;
+  }catch(e){ $("payPend").innerHTML = ""; handleErr(e); }
+}
+async function payDecide(id, ok){
+  if(!confirm(ok ? "Pul kartangizga tushganini tekshirdingizmi? Yuklar «To'langan» bo'ladi." : "To'lov kelmadi deb rad etiladi. Mijozga xabar boradi.")) return;
+  try{ await rpc("admin_pay_decide", {p_token:token, p_id:id, p_ok:ok}); lsClear(); beep(ok ? "ok" : "dup"); toast(ok ? "To'lov tasdiqlandi" : "Rad etildi"); loadPayments(); }catch(e){ handleErr(e); }
+}
+async function savePayme(){
+  try{ await rpc("admin_set_payme", {p_token:token, p_merchant:$("pmMerchant").value, p_test:$("pmTest").checked}); toast($("pmMerchant").value.trim() ? "Payme saqlandi" : "Payme o'chirildi"); }catch(e){ handleErr(e); }
+}
+async function savePayInfo(){
+  try{ await rpc("admin_set_pay_info", {p_token:token, p_card:$("pyCard").value, p_holder:$("pyHolder").value, p_note:$("pyNote").value}); toast("Rekvizitlar saqlandi"); }catch(e){ handleErr(e); }
+}
 
 /* ====== Hisobot ====== */
 let rpPeriod = "month";
