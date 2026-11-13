@@ -310,6 +310,25 @@
   html[data-view=pc] #xlRes th,html[data-view=pc] #xlRes td{padding:6px 8px !important}
   html[data-view=pc] #bulkup textarea{min-height:260px}
   html[data-view=pc] #xl label.btn{max-width:320px}
+  .wtc,.paidc{border:0;font-weight:700;cursor:pointer;font-family:inherit}
+  .wtc{background:#FFF1DC;color:#B45309}.wtc.nowt{background:#EEF2F8;color:var(--muted)}
+  .paidc.yes{background:#DDF5E7;color:#127A45}.paidc.no{background:#FDECEC;color:#C62828}
+  .hosum{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:588px;margin:0 auto 8px;font-size:14px;font-weight:700;color:var(--navy)}
+  .hosum label{display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .hosum input{width:20px;height:20px;accent-color:#127A45}
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+  .kpi{background:var(--card);border-radius:16px;padding:11px 13px;box-shadow:var(--shadow)}
+  .kpi small{display:block;font-size:12px;color:var(--muted);font-weight:700}.kpi b{font-size:21px;color:var(--navy)}
+  .kpi.big{grid-column:1 / -1;background:linear-gradient(180deg,#22A862,#127A45)}.kpi.big small,.kpi.big b{color:#fff}.kpi.big b{font-size:30px}
+  .kpi.warn b{color:#C62828}
+  .pchips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+  .pchips button{border:1.5px solid var(--blue);background:#fff;color:var(--blue);border-radius:999px;padding:7px 14px;font-weight:800;font-size:13.5px}
+  .pchips button.on{background:var(--blue);color:#fff}
+  .rtable{width:100%;border-collapse:collapse;font-size:13.5px}.rtable th{text-align:left;color:var(--muted);font-size:12px;padding:6px 8px}.rtable td{padding:8px;border-top:1px solid var(--line)}.rtable td.r,.rtable th.r{text-align:right}
+  html[data-view=pc] #report.screen{max-width:1280px}
+  html[data-view=pc] #report .wrap{max-width:1100px;margin:0 auto;padding:16px 24px 40px}
+  html[data-view=pc] .kpis{grid-template-columns:repeat(3,1fr)}
+  html[data-view=pc] .hosum{max-width:420px;margin:0 auto 8px}
 </style>
 </head>
 <body>
@@ -365,6 +384,27 @@
   <div class="wrap"><div id="out"></div></div>
 </main>
 
+<!-- ===== HISOBOT ===== -->
+<main id="report" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Hisobot va foyda</b>
+  </div>
+  <div class="wrap" style="padding-bottom:30px">
+    <div class="scanbox">
+      <span class="lbl">Narxlar ($ / kg)</span>
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:1;min-width:120px"><span class="lbl" style="margin:0 0 4px">Mijozga (sotish)</span><input id="rtSell" inputmode="decimal" class="xsel" style="padding:0 12px"></div>
+        <div style="flex:1;min-width:120px"><span class="lbl" style="margin:0 0 4px">iPost'ga (sizdan)</span><input id="rtCost" inputmode="decimal" class="xsel" style="padding:0 12px"></div>
+        <button class="go" style="height:46px;padding:0 18px;border:0;border-radius:14px;background:linear-gradient(180deg,#FF9322,#F26A00);color:#fff;font-weight:800" onclick="saveRates()">Saqlash</button>
+      </div>
+      <div class="info" style="margin:8px 0 0">Yangi narx faqat keyin tortiladigan yuklarga ta'sir qiladi. Eski yuklar o'z narxida qoladi.</div>
+    </div>
+    <div class="pchips" id="rpChips"></div>
+    <div id="rpBody"></div>
+  </div>
+</main>
+
 <!-- ===== EXCEL'DAN AJRATISH ===== -->
 <main id="xl" class="screen">
   <div class="th-top">
@@ -385,6 +425,8 @@
           <select id="xlStatCol" class="field xsel" onchange="xl.sel.clear();xlRun()"></select></div>
         <div class="xf"><span class="lbl">Trek raqam qaysi ustunda?</span>
           <select id="xlTrkCol" class="field xsel"></select></div>
+        <div class="xf"><span class="lbl">Og'irlik (kg) qaysi ustunda?</span>
+          <select id="xlWtCol" class="field xsel"></select></div>
         <div class="xf xwide"><span class="lbl">5. Qaysi holatdagi yuklar kerak? (bir nechtasini tanlash mumkin, tanlamasangiz hammasi)</span>
           <div id="xlChips" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
       </div></div>
@@ -455,7 +497,7 @@
     </div>
     <div id="hoBody"></div>
   </div>
-  <div class="actbar" id="hoBar"><button class="btn" id="hoBtn" onclick="applyHandover()">Topshirish</button></div>
+  <div class="actbar" id="hoBar"><div class="hosum" id="hoSum"></div><button class="btn" id="hoBtn" onclick="applyHandover()">Topshirish</button></div>
 </main>
 
 <!-- ===== SOZLAMALAR ===== -->
@@ -465,6 +507,11 @@
     <b style="font-size:17px">Sozlamalar</b>
   </div>
   <div class="wrap">
+    <button class="setrow" onclick="openReport()">
+      <span class="si"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>
+      <span class="st"><b>Hisobot va foyda</b><small>Kg, summa, iPost to'lovi, foyda, qarzdorlar va narxlar</small></span>
+      <span class="ch">›</span>
+    </button>
     <button class="setrow" onclick="openXl()">
       <span class="si"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13l4 5M13 13l-4 5"/></svg></span>
       <span class="st"><b>Excel'dan mijozni ajratish</b><small>Katta Excel'dan bitta mijozning yuklarini ajratib, alohida fayl qilish</small></span>
@@ -645,6 +692,30 @@ function custCard(c, clickable, eye){
     ${eye ? `<span class="eyeb ${eye==="open"?"on":""}" role="button" aria-label="Yuklarni ko'rsatish / yashirish" onclick="toggleCargo(event)"><svg viewBox="0 0 24 24">${eye==="open"?EYE_OFF:EYE_ON}</svg></span>` : ""}
   </${clickable?'button':'div'}>`;
 }
+/* ====== Og'irlik, narx, to'lov ====== */
+const money = n => "$" + (Math.round(Number(n||0)*100)/100).toFixed(2).replace(/\.00$/,"");
+const kgf = n => String(Math.round(Number(n||0)*1000)/1000);
+function wtHtml(d){
+  if(d.weight_kg == null) return `<button class="chip wtc nowt" onclick="editWeight(${d.id})">⚖ Og'irlik kiriting</button>`;
+  return `<button class="chip wtc" onclick="editWeight(${d.id})">⚖ ${kgf(d.weight_kg)} kg · ${money(d.amount)}</button><button class="chip paidc ${d.paid?"yes":"no"}" onclick="togglePaid(${d.id})">${d.paid?"✓ To'langan":"To'lanmagan"}</button>`;
+}
+function findCargo(id){ return (cState && (cState.declarations||[]).find(x=>x.id===id)) || hoItems.find(x=>x.id===id) || rcv.find(x=>x.id===id) || null; }
+function paintWt(id){ const d = findCargo(id), el = $("wt"+id); if(d && el) el.innerHTML = wtHtml(d); if($("handover").classList.contains("active")) drawHo(); }
+async function editWeight(id){
+  const d = findCargo(id) || {}, cur = d.weight_kg != null ? kgf(d.weight_kg) : "";
+  const v = prompt("Yuk og'irligi (kg). Bo'sh qoldirsangiz o'chadi:", cur); if(v === null) return;
+  const t = v.trim().replace(",", "."); if(t !== "" && !(isFinite(t) && +t >= 0)){ toast("Raqam kiriting", true); return; }
+  try{
+    const r = await rpc("admin_set_weight", {p_token:token, p_id:id, p_weight: t === "" ? null : +t});
+    Object.assign(d, {weight_kg:r.weight_kg, amount:r.amount, paid:r.paid}); lsClear(); paintWt(id); toast(t === "" ? "Og'irlik o'chirildi" : kgf(r.weight_kg) + " kg · " + money(r.amount));
+  }catch(e){ handleErr(e); }
+}
+async function togglePaid(id){
+  const d = findCargo(id); if(!d) return; const nv = !d.paid;
+  d.paid = nv; paintWt(id);
+  try{ await rpc("admin_set_paid", {p_token:token, p_ids:[id], p_paid:nv}); lsClear(); toast(nv ? "To'langan deb belgilandi" : "To'lanmagan"); }
+  catch(e){ d.paid = !nv; paintWt(id); handleErr(e); }
+}
 function cargoCard(d){
   const opts = Object.keys(STATUS).map(k=>`<option value="${k}" ${d.status===k?"selected":""}>${STATUS[k]}</option>`).join("");
   const pick = (d.status==="pickup" && canPick) ? `<label class="chk pick"><input type="checkbox" data-id="${d.id}" onchange="togglePick(${d.id},this)"></label>` : `<span class="chk pick"></span>`;
@@ -652,7 +723,7 @@ function cargoCard(d){
     <div class="row1">${pick}<button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button>
       <button class="who" onclick="openCustomer('${esc(d.customer_code)}')">${esc(d.customer_code)}</button></div>
     <div class="nm" style="margin-top:6px;font-size:15px;font-weight:600">${esc(d.customer_name)} <a style="color:var(--blue);text-decoration:none;font-weight:600" href="tel:+${esc(d.customer_phone)}">${esc(fmtPhone(d.customer_phone))}</a></div>
-    <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div>
+    <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}<span id="wt${d.id}">${wtHtml(d)}</span></div>
     ${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}
     <div class="row3"><span class="when">${when(d.created_at)}</span>
       <span class="stsel ${esc(d.status)}" id="s${d.id}"><select onchange="setStatus(${d.id},this)" data-prev="${esc(d.status)}">${opts}</select></span></div>
@@ -679,6 +750,47 @@ function toggleView(){ const v = curView()==="pc" ? "phone" : "pc"; try{ localSt
 applyView(curView());
 
 
+
+
+/* ====== Hisobot ====== */
+let rpPeriod = "month";
+function ymd(d){ return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+async function openReport(){
+  show("report");
+  try{ const r = await rpc("admin_rates", {p_token:token}); $("rtSell").value = r.sell; $("rtCost").value = r.cost; }catch(e){ handleErr(e); }
+  drawPeriods(); loadReport();
+}
+function drawPeriods(){
+  const P = [["today","Bugun"],["week","7 kun"],["month","Bu oy"],["all","Hammasi"]];
+  $("rpChips").innerHTML = P.map(([k,t])=>`<button class="${rpPeriod===k?"on":""}" onclick="rpPeriod='${k}';drawPeriods();loadReport()">${t}</button>`).join("");
+}
+async function saveRates(){
+  const sell = +$("rtSell").value.replace(",","."), cost = +$("rtCost").value.replace(",",".");
+  if(!isFinite(sell) || !isFinite(cost) || sell < 0 || cost < 0){ toast("Narxni raqam bilan kiriting", true); return; }
+  try{ await rpc("admin_set_rates", {p_token:token, p_sell:sell, p_cost:cost}); toast("Narxlar saqlandi: " + money(sell) + " / " + money(cost)); }catch(e){ handleErr(e); }
+}
+async function loadReport(){
+  const now = new Date(); let from = null, to = null;
+  if(rpPeriod === "today"){ from = to = ymd(now); }
+  else if(rpPeriod === "week"){ const d = new Date(now); d.setDate(d.getDate()-6); from = ymd(d); to = ymd(now); }
+  else if(rpPeriod === "month"){ from = ymd(new Date(now.getFullYear(), now.getMonth(), 1)); to = ymd(now); }
+  $("rpBody").innerHTML = '<div class="skel"></div><div class="skel"></div>';
+  try{
+    const r = await rpc("admin_report", {p_token:token, p_date_from:from, p_date_to:to});
+    const profit = Number(r.revenue) - Number(r.cost);
+    $("rpBody").innerHTML = `<div class="kpis">
+      <div class="kpi big"><small>Sof foyda</small><b>${money(profit)}</b></div>
+      <div class="kpi"><small>Jami og'irlik</small><b>${kgf(r.kg)} kg</b></div>
+      <div class="kpi"><small>Mijozlardan (sotish)</small><b>${money(r.revenue)}</b></div>
+      <div class="kpi"><small>iPost'ga to'lov</small><b>${money(r.cost)}</b></div>
+      <div class="kpi"><small>To'langan</small><b style="color:#127A45">${money(r.paid)}</b></div>
+      <div class="kpi ${Number(r.debt)?"warn":""}"><small>To'lanmagan (qarz)</small><b>${money(r.debt)}</b></div>
+      <div class="kpi"><small>Og'irligi kiritilgan</small><b>${r.weighed} / ${r.cargos}</b></div></div>
+      ${r.no_weight ? `<div class="info" style="margin-bottom:10px">Og'irligi kiritilmagan ${r.no_weight} ta yuk hisobga kirmagan. Og'irlikni yuk kartasidagi «⚖» tugmasi yoki Sozlamalar → «Excel'dan ajratish» orqali kiriting.</div>` : ""}
+      ${r.months.length ? `<div class="info">Oylar bo'yicha</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Oy</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Summa</th><th class="r">Foyda</th></tr>${r.months.map(m=>`<tr><td>${esc(m.month)}</td><td class="r">${m.cargos}</td><td class="r">${kgf(m.kg)}</td><td class="r">${money(m.revenue)}</td><td class="r"><b>${money(m.profit)}</b></td></tr>`).join("")}</table></div>` : ""}
+      ${r.debtors.length ? `<div class="info">Qarzdorlar (to'lanmagan yuklar)</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Mijoz</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Qarz</th></tr>${r.debtors.map(c=>`<tr style="cursor:pointer" onclick="openCustomer('${esc(c.code)}')"><td><b>${esc(c.code)}</b> ${esc(c.name)}</td><td class="r">${c.cargos}</td><td class="r">${kgf(c.kg)}</td><td class="r"><b style="color:#C62828">${money(c.debt)}</b></td></tr>`).join("")}</table></div>` : ""}`;
+  }catch(e){ $("rpBody").innerHTML = ""; handleErr(e); }
+}
 
 /* ====== Excel'dan mijozni ajratish (internetsiz, kutubxonasiz) ====== */
 const xl = {head:[], rows:[], hit:[], name:"", sel:new Set()};
@@ -761,6 +873,8 @@ async function xlLoad(inp){
     $("xlStatCol").innerHTML = '<option value="-1">— holat bo\'yicha ajratmaslik —</option>' + xl.head.map((h,i)=>`<option value="${i}" ${i===si?"selected":""}>${esc(h)}</option>`).join("");
     let ti = xl.head.findIndex(h=>/trek|track|трек|tracking/i.test(h)); if(ti < 0) ti = 0;
     $("xlTrkCol").innerHTML = xl.head.map((h,i)=>`<option value="${i}" ${i===ti?"selected":""}>${esc(h)}</option>`).join("");
+    let wi = xl.head.findIndex(h=>/og.?irlik|weight|вес|\bkg\b|massa/i.test(h));
+    $("xlWtCol").innerHTML = '<option value="-1">— yo\'q —</option>' + xl.head.map((h,i)=>`<option value="${i}" ${i===wi?"selected":""}>${esc(h)}</option>`).join("");
     xl.sel.clear();
     $("xlInfo").textContent = f.name + " · " + xl.rows.length + " ta qator";
     $("xlStep2").style.display = "block"; xlRun(); $("xlCode").focus();
@@ -783,7 +897,7 @@ function xlRun(){
   if(!code && !xl.sel.size){ res.innerHTML = `<div class="info">Mijoz kodini yozing yoki holatni tanlang.</div>`; xl.hit = []; return; }
   if(!xl.hit.length){ res.innerHTML = `<div class="empty"><b>Topilmadi</b><p>Bunday yuk yo'q. Ustunlarni va kodni tekshiring.</p></div>`; return; }
   const cols = xl.head.length, show_ = xl.hit.slice(0, 100);
-  res.innerHTML = `<div class="listhead"><b>${xl.hit.length} ta yuk topildi</b><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:linear-gradient(180deg,#22A862,#127A45);color:#fff;font-weight:800" onclick="xlDownload()">Hammasi (Excel)</button><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:linear-gradient(180deg,#FF9322,#F26A00);color:#fff;font-weight:800" onclick="xlDownload(true)">Faqat trek raqam</button><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:var(--blue-soft);color:var(--blue);font-weight:800" onclick="xlCopy()">Nusxalash</button></span></div>
+  res.innerHTML = `<div class="listhead"><b>${xl.hit.length} ta yuk topildi</b><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:linear-gradient(180deg,#22A862,#127A45);color:#fff;font-weight:800" onclick="xlDownload()">Hammasi (Excel)</button><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:linear-gradient(180deg,#FF9322,#F26A00);color:#fff;font-weight:800" onclick="xlDownload(true)">Faqat trek raqam</button><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:var(--blue-soft);color:var(--blue);font-weight:800" onclick="xlCopy()">Nusxalash</button><button class="go" style="height:40px;padding:0 12px;border:0;border-radius:12px;background:#0B2B6B;color:#fff;font-weight:800" onclick="xlPushWeights()">Og'irlikni TezPost'ga yozish</button></span></div>
     <div style="overflow-x:auto;background:var(--card);border-radius:16px;box-shadow:var(--shadow)"><table style="border-collapse:collapse;font-size:13px;width:100%">
     <tr>${xl.head.map(h=>`<th style="text-align:left;padding:8px 10px;white-space:nowrap;background:var(--blue-soft);color:var(--blue)">${esc(h)}</th>`).join("")}</tr>
     ${show_.map(r=>`<tr>${Array.from({length:cols},(_,i)=>`<td style="padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis" title="${esc(r[i] ?? "")}">${esc(r[i] ?? "")}</td>`).join("")}</tr>`).join("")}</table></div>
@@ -807,6 +921,19 @@ function zipWrite(files){
 const xe = v => String(v ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const colName = i => { let s = "", n = i + 1; while(n > 0){ const m = (n-1) % 26; s = String.fromCharCode(65+m) + s; n = Math.floor((n-1)/26); } return s; };
 function xlTracks(){ const ti = +$("xlTrkCol").value; return xl.hit.map(r=>String(r[ti] ?? "").trim()).filter(Boolean); }
+async function xlPushWeights(){
+  const wi = +$("xlWtCol").value, ti = +$("xlTrkCol").value;
+  if(wi < 0){ toast("Avval og'irlik ustunini tanlang", true); return; }
+  const items = xl.hit.map(r=>({track:String(r[ti] ?? "").trim(), kg:String(r[wi] ?? "").trim()})).filter(x=>x.track && x.kg);
+  if(!items.length){ toast("Og'irlik topilmadi", true); return; }
+  if(!confirm(items.length + " ta yukning og'irligi TezPost'ga yoziladi (mijozlar deklaratsiya qilgan yuklarga). Davom etamizmi?")) return;
+  let upd = 0, missing = [];
+  try{
+    for(let i=0;i<items.length;i+=1000){ const r = await rpc("admin_bulk_weights", {p_token:token, p_items:items.slice(i,i+1000)}); upd += r.updated; missing = missing.concat(r.missing || []); }
+    lsClear(); beep("done");
+    $("xlRes").insertAdjacentHTML("afterbegin", `<div class="scanbox" style="margin-bottom:10px"><b>Og'irlik yozildi: ${upd} ta yuk</b><div class="hoinfo" style="margin:6px 0 0">TezPost'da topilmadi (mijoz hali deklaratsiya qilmagan): <b>${items.length - upd}</b> ta${missing.length ? "<br>" + missing.slice(0,20).map(esc).join(", ") + (missing.length > 20 ? " ..." : "") : ""}</div></div>`);
+  }catch(e){ handleErr(e); }
+}
 function xlCopy(){ const t = xlTracks().join("\n"); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>toast(xlTracks().length + " ta trek nusxalandi")).catch(()=>{ const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); toast(xlTracks().length + " ta trek nusxalandi"); }catch(e){ toast("Nusxalab bo'lmadi", true); } ta.remove(); }); }
 function xlDownload(only){
   const ti = +$("xlTrkCol").value;
@@ -942,7 +1069,7 @@ async function applyReceive(){
 }
 
 /* ====== Topshirish (mijoz kodi bo'yicha) ====== */
-let hoCust = null, hoItems = [], hoOther = 0, hoTimer = null;
+let hoPaidOn = true, hoCust = null, hoItems = [], hoOther = 0, hoTimer = null;
 function openHandover(){ audio(); hoCust = null; hoItems = []; $("hoIn").value = ""; $("hoBody").innerHTML = ""; $("hoBar").classList.remove("show"); show("handover"); setTimeout(()=>$("hoIn").focus(), 120); }
 function closeHo(){ show("main"); search(); }
 $("hoIn").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoFind(); } });
@@ -965,19 +1092,23 @@ function drawHo(){
     + (hoItems.length
       ? `<div class="listhead"><label class="chk"><input type="checkbox" ${sel===hoItems.length?"checked":""} onchange="hoAll(this)">Hammasini belgilash</label><span class="when">${sel} / ${hoItems.length}</span></div>`
         + hoItems.map(d=>`<div class="item"><div class="row1"><label class="chk pick"><input type="checkbox" ${d.checked?"checked":""} onchange="hoTick(${d.id},this)"></label><button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button></div>
-            <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div>${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}</div>`).join("")
+            <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}<span id="wt${d.id}">${wtHtml(d)}</span></div>${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}</div>`).join("")
       : `<div class="empty"><b>Topshiriladigan yuk yo'q</b><p>Bu mijozning yuklari hali topshirish punktiga qabul qilinmagan yoki hammasi topshirib bo'lingan.</p></div>`);
+  const chosen = hoItems.filter(x=>x.checked), kg = chosen.reduce((a,x)=>a + Number(x.weight_kg||0), 0), due = chosen.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Number(x.amount||0), 0), nowt = chosen.filter(x=>x.weight_kg == null).length;
+  $("hoSum").innerHTML = sel ? `<span>${sel} ta · ${kgf(kg)} kg<br><span style="color:${due?"#C62828":"#127A45"}">${due ? "To'lov: " + money(due) : "Hammasi to'langan"}${nowt ? " · og'irliksiz: " + nowt : ""}</span></span>${due ? `<label><input type="checkbox" ${hoPaidOn?"checked":""} onchange="hoPaidOn=this.checked">To'lov olindi</label>` : ""}` : "";
   $("hoBtn").textContent = "Topshirish (" + sel + " ta)"; $("hoBar").classList.toggle("show", sel > 0);
 }
 function hoTick(id, cb){ const x = hoItems.find(v=>v.id===id); if(x) x.checked = cb.checked; drawHo(); }
 function hoAll(cb){ hoItems.forEach(x=>x.checked = cb.checked); drawHo(); }
 async function applyHandover(){
   const ids = hoItems.filter(x=>x.checked).map(x=>x.id); if(!ids.length) return;
-  if(!confirm(hoCust.name + " (" + hoCust.code + ") ga " + ids.length + " ta yuk topshirilsinmi?")) return;
+  const ch = hoItems.filter(x=>x.checked), due = ch.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Number(x.amount||0), 0);
+  if(!confirm(hoCust.name + " (" + hoCust.code + ") ga " + ids.length + " ta yuk topshirilsinmi?" + (due ? "\nTo'lov: " + money(due) + (hoPaidOn ? " (olindi deb belgilanadi)" : " (to'lanmagan qoladi)") : ""))) return;
   const b = $("hoBtn"); b.disabled = true;
   try{
     const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:["pickup"]});
     const n = (r && r.count != null) ? r.count : ids.length;
+    if(hoPaidOn){ const pid = ch.filter(x=>!x.paid && x.weight_kg != null).map(x=>x.id); if(pid.length) await rpc("admin_set_paid", {p_token:token, p_ids:pid, p_paid:true}); }
     lsClear(); beep("done"); toast(n + " ta yuk topshirildi (Tasdiqlangan)"); await hoFind();
   }catch(e){ handleErr(e); }
   b.disabled = false;

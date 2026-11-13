@@ -352,6 +352,10 @@
   .nrow{background:var(--card);border-radius:16px;padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow);position:relative}
   .nrow.unread{border-left:4px solid var(--orange)}
   .nrow b{display:block;font-size:15px}.nrow p{margin:3px 0 0;font-size:13.5px;color:var(--muted)}.nrow .nt{font-size:11.5px;color:var(--muted);margin-top:4px}
+  .wline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:7px 0 2px;font-size:13.5px;font-weight:800;color:var(--navy)}
+  .wline .pd{padding:3px 9px;border-radius:999px;font-size:12px}
+  .wline .pd.yes{background:#DDF5E7;color:#127A45}.wline .pd.no{background:#FDECEC;color:#C62828}
+  [data-theme=dark] .wline{color:#E8EEF9}
 </style>
 <script>
 try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
@@ -913,6 +917,7 @@ function itemHtml(d){
     <div class="top"><div class="trk">${esc(d.track)}</div><span class="st ${esc(d.status)}">${esc(STATUS[d.status]||d.status)}</span></div>
     <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}</div>
     ${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}
+    ${d.weight_kg != null ? `<div class="wline"><span>⚖ ${Math.round(d.weight_kg*1000)/1000} kg</span><span>${"$" + (Math.round(Number(d.amount)*100)/100).toFixed(2).replace(/\.00$/,"")}</span><span class="pd ${d.paid?"yes":"no"}">${d.paid?"To'langan":"To'lanmagan"}</span></div>` : ""}
     <div class="when">${when(d.created_at)}</div></div></div>`;
 }
 let allShown = 15;
