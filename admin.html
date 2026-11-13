@@ -329,6 +329,8 @@
   html[data-view=pc] #report .wrap{max-width:1100px;margin:0 auto;padding:16px 24px 40px}
   html[data-view=pc] .kpis{grid-template-columns:repeat(3,1fr)}
   html[data-view=pc] .hosum{max-width:420px;margin:0 auto 8px}
+.xsy{display:flex;flex-direction:column;gap:7px}.xsyrow{display:flex;align-items:center;gap:8px}.xsyl{flex:1;min-width:0;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xsyl span{color:var(--muted)}.xsya{color:var(--muted);font-weight:800}.xsyrow .xsel{flex:1.2;min-width:0}.xsyc{display:flex;align-items:center;gap:8px;margin-top:10px;font-weight:700;font-size:14px}.xsyc input{width:20px;height:20px}
+html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 18px}
 </style>
 </head>
 <body>
@@ -426,11 +428,12 @@
         <div class="xf"><span class="lbl">Trek raqam qaysi ustunda?</span>
           <select id="xlTrkCol" class="field xsel"></select></div>
         <div class="xf"><span class="lbl">Og'irlik (kg) qaysi ustunda?</span>
-          <select id="xlWtCol" class="field xsel"></select></div>
+          <select id="xlWtCol" class="field xsel" onchange="xlRun()"></select></div>
         <div class="xf xwide"><span class="lbl">5. Qaysi holatdagi yuklar kerak? (bir nechtasini tanlash mumkin, tanlamasangiz hammasi)</span>
           <div id="xlChips" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
       </div></div>
     </div>
+    <div id="xlSync"></div>
     <div id="xlRes"></div>
   </div>
 </main>
@@ -793,7 +796,7 @@ async function loadReport(){
 }
 
 /* ====== Excel'dan mijozni ajratish (internetsiz, kutubxonasiz) ====== */
-const xl = {head:[], rows:[], hit:[], name:"", sel:new Set()};
+const xl = {head:[], rows:[], hit:[], name:"", sel:new Set(), map:{}, byCode:[]};
 async function zipRead(buf){
   const u8 = new Uint8Array(buf), dv = new DataView(buf); let e = u8.length - 22;
   while(e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
@@ -851,7 +854,7 @@ function csvParse(text){
     else if(ch === "\n"){ row.push(cur); rows.push(row); row = []; cur = ""; } else if(ch !== "\r") cur += ch; }
   if(cur !== "" || row.length){ row.push(cur); rows.push(row); } return rows;
 }
-function openXl(){ xl.head = []; xl.rows = []; $("xlInfo").textContent = "Fayl tanlanmagan"; $("xlStep2").style.display = "none"; $("xlRes").innerHTML = ""; $("xlCode").value = ""; show("xl"); }
+function openXl(){ xl.head = []; xl.rows = []; $("xlInfo").textContent = "Fayl tanlanmagan"; $("xlStep2").style.display = "none"; $("xlRes").innerHTML = ""; $("xlSync").innerHTML = ""; $("xlCode").value = ""; show("xl"); }
 async function xlLoad(inp){
   const f = inp.files[0]; inp.value = ""; if(!f) return;
   $("xlInfo").textContent = "O'qilmoqda..."; $("xlRes").innerHTML = "";
@@ -884,10 +887,11 @@ const xlNorm = v => String(v ?? "").trim().replace(/\s+/g,"").replace(/\.0+$/,""
 function xlChip(v){ if(xl.sel.has(v)) xl.sel.delete(v); else xl.sel.add(v); xlRun(); }
 function xlRun(){
   const codeRaw = $("xlCode").value.trim(), code = xlNorm(codeRaw), res = $("xlRes");
-  if(!xl.rows.length){ res.innerHTML = ""; return; }
+  if(!xl.rows.length){ res.innerHTML = ""; $("xlSync").innerHTML = ""; return; }
   const ci = +$("xlCol").value, si = +$("xlStatCol").value;
   const byCode = code ? xl.rows.filter(r=>xlNorm(r[ci]) === code) : xl.rows;
   // holatlar ro'yxati (tanlangan mijoz bo'yicha, soni bilan)
+  xlSyncPanel(byCode, si);
   const cnt = new Map();
   if(si >= 0) byCode.forEach(r=>{ const v = String(r[si] ?? "").trim() || "(bo'sh)"; cnt.set(v, (cnt.get(v)||0) + 1); });
   [...xl.sel].forEach(v=>{ if(!cnt.has(v)) xl.sel.delete(v); });
@@ -920,6 +924,62 @@ function zipWrite(files){
 }
 const xe = v => String(v ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const colName = i => { let s = "", n = i + 1; while(n > 0){ const m = (n-1) % 26; s = String.fromCharCode(65+m) + s; n = Math.floor((n-1)/26); } return s; };
+const XL_ST = [["","⏭ O'tkazib yuborish"],["china","Xitoy omborida"],["transit","Yo'lda"],["uz","Topshirish punktiga yetkazilmoqda"],["pickup","Topshirish punktida"],["done","Tasdiqlangan (topshirilgan)"]];
+function xlGuess(v){
+  const t = String(v).toLowerCase();
+  if(/topshiril|delivered|выдан|получен|completed|yakun|tasdiq|received by/.test(t)) return "done";
+  if(/punktda|pickup|pick-up|ready|готов к выдаче|на пункте|в пункте|olib ket/.test(t)) return "pickup";
+  if(/yetkazilmoqda|доставля|delivering|out for|arrived|прибы|bojxona|customs|таможн|uzbek|ўзб|o.zbek/.test(t)) return "uz";
+  if(/yo.lda|transit|в пути|отправ|dispatch|shipped|sent|kuzat/.test(t)) return "transit";
+  if(/xitoy|china|склад|ombor|warehouse|принят|qabul|received|stock/.test(t)) return "china";
+  return "";
+}
+function xlMapGet(v){
+  if(xl.map[v] === undefined){ let sv = null; try{ sv = (JSON.parse(localStorage.getItem("tp_xlmap")||"{}"))[v]; }catch(e){} xl.map[v] = sv !== null && sv !== undefined ? sv : xlGuess(v); }
+  return xl.map[v];
+}
+function xlMapSet(v, st){ xl.map[v] = st; try{ const m = JSON.parse(localStorage.getItem("tp_xlmap")||"{}"); m[v] = st; localStorage.setItem("tp_xlmap", JSON.stringify(m)); }catch(e){} xlSyncPanel(xl.byCode, +$("xlStatCol").value); }
+function xlSyncRows(){
+  const ti = +$("xlTrkCol").value, si = +$("xlStatCol").value, wi = +$("xlWtCol").value, useW = $("xlSyW") && $("xlSyW").checked && wi >= 0;
+  const out = [];
+  (xl.byCode || []).forEach(r=>{
+    const track = String(r[ti] ?? "").trim(); if(!track) return;
+    const key = si >= 0 ? (String(r[si] ?? "").trim() || "(bo'sh)") : null;
+    const status = key !== null ? xlMapGet(key) : "";
+    const kg = useW ? String(r[wi] ?? "").trim() : "";
+    if(status || kg) out.push({track, status: status || null, kg});
+  });
+  return out;
+}
+function xlSyncPanel(byCode, si){
+  xl.byCode = byCode; const box = $("xlSync"); if(!box) return;
+  if(!xl.rows.length){ box.innerHTML = ""; return; }
+  const wi = +$("xlWtCol").value, cnt = new Map();
+  if(si >= 0) byCode.forEach(r=>{ const v = String(r[si] ?? "").trim() || "(bo'sh)"; cnt.set(v, (cnt.get(v)||0) + 1); });
+  const keepW = $("xlSyW") ? $("xlSyW").checked : true;
+  const rowsH = [...cnt.entries()].sort((a,b)=>b[1]-a[1]).map(([v,n])=>`<div class="xsyrow"><div class="xsyl"><b>${esc(v)}</b> <span>· ${n} ta</span></div><span class="xsya">→</span>
+    <select class="field xsel" data-v="${esc(v)}" onchange="xlMapSet(this.dataset.v,this.value)">${XL_ST.map(([k,l])=>`<option value="${k}" ${xlMapGet(v)===k?"selected":""}>${l}</option>`).join("")}</select></div>`).join("");
+  const n = byCode.length;
+  box.innerHTML = `<div class="scanbox" style="margin-top:12px"><span class="lbl">6. TezPost'ni avtomatik yangilash</span>
+    ${si >= 0 ? `<div class="hoinfo" style="margin:4px 0 8px">Excel'dagi har bir holatga TezPost holatini tanlang. Bir marta tanlasangiz, eslab qoladi.</div><div class="xsy">${rowsH}</div>` : `<div class="hoinfo">Holat ustuni tanlanmagan, faqat og'irlik yoziladi.</div>`}
+    <label class="xsyc"><input type="checkbox" id="xlSyW" ${keepW && wi >= 0 ? "checked" : ""} ${wi < 0 ? "disabled" : ""} onchange="xlSyncPanel(xl.byCode,+$('xlStatCol').value)"> Og'irlikni ham yozish ${wi < 0 ? "(og'irlik ustuni tanlanmagan)" : ""}</label>
+    <button class="btn" id="xlSyBtn" style="margin-top:10px;background:linear-gradient(180deg,#22A862,#127A45);box-shadow:none" onclick="xlSync()">🔄 TezPost'ni yangilash · ${n} ta qator</button></div>`;
+}
+async function xlSync(){
+  const items = xlSyncRows();
+  if(!items.length){ toast("Yangilanadigan narsa yo'q: holatlarni tanlang", true); return; }
+  const code = $("xlCode").value.trim();
+  if(!confirm((code ? "Mijoz " + code + ": " : "DIQQAT, mijoz kodi yozilmagan, butun fayl: ") + items.length + " ta yukning holati va og'irligi yangilanadi. Holat faqat oldinga suriladi. Davom etamizmi?")) return;
+  const b = $("xlSyBtn"); b.disabled = true; b.textContent = "Yangilanmoqda...";
+  let t = {found:0, status_updated:0, weight_updated:0, pending:0};
+  try{
+    for(let i=0;i<items.length;i+=2000){ const r = await rpc("admin_sync", {p_token:token, p_items:items.slice(i,i+2000)}); for(const k in t) t[k] += r[k] || 0; }
+    lsClear(); beep("done");
+    $("xlRes").insertAdjacentHTML("afterbegin", `<div class="scanbox" style="margin-bottom:10px"><b style="font-size:16px">Tayyor: ${items.length} ta qator</b>
+      <div class="hoinfo" style="margin:8px 0 0;font-size:14px;line-height:1.7">✅ Holati o'zgardi: <b>${t.status_updated}</b><br>⚖ Og'irligi yozildi: <b>${t.weight_updated}</b><br>🕓 Mijoz hali deklaratsiya qilmagan (saqlandi, qo'shganda avtomatik o'zgaradi): <b>${t.pending}</b><br>📦 TezPost'da topilgan yuklar: <b>${t.found}</b></div></div>`);
+  }catch(e){ handleErr(e); }
+  b.disabled = false; b.textContent = "🔄 TezPost'ni yangilash · " + (xl.byCode||[]).length + " ta qator";
+}
 function xlTracks(){ const ti = +$("xlTrkCol").value; return xl.hit.map(r=>String(r[ti] ?? "").trim()).filter(Boolean); }
 async function xlPushWeights(){
   const wi = +$("xlWtCol").value, ti = +$("xlTrkCol").value;
