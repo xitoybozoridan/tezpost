@@ -348,6 +348,7 @@ html[data-view=pc] #payments .wrap{max-width:900px}
 .obox .ob{display:flex;gap:8px}.obox .ob button{height:42px;border:0;border-radius:12px;font-weight:800;font-size:14px;padding:0 14px}
 .obox .ob .go2{flex:1;background:linear-gradient(180deg,#2E6BE6,#1648B8);color:#fff}.obox .ob .no2{background:#FDECEC;color:#C62828}
 html[data-view=pc] #orphans .wrap{max-width:900px}
+.rcview{width:100%;margin-top:8px;padding:10px;border:1px solid #0B4DB5;background:#F2F7FE;color:#0B4DB5;border-radius:10px;font:inherit;font-weight:600}
 </style>
 </head>
 <body>
@@ -876,9 +877,19 @@ async function loadPayments(){
     $("pyCard").value = r.card || ""; $("pyHolder").value = r.holder || ""; $("pyNote").value = r.note || "";
     $("payPend").innerHTML = (r.pending||[]).length ? r.pending.map(p=>`<div class="pbox"><div class="ph"><div><b>${esc(p.code)} · ${esc(p.name)}</b><small>${esc(p.phone||"")} · ${when(p.created_at)}</small></div><span class="pt">${somN(p.total)}</span></div>
       <table>${(p.tracks||[]).map(t=>`<tr><td>${esc(t.track)}</td><td class="r" style="font-weight:500">${kgf(t.kg)} kg</td><td class="r">${somN(t.amount)}</td></tr>`).join("")}</table>
+      ${p.has_receipt ? `<button class="rcview" onclick="viewReceipt(${p.id},this)">🧾 Chekni ko'rish</button>` : ""}
       <div class="pbtn"><button class="no" onclick="payDecide(${p.id},false)">✕ Kelmadi</button><button class="ok" onclick="payDecide(${p.id},true)">✓ Tushdi, tasdiqlash</button></div></div>`).join("")
       : `<div class="empty"><b>Kutilayotgan to'lov yo'q</b><p>Mijoz to'lov qildim deb yuborsa, shu yerda chiqadi.</p></div>`;
   }catch(e){ $("payPend").innerHTML = ""; handleErr(e); }
+}
+async function viewReceipt(id, btn){
+  btn.disabled = true; const o = btn.textContent; btn.textContent = "Yuklanmoqda...";
+  try{ const d = await rpc("admin_payment_receipt", {p_token:token, p_id:id});
+    if(!d){ btn.textContent = "Chek yo'q"; return; }
+    const im = document.createElement("img"); im.src = d; im.style.cssText = "width:100%;margin-top:8px;border-radius:10px;border:1px solid #dde3ee";
+    im.onclick = ()=>{ const w = window.open(); if(w){ w.document.write('<body style="margin:0;background:#000"><img src="'+d+'" style="width:100%">'); } };
+    btn.replaceWith(im);
+  }catch(e){ btn.disabled = false; btn.textContent = o; handleErr(e); }
 }
 async function payDecide(id, ok){
   if(!confirm(ok ? "Pul kartangizga tushganini tekshirdingizmi? Yuklar «To'langan» bo'ladi." : "To'lov kelmadi deb rad etiladi. Mijozga xabar boradi.")) return;
