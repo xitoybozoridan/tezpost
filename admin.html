@@ -448,26 +448,30 @@ html[data-view=pc] #payments .wrap{max-width:900px}
   </div>
   <div class="wrap" style="padding-bottom:30px">
     <div class="scanbox">
-      <span class="lbl">1. Excel faylni tanlang (.xlsx yoki .csv)</span>
+      <div class="hoinfo" style="margin:0 0 10px;line-height:1.5">iPost faylidagi yuklarning <b>holati</b> va <b>og'irligini</b> TezPost'ga bir tugma bilan o'tkazadi. Faqat mijoz ilovaga qo'shgan trek-kodlar yangilanadi, qolganlari mijoz qo'shganda avtomatik yangilanadi.</div>
+      <span class="lbl">1. iPost Excel faylini tanlang (.xlsx yoki .csv)</span>
       <label class="btn" style="display:block;text-align:center;line-height:46px;height:46px;cursor:pointer;background:linear-gradient(180deg,#FF9322,#F26A00);box-shadow:none">Fayl tanlash<input type="file" id="xlFile" accept=".xlsx,.csv,.txt" style="display:none" onchange="xlLoad(this)"></label>
       <div class="scanstat"><span id="xlInfo">Fayl tanlanmagan</span></div>
-      <div id="xlStep2" style="display:none"><div class="xgrid">
-        <div class="xf"><span class="lbl">2. Mijoz kodi qaysi ustunda?</span>
-          <select id="xlCol" class="field xsel" onchange="xlRun()"></select></div>
-        <div class="xf"><span class="lbl">3. Mijoz kodi (bo'sh bo'lsa, hamma mijoz)</span>
-          <div class="scanrow"><input id="xlCode" inputmode="numeric" autocomplete="off" placeholder="41124" oninput="xlRun()" onkeydown="if(event.key==='Enter')xlRun()"></div></div>
-        <div class="xf"><span class="lbl">4. Yuk holati qaysi ustunda?</span>
-          <select id="xlStatCol" class="field xsel" onchange="xl.sel.clear();xlRun()"></select></div>
-        <div class="xf"><span class="lbl">Trek raqam qaysi ustunda?</span>
-          <select id="xlTrkCol" class="field xsel"></select></div>
-        <div class="xf"><span class="lbl">Og'irlik (kg) qaysi ustunda?</span>
-          <select id="xlWtCol" class="field xsel" onchange="xlRun()"></select></div>
-        <div class="xf xwide"><span class="lbl">5. Qaysi holatdagi yuklar kerak? (bir nechtasini tanlash mumkin, tanlamasangiz hammasi)</span>
-          <div id="xlChips" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
-      </div></div>
+      <div id="xlStep2" style="display:none">
+        <span class="lbl" style="margin-top:12px">2. Mijoz kodini yozing (bo'sh qoldirsangiz, fayldagi hamma yuk)</span>
+        <div class="scanrow"><input id="xlCode" inputmode="numeric" autocomplete="off" placeholder="Masalan: 41124" oninput="xlRun()" onkeydown="if(event.key==='Enter')xlRun()"></div>
+        <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;color:var(--blue);font-size:14px">⚙ Ustunlar (avtomatik tanlangan, xato bo'lsa o'zgartiring)</summary>
+          <div class="xgrid" style="margin-top:8px">
+            <div class="xf"><span class="lbl">Mijoz kodi ustuni</span><select id="xlCol" class="field xsel" onchange="xlRun()"></select></div>
+            <div class="xf"><span class="lbl">Yuk holati ustuni</span><select id="xlStatCol" class="field xsel" onchange="xl.sel.clear();xlRun()"></select></div>
+            <div class="xf"><span class="lbl">Trek raqam ustuni</span><select id="xlTrkCol" class="field xsel" onchange="xlRun()"></select></div>
+            <div class="xf"><span class="lbl">Og'irlik (kg) ustuni</span><select id="xlWtCol" class="field xsel" onchange="xlRun()"></select></div>
+          </div>
+        </details>
+      </div>
     </div>
     <div id="xlSync"></div>
-    <div id="xlRes"></div>
+    <div id="xlDone"></div>
+    <details id="xlMore" style="margin-top:14px;display:none"><summary style="cursor:pointer;font-weight:800;color:var(--blue);font-size:14.5px;padding:6px 2px">📥 Yuklab olish va ro'yxatni ko'rish (ixtiyoriy)</summary>
+      <div class="scanbox" style="margin-top:8px"><span class="lbl">Faqat shu holatdagi yuklar (tanlamasangiz hammasi)</span>
+        <div id="xlChips" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
+      <div id="xlRes" style="margin-top:10px"></div>
+    </details>
   </div>
 </main>
 
@@ -966,7 +970,7 @@ function csvParse(text){
     else if(ch === "\n"){ row.push(cur); rows.push(row); row = []; cur = ""; } else if(ch !== "\r") cur += ch; }
   if(cur !== "" || row.length){ row.push(cur); rows.push(row); } return rows;
 }
-function openXl(){ xl.head = []; xl.rows = []; $("xlInfo").textContent = "Fayl tanlanmagan"; $("xlStep2").style.display = "none"; $("xlRes").innerHTML = ""; $("xlSync").innerHTML = ""; $("xlCode").value = ""; show("xl"); }
+function openXl(){ xl.head = []; xl.rows = []; $("xlInfo").textContent = "Fayl tanlanmagan"; $("xlStep2").style.display = "none"; $("xlRes").innerHTML = ""; $("xlSync").innerHTML = ""; $("xlDone").innerHTML = ""; $("xlMore").style.display = "none"; $("xlCode").value = ""; show("xl"); }
 async function xlLoad(inp){
   const f = inp.files[0]; inp.value = ""; if(!f) return;
   $("xlInfo").textContent = "O'qilmoqda..."; $("xlRes").innerHTML = "";
@@ -988,11 +992,12 @@ async function xlLoad(inp){
     $("xlStatCol").innerHTML = '<option value="-1">— holat bo\'yicha ajratmaslik —</option>' + xl.head.map((h,i)=>`<option value="${i}" ${i===si?"selected":""}>${esc(h)}</option>`).join("");
     let ti = xl.head.findIndex(h=>/trek|track|трек|tracking/i.test(h)); if(ti < 0) ti = 0;
     $("xlTrkCol").innerHTML = xl.head.map((h,i)=>`<option value="${i}" ${i===ti?"selected":""}>${esc(h)}</option>`).join("");
-    let wi = xl.head.findIndex(h=>/og.?irlik|weight|вес|\bkg\b|massa/i.test(h));
+    let wi = xl.head.findIndex(h=>/og.?irlik|vazn|weight|вес|\bkg\b|massa/i.test(h));
     $("xlWtCol").innerHTML = '<option value="-1">— yo\'q —</option>' + xl.head.map((h,i)=>`<option value="${i}" ${i===wi?"selected":""}>${esc(h)}</option>`).join("");
     xl.sel.clear();
     $("xlInfo").textContent = f.name + " · " + xl.rows.length + " ta qator";
-    $("xlStep2").style.display = "block"; xlRun(); $("xlCode").focus();
+    $("xlStep2").style.display = "block"; $("xlMore").style.display = ""; xlRun(); $("xlCode").focus();
+    rpc("admin_rates", {p_token:token}).then(r=>{ xl.rates = r; xlRun(); }).catch(()=>{});
   }catch(e){ $("xlInfo").textContent = "Fayl tanlanmagan"; toast(e.message || "Faylni o'qib bo'lmadi", true); }
 }
 const xlNorm = v => String(v ?? "").trim().replace(/\s+/g,"").replace(/\.0+$/,"").toUpperCase();
@@ -1043,7 +1048,7 @@ function xlGuess(v){
   if(/punktda|pickup|pick-up|ready|готов к выдаче|на пункте|в пункте|olib ket/.test(t)) return "pickup";
   if(/yetkazilmoqda|доставля|delivering|out for|arrived|прибы|bojxona|customs|таможн|uzbek|ўзб|o.zbek/.test(t)) return "uz";
   if(/yo.lda|transit|в пути|отправ|dispatch|shipped|sent|kuzat/.test(t)) return "transit";
-  if(/xitoy|china|склад|ombor|warehouse|принят|qabul|received|stock/.test(t)) return "china";
+  if(/xitoy|china|склад|ombor|warehouse|принят|qabul|received|stock|yiwu|yiwo|иу|guangzhou|guanchjou|shenzhen|foshan|ичжоу|гуанчжоу/.test(t)) return "china";
   return "";
 }
 function xlMapGet(v){
@@ -1072,8 +1077,17 @@ function xlSyncPanel(byCode, si){
   const rowsH = [...cnt.entries()].sort((a,b)=>b[1]-a[1]).map(([v,n])=>`<div class="xsyrow"><div class="xsyl"><b>${esc(v)}</b> <span>· ${n} ta</span></div><span class="xsya">→</span>
     <select class="field xsel" data-v="${esc(v)}" onchange="xlMapSet(this.dataset.v,this.value)">${XL_ST.map(([k,l])=>`<option value="${k}" ${xlMapGet(v)===k?"selected":""}>${l}</option>`).join("")}</select></div>`).join("");
   const n = byCode.length;
-  box.innerHTML = `<div class="scanbox" style="margin-top:12px"><span class="lbl">6. TezPost'ni avtomatik yangilash</span>
+  let sumH = "";
+  if(wi >= 0 && n){
+    let kg = 0, cntW = 0; byCode.forEach(r=>{ const v = parseFloat(String(r[wi] ?? "").replace(",",".")); if(isFinite(v) && v > 0){ kg += v; cntW++; } });
+    const R = xl.rates, kgS = (Math.round(kg*1000)/1000).toString();
+    sumH = `<div class="hoinfo" style="margin:10px 0 0;font-size:14.5px;line-height:1.6;background:var(--blue-soft);border-radius:12px;padding:10px 12px">⚖ Og'irligi bor: <b>${cntW} ta</b> · jami <b>${kgS} kg</b>`
+      + (R && cntW ? `<br>💵 Mijozdan olinadi: <b>${somN(kg * R.sell * R.usd)}</b> <span style="color:var(--muted)">(${R.sell}$ × ${kgS} kg × ${somN(R.usd)})</span>` : "")
+      + (cntW < n ? `<br><span style="color:var(--muted)">Og'irligi yo'q: ${n - cntW} ta</span>` : "") + `</div>`;
+  }
+  box.innerHTML = `<div class="scanbox" style="margin-top:12px"><span class="lbl">3. TezPost'ni avtomatik yangilash · ${n} ta yuk</span>
     ${si >= 0 ? `<div class="hoinfo" style="margin:4px 0 8px">Excel'dagi har bir holatga TezPost holatini tanlang. Bir marta tanlasangiz, eslab qoladi.</div><div class="xsy">${rowsH}</div>` : `<div class="hoinfo">Holat ustuni tanlanmagan, faqat og'irlik yoziladi.</div>`}
+    ${sumH}
     <label class="xsyc"><input type="checkbox" id="xlSyW" ${keepW && wi >= 0 ? "checked" : ""} ${wi < 0 ? "disabled" : ""} onchange="xlSyncPanel(xl.byCode,+$('xlStatCol').value)"> Og'irlikni ham yozish ${wi < 0 ? "(og'irlik ustuni tanlanmagan)" : ""}</label>
     <button class="btn" id="xlSyBtn" style="margin-top:10px;background:linear-gradient(180deg,#22A862,#127A45);box-shadow:none" onclick="xlSync()">🔄 TezPost'ni yangilash · ${n} ta qator</button></div>`;
 }
@@ -1087,8 +1101,8 @@ async function xlSync(){
   try{
     for(let i=0;i<items.length;i+=2000){ const r = await rpc("admin_sync", {p_token:token, p_items:items.slice(i,i+2000)}); for(const k in t) t[k] += r[k] || 0; }
     lsClear(); beep("done");
-    $("xlRes").insertAdjacentHTML("afterbegin", `<div class="scanbox" style="margin-bottom:10px"><b style="font-size:16px">Tayyor: ${items.length} ta qator</b>
-      <div class="hoinfo" style="margin:8px 0 0;font-size:14px;line-height:1.7">✅ Holati o'zgardi: <b>${t.status_updated}</b><br>⚖ Og'irligi yozildi: <b>${t.weight_updated}</b><br>🕓 Mijoz hali deklaratsiya qilmagan (saqlandi, qo'shganda avtomatik o'zgaradi): <b>${t.pending}</b><br>📦 TezPost'da topilgan yuklar: <b>${t.found}</b></div></div>`);
+    $("xlDone").innerHTML = `<div class="scanbox" style="margin-top:12px"><b style="font-size:16px">✅ Tayyor: ${items.length} ta qator yuborildi</b>
+      <div class="hoinfo" style="margin:8px 0 0;font-size:14px;line-height:1.7">✅ Holati o'zgardi: <b>${t.status_updated}</b><br>⚖ Og'irligi yozildi: <b>${t.weight_updated}</b><br>🕓 Mijoz hali deklaratsiya qilmagan (saqlandi, qo'shganda avtomatik o'zgaradi): <b>${t.pending}</b><br>📦 TezPost'da topilgan yuklar: <b>${t.found}</b></div></div>`;
   }catch(e){ handleErr(e); }
   b.disabled = false; b.textContent = "🔄 TezPost'ni yangilash · " + (xl.byCode||[]).length + " ta qator";
 }
