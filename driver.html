@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B3D2E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="driver-manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>TezPost Taksi</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--bg:#F1F5F3;--card:#fff;--text:#0E1F1A;--muted:#66786F;--line:#DCE6E1;--g:#127A45;--gd:#0B3D2E;--o:#FF7A00;--red:#C62828}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  button{font:inherit;cursor:pointer}
+  .screen{display:none;max-width:520px;margin:0 auto;min-height:100vh}.screen.active{display:block}
+  .hero{background:linear-gradient(160deg,#127A45,#0B3D2E);color:#fff;padding:calc(env(safe-area-inset-top) + 22px) 18px 26px}
+  .hero h1{margin:0;font-size:24px}.hero p{margin:4px 0 0;opacity:.85;font-size:14px}
+  .card{background:var(--card);border-radius:22px;padding:18px;margin:-14px 14px 14px;box-shadow:0 8px 24px rgba(10,40,30,.12)}
+  .field{display:block;border:1.5px solid var(--line);border-radius:16px;padding:9px 14px;margin-bottom:12px}
+  .field span{display:block;font-size:12.5px;font-weight:700;color:var(--muted)}
+  .field input{width:100%;border:0;outline:0;font-size:18px;padding:3px 0;background:transparent;color:var(--text)}
+  .btn{width:100%;height:54px;border:0;border-radius:27px;background:linear-gradient(180deg,#22A862,#127A45);color:#fff;font-size:18px;font-weight:800}
+  .btn[disabled]{opacity:.7}.msg{color:var(--red);font-size:14px;min-height:20px;margin-bottom:8px}
+  .top{display:flex;align-items:center;gap:10px}.top .who{flex:1;min-width:0}.top b{display:block;font-size:18px}.top small{opacity:.85}
+  .out{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:12px;padding:8px 12px;font-weight:700;font-size:13px}
+  .sw{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.14);border-radius:16px;padding:12px 14px;margin-top:14px;font-weight:700}
+  .tg{width:54px;height:30px;border-radius:15px;background:rgba(255,255,255,.3);position:relative;border:0;transition:.2s}
+  .tg::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+  .tg.on{background:#35D07F}.tg.on::after{left:27px}
+  .stats{display:flex;gap:8px;padding:0 14px;margin:14px 0}.st{flex:1;background:var(--card);border-radius:16px;padding:10px 8px;text-align:center;box-shadow:0 4px 14px rgba(10,40,30,.07)}
+  .st b{display:block;font-size:16px}.st small{color:var(--muted);font-size:12px}
+  .owe{margin:0 14px 12px;background:#FFF4E5;border-radius:14px;padding:10px 14px;font-size:14px;color:#8A5A00}
+  .off{margin:0 14px 12px;background:#FDECEC;border-radius:14px;padding:12px 14px;font-size:14px;color:var(--red);font-weight:600}
+  h3{margin:18px 18px 8px;font-size:15px;color:var(--muted)}
+  .ride{background:var(--card);border-radius:20px;margin:0 14px 12px;padding:14px;box-shadow:0 4px 14px rgba(10,40,30,.08);border:2px solid transparent}
+  .ride.offered{border-color:var(--o);animation:pulse 1.6s infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 6px rgba(255,122,0,.18)}}
+  .rh{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.rh b{font-size:17px}.rh .p{font-size:20px;font-weight:800;color:var(--g);white-space:nowrap}
+  .rm{font-size:14px;color:var(--text);margin:8px 0;line-height:1.5}.rm small{color:var(--muted)}
+  .row{display:flex;gap:8px;margin-top:10px}.row button,.row a{flex:1;height:46px;border:0;border-radius:14px;font-weight:800;font-size:15px;text-decoration:none;display:grid;place-items:center}
+  .go{background:linear-gradient(180deg,#22A862,#127A45);color:#fff}.no{background:#FDECEC;color:var(--red)}.lnk{background:#E8F3EE;color:var(--g)}
+  .empty{margin:30px 20px;text-align:center;color:var(--muted);line-height:1.5}
+  .toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,20px);background:#222;color:#fff;padding:12px 18px;border-radius:14px;opacity:0;transition:.25s;pointer-events:none;z-index:99;max-width:90%}
+  .toast.show{opacity:1;transform:translate(-50%,0)}.toast.bad{background:var(--red)}
+</style>
+</head>
+<body>
+<main id="login" class="screen active">
+  <section class="hero" style="padding-bottom:44px"><h1>🚕 TezPost Taksi</h1><p>Taksichilar uchun ilova</p></section>
+  <div class="card">
+    <label class="field"><span>Telefon raqam</span><input id="lPhone" inputmode="tel" placeholder="90 123 45 67" autocomplete="username"></label>
+    <label class="field"><span>Parol</span><input id="lPass" type="password" autocomplete="current-password" placeholder="••••••••"></label>
+    <div class="msg" id="lMsg"></div>
+    <button class="btn" id="lBtn" onclick="doLogin()">Kirish</button>
+    <p style="color:var(--muted);font-size:13px;margin:14px 0 0;line-height:1.5">Login va parolni TezPost administratori beradi.</p>
+  </div>
+</main>
+
+<main id="main" class="screen">
+  <section class="hero">
+    <div class="top"><div class="who"><b id="dName">—</b><small id="dCar"></small></div><button class="out" onclick="logout()">Chiqish</button></div>
+    <div class="sw"><span id="swTxt">Ishda emasman</span><button class="tg" id="tg" onclick="toggleOn()" aria-label="Ishda"></button></div>
+  </section>
+  <div class="stats" id="stats"></div>
+  <div id="owe"></div>
+  <div id="offBn"></div>
+  <div id="list"></div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script>
+const CONFIG = { url: (window.TP_CONFIG||{}).url || "", key: (window.TP_CONFIG||{}).key || "" };
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const som = n => Math.round(Number(n||0)).toLocaleString("en-US").replace(/,/g," ") + " so'm";
+const store = { get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } }, set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }, del(k){ try{ localStorage.removeItem(k) }catch(e){} } };
+async function rpc(name, args){
+  let res;
+  try{ res = await fetch(CONFIG.url + "/rest/v1/rpc/" + name, {method:"POST", headers:{"apikey":CONFIG.key, "Content-Type":"application/json"}, body:JSON.stringify(args||{})}); }
+  catch(e){ const er = new Error("Internet yo'q"); er.offline = true; throw er; }
+  let data = null; try{ data = await res.json() }catch(e){}
+  if(!res.ok){ const m = (data && data.message) || "Xatolik"; const er = new Error(m); er.session = /Sessiya tugagan|invalid input syntax for type uuid/i.test(m); throw er; }
+  return data;
+}
+let token = store.get("tpd_token"), S = null, timer = null, seen = new Set(), first = true, actx = null, busy = false;
+function toast(m, bad){ const t = $("toast"); t.textContent = m; t.classList.toggle("bad", !!bad); t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("show"), 2600); }
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active", s.id===id)); window.scrollTo(0,0); }
+function audio(){ try{ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume(); }catch(e){} }
+function ring(){
+  audio(); try{ if(navigator.vibrate) navigator.vibrate([300,120,300,120,300]); }catch(e){}
+  if(!actx) return;
+  [0,.28,.56].forEach(t0=>{ const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + t0; o.type = "sine"; o.frequency.value = t0 === .28 ? 1180 : 880; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.4,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.24); o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+.26); });
+}
+async function doLogin(){
+  if(busy) return; $("lMsg").textContent = ""; audio();
+  if(!CONFIG.url){ $("lMsg").textContent = "Server ulanmagan"; return; }
+  busy = true; const b = $("lBtn"); b.disabled = true; b.textContent = "Kuting…";
+  try{
+    const r = await rpc("driver_login", {p_phone:$("lPhone").value, p_password:$("lPass").value});
+    if(r.error){ $("lMsg").textContent = r.error; }
+    else{ token = r.token; store.set("tpd_token", token); $("lPass").value = ""; enter(); }
+  }catch(e){ $("lMsg").textContent = e.message; }
+  busy = false; b.disabled = false; b.textContent = "Kirish";
+}
+$("lPass").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+function forceLogout(){ token = null; store.del("tpd_token"); clearInterval(timer); show("login"); }
+async function logout(){ try{ await rpc("driver_toggle", {p_token:token, p_on:false}); await rpc("driver_logout", {p_token:token}); }catch(e){} forceLogout(); }
+function err(e){ if(e.session){ forceLogout(); toast("Qaytadan kiring", true); } else toast(e.message, true); }
+function enter(){ first = true; seen = new Set(); show("main"); load(); clearInterval(timer); timer = setInterval(()=>{ if(!document.hidden) load(); }, 7000); }
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token) load(); });
+async function load(){
+  if(!token) return;
+  try{ S = await rpc("driver_state", {p_token:token}); }catch(e){ if(e.session) err(e); return; }
+  const offered = S.rides.filter(r=>r.status==="offered");
+  if(offered.some(r=>!seen.has(r.id)) && !first) ring();
+  offered.forEach(r=>seen.add(r.id)); first = false;
+  draw();
+}
+function draw(){
+  $("dName").textContent = S.name; $("dCar").textContent = S.car || "";
+  $("tg").classList.toggle("on", S.is_on); $("swTxt").textContent = S.is_on ? "🟢 Ishdaman (buyurtma qabul qilaman)" : "Ishda emasman";
+  const s = S.stats;
+  $("stats").innerHTML = `<div class="st"><b>${s.today_cnt}</b><small>Bugun</small></div><div class="st"><b>${som(s.today_earn)}</b><small>Bugun topdim</small></div><div class="st"><b>${s.total_cnt}</b><small>Jami</small></div>`;
+  $("owe").innerHTML = s.owe > 0 ? `<div class="owe">Administratorga berishingiz kerak: <b>${som(s.owe)}</b></div>` : "";
+  $("offBn").innerHTML = S.is_on ? "" : '<div class="off">Ishda emassiz — yangi buyurtmalar kelmaydi. Yuqoridagi tugmani yoqing.</div>';
+  const act = S.rides.filter(r=>["offered","accepted","onway"].includes(r.status)), done = S.rides.filter(r=>r.status==="delivered");
+  let h = "";
+  if(act.length) h += "<h3>Buyurtmalar</h3>" + act.map(card).join("");
+  else h += S.is_on ? '<div class="empty">🚕<br>Yangi buyurtma kutilmoqda…<br><small>Buyurtma kelganda ovoz chiqadi</small></div>' : "";
+  if(done.length) h += "<h3>Yetkazilgan</h3>" + done.map(card).join("");
+  $("list").innerHTML = h;
+}
+function card(r){
+  const lat = r.lat, lng = r.lng, ypt = `https://yandex.uz/maps/?rtext=~${lat},${lng}&rtt=auto`, gm = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  const pt = S.point ? `https://yandex.uz/maps/?pt=${S.point.lng},${S.point.lat}&z=17&l=map` : "";
+  let btns = "";
+  if(r.status === "offered") btns = `<div class="row"><button class="no" onclick="act('driver_decline',${r.id})">✕ Rad etish</button><button class="go" onclick="act('driver_accept',${r.id})">✓ Qabul qilish</button></div>`;
+  else if(r.status === "accepted") btns = `<div class="row"><a class="lnk" href="tel:+${esc(r.phone)}">📞 Mijoz</a><a class="lnk" href="${ypt}" target="_blank" rel="noopener">🧭 Yandex</a><a class="lnk" href="${gm}" target="_blank" rel="noopener">Google</a></div>
+      <div class="row"><button class="go" onclick="act('driver_start',${r.id})">🚕 Yo'lga chiqdim</button></div>`;
+  else if(r.status === "onway") btns = `<div class="row"><a class="lnk" href="tel:+${esc(r.phone)}">📞 Mijoz</a><a class="lnk" href="${ypt}" target="_blank" rel="noopener">🧭 Yandex</a><a class="lnk" href="${gm}" target="_blank" rel="noopener">Google</a></div>
+      <div class="row"><button class="go" onclick="done(${r.id})">✓ Yetkazdim</button></div>`;
+  const tr = (r.tracks||[]).map(esc).join(", ");
+  return `<div class="ride ${r.status}"><div class="rh"><div><b>${r.status==="offered" ? "🔔 Yangi buyurtma" : esc(r.customer)}</b></div><span class="p">${som(r.driver_cut)}</span></div>
+    <div class="rm">📍 ${esc(r.addr)}${r.note ? "<br>💬 " + esc(r.note) : ""}<br><small>${r.dist} km · ${r.items} ta yuk · mijoz to'laydi: <b>${som(r.fare)}</b> (naqd)</small>${r.status==="offered" ? "" : "<br><small>" + tr + "</small>"}</div>
+    ${r.status!=="delivered" && pt ? `<div style="font-size:13px"><a href="${pt}" target="_blank" rel="noopener" style="color:var(--g);font-weight:700">🏢 Yuk olinadigan punkt: ${esc(S.point.name)}</a></div>` : ""}${btns}</div>`;
+}
+async function act(fn, id){
+  try{ await rpc(fn, {p_token:token, p_id:id}); await load(); toast(fn==="driver_accept" ? "Qabul qilindi" : fn==="driver_start" ? "Yo'lga chiqdingiz" : "Rad etildi"); }catch(e){ err(e); await load(); }
+}
+async function done(id){ if(!confirm("Yuklar mijozga topshirildimi?")) return; try{ await rpc("driver_done", {p_token:token, p_id:id}); await load(); toast("Yetkazildi ✓"); }catch(e){ err(e); } }
+async function toggleOn(){ audio(); try{ await rpc("driver_toggle", {p_token:token, p_on:!S.is_on}); await load(); }catch(e){ err(e); } }
+if(token){ enter(); }
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>

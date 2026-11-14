@@ -349,6 +349,9 @@ html[data-view=pc] #payments .wrap{max-width:900px}
 .obox .ob .go2{flex:1;background:linear-gradient(180deg,#2E6BE6,#1648B8);color:#fff}.obox .ob .no2{background:#FDECEC;color:#C62828}
 html[data-view=pc] #orphans .wrap{max-width:900px}
 .rcview{width:100%;margin-top:8px;padding:10px;border:1px solid #0B4DB5;background:#F2F7FE;color:#0B4DB5;border-radius:10px;font:inherit;font-weight:600}
+.txamapw{height:240px;border-radius:16px;overflow:hidden;border:1.5px solid var(--line);position:relative;z-index:0}
+.pbox .pbtn button{background:#E8F0FD}
+.pbox .pbtn .no{background:#FDECEC}.pbox .pbtn .ok{background:linear-gradient(180deg,#22A862,#127A45)}
 </style>
 </head>
 <body>
@@ -575,6 +578,11 @@ html[data-view=pc] #orphans .wrap{max-width:900px}
       <span class="st"><b>Mijoz to'lovlari <span class="paydot show" id="payDot2" style="position:static;display:none;margin-left:6px;vertical-align:middle"></span></b><small>Karta rekvizitlari va mijozlar yuborgan to'lovlarni tasdiqlash</small></span>
       <span class="ch">›</span>
     </button>
+    <button class="setrow" onclick="openTx()">
+      <span class="si" style="background:#F26A00"><svg viewBox="0 0 24 24"><path d="M5 16l1.5-5.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 16M4 16h16v3h-2v-1.5H6V19H4zM9 6h6l1 3H8z"/></svg></span>
+      <span class="st"><b>Taksi: uyga yetkazish <span id="txCnt" style="color:var(--muted);font-weight:700"></span></b><small>Taksichilar, narx, ulushingiz va buyurtmalar</small></span>
+      <span class="ch">›</span>
+    </button>
     <button class="setrow" onclick="openOrphans()">
       <span class="si" style="background:#8A5A00"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg></span>
       <span class="st"><b>Egasi topilmagan yuklar <span id="orCnt" style="color:var(--muted);font-weight:700"></span></b><small>Excel'da bor, lekin mijoz ilovaga qo'shmagan trek-kodlar</small></span>
@@ -602,6 +610,54 @@ html[data-view=pc] #orphans .wrap{max-width:900px}
     </button>
   </div>
 </main>
+
+<!-- ===== TAKSI (UYGA YETKAZISH) ===== -->
+<main id="tx" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Taksi (uyga yetkazish)</b>
+  </div>
+  <div class="wrap" style="padding-bottom:40px">
+    <div class="scanbox" id="txSum"></div>
+    <div class="info" style="margin-bottom:8px">Buyurtmalar</div>
+    <div id="txaRides"></div>
+    <div class="info" style="margin:14px 4px 8px">Taksichilar</div>
+    <div id="txaDrivers"></div>
+    <button class="btn" style="box-shadow:none;margin-bottom:14px" onclick="txaDrvForm(0)">+ Taksichi qo'shish</button>
+    <div class="scanbox">
+      <span class="lbl">Sozlamalar</span>
+      <label style="display:flex;align-items:center;gap:10px;font-weight:700;margin-bottom:6px"><input type="checkbox" id="txaOn" style="width:22px;height:22px" oninput="txaDirty=true"> Uyga yetkazish yoqilgan (mijozlar ko'radi)</label>
+      <div class="xgrid">
+        <div class="xf"><span class="lbl">1 km narxi (so'm)</span><input id="txaKm" inputmode="numeric" class="xsel" style="padding:0 12px" oninput="txaDirty=true"></div>
+        <div class="xf"><span class="lbl">Minimal narx (so'm)</span><input id="txaMin" inputmode="numeric" class="xsel" style="padding:0 12px" oninput="txaDirty=true"></div>
+        <div class="xf"><span class="lbl">Sizning ulushingiz (%)</span><input id="txaPct" inputmode="decimal" class="xsel" style="padding:0 12px" oninput="txaDirty=true"></div>
+        <div class="xf"><span class="lbl">Yo'l koeffitsienti</span><input id="txaRoad" inputmode="decimal" class="xsel" style="padding:0 12px" oninput="txaDirty=true"></div>
+        <div class="xf xwide"><span class="lbl">Punkt nomi (mijoz ko'radi)</span><input id="txaPName" class="xsel" style="padding:0 12px" maxlength="80" oninput="txaDirty=true"></div>
+      </div>
+      <div class="hoinfo" style="margin:8px 0;line-height:1.5">Narx = masofa (to'g'ri chiziq × yo'l koeffitsienti) × 1 km narxi, minimal narxdan kam bo'lmaydi. Ulushingiz shu narxdan olinadi, qolgani taksichiniki.</div>
+      <span class="lbl" style="margin-top:6px">Topshirish punkti joylashuvi (mijozlar o'zgartira olmaydi)</span>
+      <div class="txamapw"><div id="txaMap" style="width:100%;height:100%"></div></div>
+      <div style="display:flex;gap:8px;margin:8px 0"><button class="btn" style="height:42px;font-size:14px;box-shadow:none;background:#0B4DB5" onclick="txaLocate(this)">📍 Men turgan joy</button><div id="txaCoord" style="flex:1;align-self:center;font-size:12.5px;color:var(--muted)"></div></div>
+      <button class="btn" style="margin-top:6px;box-shadow:none" onclick="txaSave()">Saqlash</button>
+    </div>
+  </div>
+</main>
+
+<div class="sheet-back" id="txdBack" onclick="txaDrvClose()" style="display:none;position:fixed;inset:0;z-index:50;background:rgba(10,20,50,.5);align-items:flex-end;justify-content:center">
+  <div onclick="event.stopPropagation()" style="background:var(--bg);width:100%;max-width:520px;border-radius:26px 26px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 16px)">
+    <b id="txdTitle" style="font-size:18px">Taksichi</b>
+    <div class="xgrid">
+      <div class="xf"><span class="lbl">Ism</span><input id="txdName" class="xsel" style="padding:0 12px" maxlength="60"></div>
+      <div class="xf"><span class="lbl">Telefon (kirish logini)</span><input id="txdPhone" inputmode="tel" class="xsel" style="padding:0 12px" placeholder="90 123 45 67"></div>
+      <div class="xf"><span class="lbl">Mashina</span><input id="txdCar" class="xsel" style="padding:0 12px" placeholder="Nexia 01 A 123 AA" maxlength="60"></div>
+      <div class="xf"><span class="lbl" id="txdPassL">Parol (kamida 6 belgi)</span><input id="txdPass" class="xsel" style="padding:0 12px" autocomplete="off"></div>
+    </div>
+    <label style="display:flex;align-items:center;gap:10px;font-weight:700;margin:12px 0"><input type="checkbox" id="txdActive" checked style="width:22px;height:22px"> Faol</label>
+    <div class="msg" id="txdMsg" style="min-height:18px;color:#C62828;font-size:13px"></div>
+    <button class="btn" onclick="txaDrvSave()" style="box-shadow:none">Saqlash</button>
+    <button onclick="txaDrvClose()" style="width:100%;margin-top:8px;height:44px;border:0;background:transparent;font-weight:700;color:var(--muted)">Bekor qilish</button>
+  </div>
+</div>
 
 <!-- ===== MANZILNI TAHRIRLASH ===== -->
 <main id="addrEdit" class="screen">
@@ -634,6 +690,7 @@ html[data-view=pc] #orphans .wrap{max-width:900px}
 <div class="toast" id="toast"></div>
 
 <script src="config.js"></script>
+<script src="tzmap.js"></script>
 <script>
 try{ if(window.TP_CONFIG && TP_CONFIG.url){ const l=document.createElement("link"); l.rel="preconnect"; l.href=TP_CONFIG.url; l.crossOrigin=""; document.head.appendChild(l); } }catch(e){}
 /* ====== SOZLAMALAR ====== */
@@ -712,8 +769,8 @@ function handleErr(e){
   if(e.session){ forceLogout(); toast("Qaytadan kiring", true); }
   else toast(e.message, true);
 }
-function enter(){ show("main"); search(); pollBadge(); checkPay(); checkOrphans(); }
-setInterval(()=>{ if(!document.hidden) checkPay(); }, 30000);
+function enter(){ show("main"); search(); pollBadge(); checkPay(); checkOrphans(); checkTx(); }
+setInterval(()=>{ if(!document.hidden){ checkPay(); checkTx(); } }, 30000);
 
 /* ====== Qidiruv ====== */
 let timer = null;
@@ -831,6 +888,78 @@ applyView(curView());
 /* ====== Egasi topilmagan yuklar ====== */
 let orOff = 0, orT = null;
 function setOrCnt(n){ const e = $("orCnt"); if(e) e.textContent = n > 0 ? "· " + n + " ta" : ""; }
+/* ====== TAKSI ====== */
+let txa = null, txaCtl = null, txaLat = null, txaLng = null, txaDirty = false, txaEdId = null, txaMapFor = false;
+const TXA_ST = {new:"⏳ Taksichi topilmadi", offered:"📨 Taksichiga yuborildi", accepted:"✅ Qabul qilindi", onway:"🚕 Yo'lda", delivered:"📦 Yetkazildi", cancelled:"✕ Bekor qilindi"};
+async function checkTx(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_tx_badge", {p_token:token}); const e = $("txCnt"); if(e) e.textContent = r.n > 0 ? "· " + r.n + " ta kutmoqda" : ""; }catch(e){} }
+async function openTx(){ txaDirty = false; show("tx"); $("txaRides").innerHTML = '<div class="skel"></div>'; await loadTx(); }
+async function loadTx(){
+  try{ txa = await rpc("admin_tx_get", {p_token:token}); }catch(e){ handleErr(e); return; }
+  const s = txa.settings, t = txa.totals;
+  $("txSum").innerHTML = `<span class="lbl">Sizning daromadingiz (taksi ulushi)</span><div style="display:flex;gap:8px;text-align:center"><div style="flex:1"><b style="font-size:17px">${somN(t.today)}</b><br><small style="color:var(--muted)">Bugun</small></div><div style="flex:1"><b style="font-size:17px">${somN(t.month)}</b><br><small style="color:var(--muted)">Shu oy</small></div><div style="flex:1"><b style="font-size:17px">${somN(t.all)}</b><br><small style="color:var(--muted)">Jami · ${t.cnt} ta</small></div></div>`;
+  if(!txaDirty){
+    $("txaOn").checked = !!s.on; $("txaKm").value = s.km_price; $("txaMin").value = s.min_price; $("txaPct").value = s.pct; $("txaRoad").value = s.road; $("txaPName").value = s.point_name;
+    if(s.lat != null && txaLat == null){ txaLat = +s.lat; txaLng = +s.lng; }
+    txaCoordDraw();
+  }
+  txaDrawDrivers(); txaDrawRides(); setTxCnt((txa.rides||[]).filter(r=>r.status==="new").length);
+  initTxaMap();
+}
+function setTxCnt(n){ const e = $("txCnt"); if(e) e.textContent = n > 0 ? "· " + n + " ta kutmoqda" : ""; }
+function txaDrawDrivers(){
+  const ds = txa.drivers;
+  $("txaDrivers").innerHTML = ds.length ? ds.map(d=>`<div class="pbox"><div class="ph"><div><b>${esc(d.name)} ${d.active ? (d.is_on ? "🟢" : "⚪") : "🚫"}</b><small>${esc(d.phone)}${d.car ? " · " + esc(d.car) : ""}</small></div><span class="pt" style="font-size:16px">${d.delivered} ta</span></div>
+    <div style="font-size:13px;color:var(--muted);margin:6px 0">Bugun: <b>${d.today}</b> ta · Ochiq: <b>${d.open}</b> · Topgani: <b>${somN(d.earned)}</b><br>Sizga berishi kerak: <b style="color:${d.owe>0?"#C62828":"inherit"}">${somN(d.owe)}</b></div>
+    <div class="pbtn"><button style="background:#E8F0FD;color:#0B4DB5" onclick="txaDrvForm(${d.id})">✎ Tahrirlash</button>${d.owe>0 ? `<button class="ok" onclick="txaSettle(${d.id},${d.owe})">💵 Oldim</button>` : ""}</div></div>`).join("")
+    : '<div class="empty" style="margin-bottom:12px"><b>Taksichi yo\'q</b><p>Pastdagi tugma bilan taksichi qo\'shing. U driver.html ilovasi orqali telefon va parol bilan kiradi.</p></div>';
+}
+function txaDrawRides(){
+  const rs = txa.rides, act = txa.drivers.filter(d=>d.active);
+  $("txaRides").innerHTML = rs.length ? rs.map(r=>{
+    const open = ["new","offered","accepted","onway"].includes(r.status);
+    return `<div class="pbox"><div class="ph"><div><b>${esc(r.customer)} · ${esc(r.code)}</b><small>${esc(r.phone||"")} · ${when(r.created_at)}</small></div><span class="pt" style="font-size:17px">${somN(r.fare)}</span></div>
+      <div style="font-size:13.5px;margin:6px 0"><b>${esc(TXA_ST[r.status]||r.status)}</b>${r.driver ? " · " + esc(r.driver) : ""}<br>📍 ${esc(r.addr)} · ${r.dist} km<br>📦 ${r.items} ta yuk${r.note ? " · " + esc(r.note) : ""}<br><span style="color:var(--muted)">Sizga: ${somN(r.admin_cut)} · Taksichiga: ${somN(r.driver_cut)}</span></div>
+      ${open ? `<div style="display:flex;gap:8px;margin-bottom:8px"><select id="as${r.id}" class="xsel" style="flex:1">${act.map(d=>`<option value="${d.id}" ${d.id===r.driver_id?"selected":""}>${esc(d.name)}${d.is_on?"":" (ishda emas)"}</option>`).join("")}</select><button style="height:46px;border:0;border-radius:13px;background:#0B4DB5;color:#fff;font-weight:800;padding:0 14px" onclick="txaAssign(${r.id})">Biriktirish</button></div>
+      <div class="pbtn"><button class="no" onclick="txaCancel(${r.id})">✕ Bekor qilish</button></div>` : ""}</div>`;
+  }).join("") : '<div class="empty" style="margin-bottom:12px"><b>Buyurtma yo\'q</b><p>Mijoz uyga yetkazish buyurtma qilsa, shu yerda chiqadi.</p></div>';
+}
+async function txaAssign(id){ const s = $("as" + id); if(!s || !s.value) return; try{ await rpc("admin_tx_assign", {p_token:token, p_ride:id, p_driver:+s.value}); toast("Biriktirildi"); loadTx(); }catch(e){ handleErr(e); } }
+async function txaCancel(id){ if(!confirm("Buyurtma bekor qilinadi. Mijozga xabar boradi.")) return; try{ await rpc("admin_tx_cancel", {p_token:token, p_ride:id}); toast("Bekor qilindi"); loadTx(); }catch(e){ handleErr(e); } }
+async function txaSettle(id, amt){ if(!confirm(somN(amt) + " pulni taksichidan oldingizmi?")) return; try{ await rpc("admin_driver_settle", {p_token:token, p_driver:id}); toast("Hisob-kitob qilindi"); loadTx(); }catch(e){ handleErr(e); } }
+function txaDrvForm(id){
+  txaEdId = id || null; const d = id ? txa.drivers.find(x=>x.id===id) : null;
+  $("txdTitle").textContent = d ? "Taksichini tahrirlash" : "Yangi taksichi"; $("txdMsg").textContent = "";
+  $("txdName").value = d ? d.name : ""; $("txdPhone").value = d ? d.phone : ""; $("txdCar").value = d ? d.car : ""; $("txdPass").value = ""; $("txdActive").checked = d ? d.active : true;
+  $("txdPassL").textContent = d ? "Yangi parol (o'zgartirmasangiz bo'sh qoldiring)" : "Parol (kamida 6 belgi)";
+  $("txdBack").style.display = "flex";
+}
+function txaDrvClose(){ $("txdBack").style.display = "none"; }
+async function txaDrvSave(){
+  try{
+    await rpc("admin_driver_save", {p_token:token, p_id:txaEdId, p_name:$("txdName").value, p_phone:$("txdPhone").value, p_car:$("txdCar").value, p_pass:$("txdPass").value, p_active:$("txdActive").checked});
+    txaDrvClose(); toast("Saqlandi"); loadTx();
+  }catch(e){ if(e.session) handleErr(e); else $("txdMsg").textContent = e.message; }
+}
+function txaCoordDraw(){ $("txaCoord").textContent = txaLat != null ? "Punkt: " + txaLat.toFixed(5) + ", " + txaLng.toFixed(5) : "Punkt hali belgilanmagan"; }
+async function initTxaMap(){
+  if(txaMapFor) { if(txaCtl) txaCtl.invalidate(); return; }
+  txaMapFor = true;
+  const c = txaLat != null ? {lat:txaLat, lng:txaLng, zoom:17} : {lat:41.3111, lng:69.2797, zoom:11};
+  try{ txaCtl = await TZMap.create($("txaMap"), {lat:c.lat, lng:c.lng, zoom:c.zoom, onChange:(la, lo, u)=>{ if(u === false) return; txaLat = la; txaLng = lo; txaDirty = true; txaCoordDraw(); }}); }
+  catch(e){ txaMapFor = false; }
+}
+async function txaLocate(btn){
+  const o = btn.textContent; btn.textContent = "Aniqlanmoqda…"; btn.disabled = true;
+  try{ const p = await TZMap.locate(); txaLat = p.lat; txaLng = p.lng; txaDirty = true; if(txaCtl) txaCtl.setView(p.lat, p.lng, 17); txaCoordDraw(); }catch(e){ toast(e.message, true); }
+  btn.textContent = o; btn.disabled = false;
+}
+async function txaSave(){
+  const n = id => Number(String($(id).value).replace(",", ".").replace(/\s/g, ""));
+  try{
+    await rpc("admin_tx_set", {p_token:token, p_on:$("txaOn").checked, p_km:n("txaKm"), p_min:n("txaMin"), p_pct:n("txaPct"), p_road:n("txaRoad"), p_pname:$("txaPName").value, p_lat:txaLat, p_lng:txaLng});
+    txaDirty = false; toast("Saqlandi"); loadTx();
+  }catch(e){ handleErr(e); }
+}
 async function checkOrphans(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_orphans", {p_token:token, p_q:"", p_limit:1, p_offset:0}); setOrCnt(r.total); }catch(e){} }
 function orSearch(){ clearTimeout(orT); orT = setTimeout(()=>loadOrphans(true), 300); }
 async function openOrphans(){ $("orQ").value = ""; show("orphans"); await loadOrphans(true); }

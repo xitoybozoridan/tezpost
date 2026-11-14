@@ -379,6 +379,26 @@
 .paynote{font-size:13.5px;color:var(--muted);line-height:1.5;margin:6px 2px 10px}
 .rcpt{margin:10px 0}.rcbtn{width:100%;padding:12px;border:1.5px dashed #0B4DB5;background:#F2F7FE;color:#0B4DB5;border-radius:12px;font:inherit;font-weight:600;cursor:pointer}
 .rcpt img{width:100%;max-height:220px;object-fit:contain;margin-top:8px;border-radius:10px;border:1px solid #dde3ee;background:#fff}
+.txbig{width:100%;display:flex;align-items:center;gap:12px;border:0;border-radius:22px;padding:14px 16px;text-align:left;color:#fff;background:linear-gradient(135deg,#FF9322,#F26A00);box-shadow:0 10px 24px rgba(255,122,0,.35)}
+.txbig .txi{font-size:32px;line-height:1}.txbig .txt{flex:1;min-width:0}.txbig b{display:block;font-size:17px}.txbig small{display:block;font-size:12.5px;opacity:.92;margin-top:2px;line-height:1.35}.txbig .txa{font-size:26px;opacity:.9}
+#taxi.active{display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;right:0;width:100%;max-width:520px;height:auto;min-height:0;margin:0 auto;z-index:20;background:var(--bg);overflow:hidden}
+#taxi .form{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:16px !important}
+#taxi .savebar{position:static;flex:none}
+.txp{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:11px 14px;margin-bottom:8px}
+.txp input{width:22px;height:22px;accent-color:#0B4DB5;flex:none}.txp b{display:block;font-size:15px}.txp small{color:var(--muted);font-size:12.5px}
+.txpoint{display:flex;align-items:center;gap:10px;background:var(--blue-soft);border-radius:16px;padding:10px 14px;margin-bottom:10px}
+.txpoint>span{font-size:22px}.txpoint div{flex:1}.txpoint small{display:block;color:var(--muted);font-size:12px}.txpoint b{font-size:15px}
+.txsearch{display:flex;gap:8px;margin-bottom:8px}.txsearch input{flex:1;min-width:0;height:44px;border:1.5px solid var(--line);border-radius:14px;padding:0 14px;font-size:15px;background:var(--card);color:var(--text);outline:none}
+.txsearch button{border:0;border-radius:14px;background:var(--blue);color:#fff;font-weight:700;padding:0 16px}
+.txr{display:block;width:100%;text-align:left;border:0;background:var(--card);border-bottom:1px solid var(--line);padding:11px 14px;font-size:14px;color:var(--text)}
+.txmapw{height:300px;border-radius:20px;overflow:hidden;border:1.5px solid var(--line);margin-bottom:8px;position:relative;z-index:0}.txmap{width:100%;height:100%}
+.txloc{width:100%;height:44px;border:1.5px solid var(--blue);background:var(--card);color:var(--blue);border-radius:14px;font-weight:700;font-size:15px}
+.txq{display:flex;justify-content:space-between;padding:6px 4px;font-size:15px}.txq b{font-size:16px}
+.txride{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:10px}
+.txride.accepted,.txride.onway{border-color:#127A45}.txride.cancelled{opacity:.6}.txride.delivered{border-color:#127A45;background:#F1FAF5}
+.txh{display:flex;justify-content:space-between;gap:8px}.txh b{font-size:15px}.txh span{font-weight:700;color:var(--blue)}.txs{font-size:13px;color:var(--muted);margin-top:3px}
+.txd{margin-top:8px;font-size:14px;font-weight:600}.txd a{margin-left:8px;color:#127A45;text-decoration:none}
+.txcan{margin-top:8px;border:1.5px solid var(--danger);color:var(--danger);background:transparent;border-radius:12px;padding:7px 14px;font-weight:600}
 </style>
 <script>
 try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
@@ -436,6 +456,8 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
     <div class="hello">Salom, <b id="helloName"></b></div>
     <button class="cta" onclick="openDecl()">Deklaratsiya yaratish <span class="plus">+</span></button>
   </section>
+
+  <section class="section" style="padding-bottom:0"><div id="txCard"></div></section>
 
   <section class="quick">
     <h2>Tezkor kirish</h2>
@@ -530,6 +552,35 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
   <div class="savebar"><div class="in"><button class="btn-save" id="payBtn" onclick="openPaySheet()">To'lash</button></div></div>
 </main>
 
+<!-- ===== UYGA YETKAZISH ===== -->
+<main id="taxi" class="screen">
+  <div class="bar">
+    <button class="link back" onclick="closeTaxi()"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Orqaga</button>
+    <span></span>
+  </div>
+  <h1 class="title">Uyga yetkazish</h1>
+  <div class="form">
+    <div id="txRides"></div>
+    <div id="txOff" class="paynote" style="display:none;margin-top:10px">Uyga yetkazish hozircha ishlamayapti.</div>
+    <div id="txForm">
+      <div class="paysub">1. Qaysi yuklar yetkazilsin</div>
+      <div id="txParcels"></div>
+      <div class="paysub">2. Uyingiz joyini belgilang</div>
+      <div class="txpoint"><span>🏢</span><div><small>Yuk olinadigan punkt (o'zgarmaydi)</small><b id="txPointName">—</b></div><i>🔒</i></div>
+      <div class="txsearch"><input id="txQ" placeholder="Manzil qidirish: ko'cha, mahalla…" onkeydown="if(event.key==='Enter')txFind()"><button onclick="txFind()">Izlash</button></div>
+      <div id="txRes"></div>
+      <div class="txmapw"><div id="txMap" class="txmap"></div></div>
+      <button class="txloc" onclick="txLocate(this)">📍 Mening joylashuvim</button>
+      <div class="paynote" style="margin:6px 2px 10px">Xaritani surib, uyingiz joyiga pinni qo'ying.</div>
+      <label class="field"><span>Manzil</span><input id="txAddr" placeholder="Ko'cha, uy raqami" maxlength="300" oninput="txTyped=true"></label>
+      <label class="field"><span>Mo'ljal, kirish, xonadon (ixtiyoriy)</span><input id="txNote" placeholder="Masalan: 3-kirish, 45-xonadon" maxlength="300"></label>
+      <label class="field"><span>Bog'lanish uchun telefon</span><input id="txPhone" inputmode="tel" placeholder="90 123 45 67" maxlength="20"></label>
+      <div id="txPrice"></div>
+    </div>
+  </div>
+  <div class="savebar"><div class="in"><button class="btn-save" id="txBtn" onclick="txOrder()">Buyurtma berish</button></div></div>
+</main>
+
 <!-- ===== Pastki menyu ===== -->
 <nav class="nav" id="nav"><div class="in">
   <button id="navHome" class="on" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19z"/></svg>Asosiy</button>
@@ -575,6 +626,7 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
 <div class="toast" id="toast"></div>
 
 <script src="config.js"></script>
+<script src="tzmap.js"></script>
 <script>
 try{ if(window.TP_CONFIG && TP_CONFIG.url){ const l=document.createElement("link"); l.rel="preconnect"; l.href=TP_CONFIG.url; l.crossOrigin=""; document.head.appendChild(l); } }catch(e){}
 /* ====== SOZLAMALAR ====== */
@@ -639,7 +691,7 @@ function show(id){
   $("navProfile").classList.toggle("on", id==="profile");
   window.scrollTo({top:0,left:0,behavior:"instant"});
 }
-function go(id){ if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); if(id==="home") refreshAddr(); }
+function go(id){ if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); if(id==="home"){ refreshAddr(); loadTxCard(); } }
 function openDecl(){ resetForm(); show("decl"); }
 function closeDecl(){ show("home"); }
 function openLoads(){ go("loads"); }
@@ -703,7 +755,7 @@ async function submitAuth(){
 
 function enterApp(){
   $("helloName").textContent = (me && me.name || "").split(" ")[0];
-  renderList(); show("home"); loadList(); checkUnread(); refreshAddr();
+  renderList(); show("home"); loadList(); checkUnread(); refreshAddr(); loadTxCard();
 }
 function forceLogout(){
   token = null; me = null; declarations = [];
@@ -1047,6 +1099,141 @@ async function payConfirm(){
     closePaySheet(); toast("So'rov yuborildi. Tasdiqlangach xabar keladi"); go("loads");
   }catch(e){ $("payMsg").textContent = e.message || "Xatolik"; handleErr(e, e.offline); }
   payBusy = false; b.disabled = false; b.textContent = "✓ To'lov qildim";
+}
+/* ====== UYGA YETKAZISH (taksi) ====== */
+let tx = null, txSel = new Set(), txCtl = null, txLat = null, txLng = null, txBusy = false, txSeq = 0, txTimer = null, txTyped = false, txMapFor = "";
+const TX_ST = {new:"Taksichi qidirilmoqda…", offered:"Taksichi qidirilmoqda…", accepted:"Taksichi qabul qildi", onway:"Taksichi yo'lda", delivered:"Yetkazildi ✓", cancelled:"Bekor qilindi"};
+function txQuote(lat, lng){
+  if(!tx || !tx.point || lat == null) return null;
+  const R = 6371, rad = x => x*Math.PI/180, la = tx.point.lat, lo = tx.point.lng;
+  const a = Math.sin(rad(lat-la)/2)**2 + Math.cos(rad(la))*Math.cos(rad(lat))*Math.sin(rad(lng-lo)/2)**2;
+  const dist = Math.round(R*2*Math.asin(Math.sqrt(a))*tx.road*10)/10;
+  return {dist, fare: Math.max(tx.min_price, Math.ceil(dist*tx.km_price/500)*500)};
+}
+async function loadTxCard(){
+  if(!token || !CONFIGURED) return;
+  try{ tx = await rpc("tx_state", {p_token:token}); }catch(e){ return; }
+  drawTxCard();
+}
+function drawTxCard(){
+  const el = $("txCard"); if(!el) return;
+  if(!tx || !tx.on){ el.innerHTML = ""; return; }
+  const act = (tx.rides||[]).find(r=>["new","offered","accepted","onway"].includes(r.status));
+  const n = (tx.parcels||[]).length;
+  el.innerHTML = `<button class="txbig" onclick="openTaxi()"><span class="txi">🚕</span><span class="txt"><b>Uyga yetkazib berish</b><small>${act ? esc(TX_ST[act.status]) : (n ? n + " ta yukingizni taksi orqali uyingizgacha olib boramiz" : "Yuklaringiz punktga kelgach, taksi orqali uyingizgacha yetkazamiz")}</small></span><span class="txa">›</span></button>`;
+}
+async function openTaxi(){
+  show("taxi"); drawTaxi();
+  try{ tx = await rpc("tx_state", {p_token:token}); }catch(e){ handleErr(e, e.offline); }
+  if(!tx) return;
+  for(const d of (tx.parcels||[])){ if(!txSel.size) txSel.add(d.id); }
+  txSel = new Set([...txSel].filter(id=>(tx.parcels||[]).some(d=>d.id===id)));
+  if(!txSel.size) (tx.parcels||[]).forEach(d=>txSel.add(d.id));
+  drawTaxi(); initTxMap();
+  clearInterval(txTimer); txTimer = setInterval(txPoll, 8000);
+}
+async function txPoll(){
+  if(!$("taxi").classList.contains("active")){ clearInterval(txTimer); return; }
+  try{ const s = await rpc("tx_state", {p_token:token}); tx = s; txSel = new Set([...txSel].filter(id=>(tx.parcels||[]).some(d=>d.id===id))); drawTxRides(); drawTxParcels(); drawTxPrice(); }catch(e){}
+}
+function closeTaxi(){ clearInterval(txTimer); go("home"); }
+function drawTaxi(){
+  if(!tx){ $("txRides").innerHTML = '<div class="skel"></div>'; return; }
+  drawTxRides(); drawTxParcels(); drawTxPrice();
+  $("txForm").style.display = tx.on ? "" : "none";
+  $("txOff").style.display = tx.on ? "none" : "block";
+  if(tx.point) $("txPointName").textContent = tx.point.name;
+  if(!$("txPhone").value && tx.phone) $("txPhone").value = tx.phone;
+}
+function drawTxRides(){
+  const rs = (tx && tx.rides) || [];
+  $("txRides").innerHTML = rs.length ? '<div class="paysub" style="margin-top:4px">Buyurtmalarim</div>' + rs.map(r=>{
+    const live = ["accepted","onway"].includes(r.status), canc = ["new","offered","accepted"].includes(r.status);
+    return `<div class="txride ${r.status}"><div class="txh"><b>${esc(TX_ST[r.status]||r.status)}</b><span>${fmtSom(r.fare)}</span></div>
+      <div class="txs">${r.items} ta yuk · ${esc(r.addr)}</div>
+      ${live && r.driver ? `<div class="txd">🚕 ${esc(r.driver)}${r.car ? " · " + esc(r.car) : ""}${r.driver_phone ? ` <a href="tel:+${esc(r.driver_phone)}">📞 Qo'ng'iroq</a>` : ""}</div>` : ""}
+      ${canc ? `<button class="txcan" onclick="txCancel(${r.id})">Bekor qilish</button>` : ""}</div>`;
+  }).join("") : "";
+}
+function drawTxParcels(){
+  const ps = (tx && tx.parcels) || [];
+  $("txParcels").innerHTML = ps.length ? ps.map(d=>`<label class="txp"><input type="checkbox" ${txSel.has(d.id)?"checked":""} onchange="txTog(${d.id},this.checked)"><span><b>${esc(d.track)}</b><small>${d.kg!=null ? Number(d.kg).toFixed(2) + " kg · " : ""}${d.status==="pickup" ? "Punktda" : "Punktga yetkazilmoqda"}</small></span></label>`).join("")
+    : '<div class="paynote" style="margin:4px 2px">Hozircha yetkazish mumkin bo\'lgan yuk yo\'q. Yukingiz topshirish punktiga kelganda (yoki yetkazilayotganda) shu yerda ko\'rinadi.</div>';
+}
+function txTog(id, on){ if(on) txSel.add(id); else txSel.delete(id); drawTxPrice(); }
+function drawTxPrice(){
+  const q = txQuote(txLat, txLng), b = $("txBtn"); if(!b) return;
+  $("txPrice").innerHTML = q ? `<div class="txq"><span>Masofa</span><b>${q.dist} km</b></div><div class="txq"><span>Yetkazish narxi</span><b>${fmtSom(q.fare)}</b></div><div class="paynote" style="margin:4px 0 0">Narx taksichiga naqd to'lanadi</div>`
+    : '<div class="paynote" style="margin:4px 2px">Xaritada uyingiz joyini belgilang — narx shu yerda chiqadi.</div>';
+  b.textContent = q ? "Buyurtma berish · " + fmtSom(q.fare) : "Buyurtma berish";
+  b.disabled = txBusy;
+}
+async function initTxMap(){
+  if(!tx || !tx.point) return;
+  const key = tx.point.lat + "," + tx.point.lng;
+  if(txCtl && txMapFor === key){ txCtl.invalidate(); return; }
+  const saved = store.get("tp_txpos", null);
+  const c = saved && Math.abs(saved.lat - tx.point.lat) < 1 ? saved : {lat: tx.point.lat, lng: tx.point.lng};
+  try{
+    txCtl = await TZMap.create($("txMap"), {lat:c.lat, lng:c.lng, zoom:15, point:tx.point, onChange: txMoved}); txMapFor = key;
+    if(saved){ txLat = saved.lat; txLng = saved.lng; if(saved.addr && !$("txAddr").value) $("txAddr").value = saved.addr; drawTxPrice(); }
+  }catch(e){ txCtl = null; }
+}
+function txMoved(lat, lng, byUser){
+  if(byUser === false) return;
+  txLat = lat; txLng = lng; txTyped = false; drawTxPrice();
+  const my = ++txSeq; clearTimeout(txMoved._t);
+  txMoved._t = setTimeout(async ()=>{
+    let a = ""; try{ a = await TZMap.reverse(lat, lng); }catch(e){}
+    if(my !== txSeq || txTyped) return;
+    $("txAddr").value = a || (lat.toFixed(5) + ", " + lng.toFixed(5));
+  }, 500);
+}
+async function txLocate(btn){
+  const o = btn.textContent; btn.textContent = "Aniqlanmoqda…"; btn.disabled = true;
+  try{
+    const p = await TZMap.locate();
+    if(txCtl) txCtl.setView(p.lat, p.lng, 17);
+    txMoved(p.lat, p.lng, true);
+  }catch(e){ toast(e.message, true); }
+  btn.textContent = o; btn.disabled = false;
+}
+async function txFind(){
+  const q = $("txQ").value.trim(); if(q.length < 3){ $("txRes").innerHTML = ""; return; }
+  $("txRes").innerHTML = '<div class="paynote">Qidirilmoqda…</div>';
+  try{
+    const r = await TZMap.search(q, tx && tx.point);
+    $("txRes").innerHTML = r.length ? r.map((x,i)=>`<button class="txr" onclick="txPick(${x.lat},${x.lng},${i})">${esc(x.name)}</button>`).join("") : '<div class="paynote">Topilmadi. Xaritadan o\'zingiz belgilang</div>';
+    txFind.last = r;
+  }catch(e){ $("txRes").innerHTML = '<div class="paynote">Qidirib bo\'lmadi. Xaritadan belgilang</div>'; }
+}
+function txPick(lat, lng, i){
+  $("txRes").innerHTML = ""; $("txQ").value = "";
+  const x = txFind.last && txFind.last[i];
+  if(txCtl) txCtl.setView(lat, lng, 17);
+  txMoved(lat, lng, true);
+  if(x){ txTyped = true; $("txAddr").value = x.name; }
+}
+async function txOrder(){
+  if(txBusy) return;
+  const ids = [...txSel];
+  if(!ids.length){ toast("Yuklarni tanlang", true); return; }
+  if(txLat == null){ toast("Xaritadan manzilni belgilang", true); return; }
+  const addr = $("txAddr").value.trim(); if(addr.length < 3){ toast("Manzilni kiriting", true); return; }
+  txBusy = true; $("txBtn").disabled = true; $("txBtn").textContent = "Yuborilmoqda…";
+  try{
+    const note = $("txNote").value.trim();
+    await rpc("tx_order", {p_token:token, p_ids:ids, p_addr:addr, p_lat:txLat, p_lng:txLng, p_phone:$("txPhone").value, p_note:note});
+    store.set("tp_txpos", {lat:txLat, lng:txLng, addr});
+    toast("Buyurtma qabul qilindi"); $("txNote").value = ""; txSel.clear();
+    tx = await rpc("tx_state", {p_token:token}); drawTaxi(); window.scrollTo(0,0); const f = document.querySelector("#taxi .form"); if(f) f.scrollTop = 0;
+  }catch(e){ toast(e.message || "Xatolik", true); handleErr(e, true); }
+  txBusy = false; drawTxPrice();
+}
+async function txCancel(id){
+  if(!confirm("Buyurtmani bekor qilasizmi?")) return;
+  try{ await rpc("tx_cancel", {p_token:token, p_id:id}); tx = await rpc("tx_state", {p_token:token}); drawTaxi(); toast("Bekor qilindi"); }
+  catch(e){ toast(e.message || "Xatolik", true); }
 }
 let allShown = 15;
 function renderList(loading){
