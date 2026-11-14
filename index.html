@@ -398,6 +398,7 @@
 .txride.accepted,.txride.onway{border-color:#127A45}.txride.cancelled{opacity:.6}.txride.delivered{border-color:#127A45;background:#F1FAF5}
 .txh{display:flex;justify-content:space-between;gap:8px}.txh b{font-size:15px}.txh span{font-weight:700;color:var(--blue)}.txs{font-size:13px;color:var(--muted);margin-top:3px}
 .txd{margin-top:8px;font-size:14px;font-weight:600}.txd a{margin-left:8px;color:#127A45;text-decoration:none}
+.txwait{margin-top:8px;border-radius:12px;padding:9px 12px;background:#E8F3EE;color:#127A45;font-size:14px}.txwait.pay{background:#FFF4E5;color:#8A5A00}
 .txcan{margin-top:8px;border:1.5px solid var(--danger);color:var(--danger);background:transparent;border-radius:12px;padding:7px 14px;font-weight:600}
 </style>
 <script>
@@ -1102,7 +1103,7 @@ async function payConfirm(){
 }
 /* ====== UYGA YETKAZISH (taksi) ====== */
 let tx = null, txSel = new Set(), txCtl = null, txLat = null, txLng = null, txBusy = false, txSeq = 0, txTimer = null, txTyped = false, txMapFor = "";
-const TX_ST = {new:"Taksichi qidirilmoqda…", offered:"Taksichi qidirilmoqda…", accepted:"Taksichi qabul qildi", onway:"Taksichi yo'lda", delivered:"Yetkazildi ✓", cancelled:"Bekor qilindi"};
+const TX_ST = {new:"Taksichi qidirilmoqda…", offered:"Taksichi qidirilmoqda…", accepted:"Taksichi qabul qildi", onway:"Taksichi yo'lda", arrived:"Taksichi yetib keldi", delivered:"Yetkazildi ✓", cancelled:"Bekor qilindi"};
 function txQuote(lat, lng){
   if(!tx || !tx.point || lat == null) return null;
   const R = 6371, rad = x => x*Math.PI/180, la = tx.point.lat, lo = tx.point.lng;
@@ -1112,19 +1113,19 @@ function txQuote(lat, lng){
 }
 async function loadTxCard(){
   if(!token || !CONFIGURED) return;
-  try{ tx = await rpc("tx_state", {p_token:token}); }catch(e){ return; }
+  try{ tx = await rpc("tx_state", {p_token:token}); txOff = tx.now*1000 - Date.now(); }catch(e){ return; }
   drawTxCard();
 }
 function drawTxCard(){
   const el = $("txCard"); if(!el) return;
   if(!tx || !tx.on){ el.innerHTML = ""; return; }
-  const act = (tx.rides||[]).find(r=>["new","offered","accepted","onway"].includes(r.status));
+  const act = (tx.rides||[]).find(r=>["new","offered","accepted","onway","arrived"].includes(r.status));
   const n = (tx.parcels||[]).length;
   el.innerHTML = `<button class="txbig" onclick="openTaxi()"><span class="txi">🚕</span><span class="txt"><b>Uyga yetkazib berish</b><small>${act ? esc(TX_ST[act.status]) : (n ? n + " ta yukingizni taksi orqali uyingizgacha olib boramiz" : "Yuklaringiz punktga kelgach, taksi orqali uyingizgacha yetkazamiz")}</small></span><span class="txa">›</span></button>`;
 }
 async function openTaxi(){
   show("taxi"); drawTaxi();
-  try{ tx = await rpc("tx_state", {p_token:token}); }catch(e){ handleErr(e, e.offline); }
+  try{ tx = await rpc("tx_state", {p_token:token}); txOff = tx.now*1000 - Date.now(); }catch(e){ handleErr(e, e.offline); }
   if(!tx) return;
   for(const d of (tx.parcels||[])){ if(!txSel.size) txSel.add(d.id); }
   txSel = new Set([...txSel].filter(id=>(tx.parcels||[]).some(d=>d.id===id)));
@@ -1134,12 +1135,12 @@ async function openTaxi(){
 }
 async function txPoll(){
   if(!$("taxi").classList.contains("active")){ clearInterval(txTimer); return; }
-  try{ const s = await rpc("tx_state", {p_token:token}); tx = s; txSel = new Set([...txSel].filter(id=>(tx.parcels||[]).some(d=>d.id===id))); drawTxRides(); drawTxParcels(); drawTxPrice(); }catch(e){}
+  try{ const s = await rpc("tx_state", {p_token:token}); tx = s; txOff = s.now*1000 - Date.now(); txSel = new Set([...txSel].filter(id=>(tx.parcels||[]).some(d=>d.id===id))); drawTxRides(); drawTxParcels(); drawTxPrice(); txTick(); }catch(e){}
 }
 function closeTaxi(){ clearInterval(txTimer); go("home"); }
 function drawTaxi(){
   if(!tx){ $("txRides").innerHTML = '<div class="skel"></div>'; return; }
-  drawTxRides(); drawTxParcels(); drawTxPrice();
+  drawTxRides(); txTick(); drawTxParcels(); drawTxPrice();
   $("txForm").style.display = tx.on ? "" : "none";
   $("txOff").style.display = tx.on ? "none" : "block";
   if(tx.point) $("txPointName").textContent = tx.point.name;
@@ -1148,10 +1149,11 @@ function drawTaxi(){
 function drawTxRides(){
   const rs = (tx && tx.rides) || [];
   $("txRides").innerHTML = rs.length ? '<div class="paysub" style="margin-top:4px">Buyurtmalarim</div>' + rs.map(r=>{
-    const live = ["accepted","onway"].includes(r.status), canc = ["new","offered","accepted"].includes(r.status);
+    const live = ["accepted","onway","arrived"].includes(r.status), canc = ["new","offered","accepted"].includes(r.status);
     return `<div class="txride ${r.status}"><div class="txh"><b>${esc(TX_ST[r.status]||r.status)}</b><span>${fmtSom(r.fare)}</span></div>
       <div class="txs">${r.items} ta yuk · ${esc(r.addr)}</div>
       ${live && r.driver ? `<div class="txd">🚕 ${esc(r.driver)}${r.car ? " · " + esc(r.car) : ""}${r.driver_phone ? ` <a href="tel:+${esc(r.driver_phone)}">📞 Qo'ng'iroq</a>` : ""}</div>` : ""}
+      ${r.status==="arrived" ? `<div class="txwait" data-a="${Date.parse(r.arrived_at)}"></div>` : ""}
       ${canc ? `<button class="txcan" onclick="txCancel(${r.id})">Bekor qilish</button>` : ""}</div>`;
   }).join("") : "";
 }
@@ -1160,10 +1162,20 @@ function drawTxParcels(){
   $("txParcels").innerHTML = ps.length ? ps.map(d=>`<label class="txp"><input type="checkbox" ${txSel.has(d.id)?"checked":""} onchange="txTog(${d.id},this.checked)"><span><b>${esc(d.track)}</b><small>${d.kg!=null ? Number(d.kg).toFixed(2) + " kg · " : ""}${d.status==="pickup" ? "Punktda" : "Punktga yetkazilmoqda"}</small></span></label>`).join("")
     : '<div class="paynote" style="margin:4px 2px">Hozircha yetkazish mumkin bo\'lgan yuk yo\'q. Yukingiz topshirish punktiga kelganda (yoki yetkazilayotganda) shu yerda ko\'rinadi.</div>';
 }
+let txOff = 0;
+function txTick(){
+  if(!tx) return;
+  document.querySelectorAll(".txwait").forEach(e=>{
+    const el = Math.max(0, Math.floor((Date.now() + txOff - Number(e.dataset.a))/1000)), free = tx.free_min*60, mm = x=>Math.floor(x/60) + ":" + String(x%60).padStart(2,"0");
+    if(el < free){ e.className = "txwait"; e.innerHTML = "⏱ Bepul kutish: <b>" + mm(free-el) + "</b> qoldi"; }
+    else{ e.className = "txwait pay"; e.innerHTML = "⏱ Pullik kutish: <b>+" + fmtSom(Math.ceil((el-free)/60)*tx.wait_price) + "</b> (har daqiqa " + fmtSom(tx.wait_price) + ")"; }
+  });
+}
+setInterval(txTick, 1000);
 function txTog(id, on){ if(on) txSel.add(id); else txSel.delete(id); drawTxPrice(); }
 function drawTxPrice(){
   const q = txQuote(txLat, txLng), b = $("txBtn"); if(!b) return;
-  $("txPrice").innerHTML = q ? `<div class="txq"><span>Masofa</span><b>${q.dist} km</b></div><div class="txq"><span>Yetkazish narxi</span><b>${fmtSom(q.fare)}</b></div><div class="paynote" style="margin:4px 0 0">Narx taksichiga naqd to'lanadi</div>`
+  $("txPrice").innerHTML = q ? `<div class="txq"><span>Masofa</span><b>${q.dist} km</b></div><div class="txq"><span>Yetkazish narxi</span><b>${fmtSom(q.fare)}</b></div><div class="paynote" style="margin:4px 0 0">Narx taksichiga naqd to'lanadi. Taksichi yetib kelgach ${tx.free_min} daqiqa bepul kutadi, keyin har daqiqa ${fmtSom(tx.wait_price)}.</div>`
     : '<div class="paynote" style="margin:4px 2px">Xaritada uyingiz joyini belgilang — narx shu yerda chiqadi.</div>';
   b.textContent = q ? "Buyurtma berish · " + fmtSom(q.fare) : "Buyurtma berish";
   b.disabled = txBusy;

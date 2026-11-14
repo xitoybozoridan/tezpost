@@ -632,9 +632,11 @@ html[data-view=pc] #orphans .wrap{max-width:900px}
         <div class="xf"><span class="lbl">Minimal narx (so'm)</span><input id="txaMin" inputmode="numeric" class="xsel" style="padding:0 12px" oninput="txaDirty=true"></div>
         <div class="xf"><span class="lbl">Sizning ulushingiz (%)</span><input id="txaPct" inputmode="decimal" class="xsel" style="padding:0 12px" oninput="txaDirty=true"></div>
         <div class="xf"><span class="lbl">Yo'l koeffitsienti</span><input id="txaRoad" inputmode="decimal" class="xsel" style="padding:0 12px" oninput="txaDirty=true"></div>
+        <div class="xf"><span class="lbl">Bepul kutish (daqiqa)</span><input id="txaFree" inputmode="numeric" class="xsel" style="padding:0 12px" oninput="txaDirty=true"></div>
+        <div class="xf"><span class="lbl">Pullik kutish (so'm/daqiqa)</span><input id="txaWP" inputmode="numeric" class="xsel" style="padding:0 12px" oninput="txaDirty=true"></div>
         <div class="xf xwide"><span class="lbl">Punkt nomi (mijoz ko'radi)</span><input id="txaPName" class="xsel" style="padding:0 12px" maxlength="80" oninput="txaDirty=true"></div>
       </div>
-      <div class="hoinfo" style="margin:8px 0;line-height:1.5">Narx = masofa (to'g'ri chiziq × yo'l koeffitsienti) × 1 km narxi, minimal narxdan kam bo'lmaydi. Ulushingiz shu narxdan olinadi, qolgani taksichiniki.</div>
+      <div class="hoinfo" style="margin:8px 0;line-height:1.5">Narx = masofa (to'g'ri chiziq × yo'l koeffitsienti) × 1 km narxi, minimal narxdan kam bo'lmaydi. Ulushingiz shu narxdan olinadi, qolgani taksichiniki. Taksichi «Yetib keldim» bosgach bepul kutish boshlanadi, undan keyingi har daqiqa kutish puli narxga qo'shiladi (u ham ulush bo'yicha bo'linadi).</div>
       <span class="lbl" style="margin-top:6px">Topshirish punkti joylashuvi (mijozlar o'zgartira olmaydi)</span>
       <div class="txamapw"><div id="txaMap" style="width:100%;height:100%"></div></div>
       <div style="display:flex;gap:8px;margin:8px 0"><button class="btn" style="height:42px;font-size:14px;box-shadow:none;background:#0B4DB5" onclick="txaLocate(this)">📍 Men turgan joy</button><div id="txaCoord" style="flex:1;align-self:center;font-size:12.5px;color:var(--muted)"></div></div>
@@ -890,7 +892,7 @@ let orOff = 0, orT = null;
 function setOrCnt(n){ const e = $("orCnt"); if(e) e.textContent = n > 0 ? "· " + n + " ta" : ""; }
 /* ====== TAKSI ====== */
 let txa = null, txaCtl = null, txaLat = null, txaLng = null, txaDirty = false, txaEdId = null, txaMapFor = false;
-const TXA_ST = {new:"⏳ Taksichi topilmadi", offered:"📨 Taksichiga yuborildi", accepted:"✅ Qabul qilindi", onway:"🚕 Yo'lda", delivered:"📦 Yetkazildi", cancelled:"✕ Bekor qilindi"};
+const TXA_ST = {new:"⏳ Taksichi topilmadi", offered:"📨 Taksichiga yuborildi", accepted:"✅ Qabul qilindi", onway:"🚕 Yo'lda", arrived:"📍 Yetib keldi, kutyapti", delivered:"📦 Yetkazildi", cancelled:"✕ Bekor qilindi"};
 async function checkTx(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_tx_badge", {p_token:token}); const e = $("txCnt"); if(e) e.textContent = r.n > 0 ? "· " + r.n + " ta kutmoqda" : ""; }catch(e){} }
 async function openTx(){ txaDirty = false; show("tx"); $("txaRides").innerHTML = '<div class="skel"></div>'; await loadTx(); }
 async function loadTx(){
@@ -898,7 +900,7 @@ async function loadTx(){
   const s = txa.settings, t = txa.totals;
   $("txSum").innerHTML = `<span class="lbl">Sizning daromadingiz (taksi ulushi)</span><div style="display:flex;gap:8px;text-align:center"><div style="flex:1"><b style="font-size:17px">${somN(t.today)}</b><br><small style="color:var(--muted)">Bugun</small></div><div style="flex:1"><b style="font-size:17px">${somN(t.month)}</b><br><small style="color:var(--muted)">Shu oy</small></div><div style="flex:1"><b style="font-size:17px">${somN(t.all)}</b><br><small style="color:var(--muted)">Jami · ${t.cnt} ta</small></div></div>`;
   if(!txaDirty){
-    $("txaOn").checked = !!s.on; $("txaKm").value = s.km_price; $("txaMin").value = s.min_price; $("txaPct").value = s.pct; $("txaRoad").value = s.road; $("txaPName").value = s.point_name;
+    $("txaOn").checked = !!s.on; $("txaKm").value = s.km_price; $("txaMin").value = s.min_price; $("txaPct").value = s.pct; $("txaRoad").value = s.road; $("txaPName").value = s.point_name; $("txaFree").value = s.free_min; $("txaWP").value = s.wait_price;
     if(s.lat != null && txaLat == null){ txaLat = +s.lat; txaLng = +s.lng; }
     txaCoordDraw();
   }
@@ -916,9 +918,9 @@ function txaDrawDrivers(){
 function txaDrawRides(){
   const rs = txa.rides, act = txa.drivers.filter(d=>d.active);
   $("txaRides").innerHTML = rs.length ? rs.map(r=>{
-    const open = ["new","offered","accepted","onway"].includes(r.status);
+    const open = ["new","offered","accepted","onway","arrived"].includes(r.status);
     return `<div class="pbox"><div class="ph"><div><b>${esc(r.customer)} · ${esc(r.code)}</b><small>${esc(r.phone||"")} · ${when(r.created_at)}</small></div><span class="pt" style="font-size:17px">${somN(r.fare)}</span></div>
-      <div style="font-size:13.5px;margin:6px 0"><b>${esc(TXA_ST[r.status]||r.status)}</b>${r.driver ? " · " + esc(r.driver) : ""}<br>📍 ${esc(r.addr)} · ${r.dist} km<br>📦 ${r.items} ta yuk${r.note ? " · " + esc(r.note) : ""}<br><span style="color:var(--muted)">Sizga: ${somN(r.admin_cut)} · Taksichiga: ${somN(r.driver_cut)}</span></div>
+      <div style="font-size:13.5px;margin:6px 0"><b>${esc(TXA_ST[r.status]||r.status)}</b>${r.driver ? " · " + esc(r.driver) : ""}<br>📍 ${esc(r.addr)} · ${r.dist} km<br>📦 ${r.items} ta yuk${r.note ? " · " + esc(r.note) : ""}<br>${r.wait_fee>0 ? "<br>⏱ Kutish puli: <b>" + somN(r.wait_fee) + "</b>" : ""}<br><span style="color:var(--muted)">Sizga: ${somN(r.admin_cut)} · Taksichiga: ${somN(r.driver_cut)}</span></div>
       ${open ? `<div style="display:flex;gap:8px;margin-bottom:8px"><select id="as${r.id}" class="xsel" style="flex:1">${act.map(d=>`<option value="${d.id}" ${d.id===r.driver_id?"selected":""}>${esc(d.name)}${d.is_on?"":" (ishda emas)"}</option>`).join("")}</select><button style="height:46px;border:0;border-radius:13px;background:#0B4DB5;color:#fff;font-weight:800;padding:0 14px" onclick="txaAssign(${r.id})">Biriktirish</button></div>
       <div class="pbtn"><button class="no" onclick="txaCancel(${r.id})">✕ Bekor qilish</button></div>` : ""}</div>`;
   }).join("") : '<div class="empty" style="margin-bottom:12px"><b>Buyurtma yo\'q</b><p>Mijoz uyga yetkazish buyurtma qilsa, shu yerda chiqadi.</p></div>';
@@ -956,7 +958,7 @@ async function txaLocate(btn){
 async function txaSave(){
   const n = id => Number(String($(id).value).replace(",", ".").replace(/\s/g, ""));
   try{
-    await rpc("admin_tx_set", {p_token:token, p_on:$("txaOn").checked, p_km:n("txaKm"), p_min:n("txaMin"), p_pct:n("txaPct"), p_road:n("txaRoad"), p_pname:$("txaPName").value, p_lat:txaLat, p_lng:txaLng});
+    await rpc("admin_tx_set", {p_token:token, p_on:$("txaOn").checked, p_km:n("txaKm"), p_min:n("txaMin"), p_pct:n("txaPct"), p_road:n("txaRoad"), p_pname:$("txaPName").value, p_lat:txaLat, p_lng:txaLng, p_free:n("txaFree"), p_wprice:n("txaWP")});
     txaDirty = false; toast("Saqlandi"); loadTx();
   }catch(e){ handleErr(e); }
 }

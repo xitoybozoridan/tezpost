@@ -42,6 +42,8 @@
   .rm{font-size:14px;color:var(--text);margin:8px 0;line-height:1.5}.rm small{color:var(--muted)}
   .row{display:flex;gap:8px;margin-top:10px}.row button,.row a{flex:1;height:46px;border:0;border-radius:14px;font-weight:800;font-size:15px;text-decoration:none;display:grid;place-items:center}
   .go{background:linear-gradient(180deg,#22A862,#127A45);color:#fff}.no{background:#FDECEC;color:var(--red)}.lnk{background:#E8F3EE;color:var(--g)}
+  .wt{margin:8px 0;border-radius:14px;padding:10px 12px;background:#E8F3EE;color:var(--g);font-weight:700;font-size:15px;line-height:1.4}
+  .wt.pay{background:#FFF4E5;color:#8A5A00}
   .empty{margin:30px 20px;text-align:center;color:var(--muted);line-height:1.5}
   .toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,20px);background:#222;color:#fff;padding:12px 18px;border-radius:14px;opacity:0;transition:.25s;pointer-events:none;z-index:99;max-width:90%}
   .toast.show{opacity:1;transform:translate(-50%,0)}.toast.bad{background:var(--red)}
@@ -86,7 +88,7 @@ async function rpc(name, args){
   if(!res.ok){ const m = (data && data.message) || "Xatolik"; const er = new Error(m); er.session = /Sessiya tugagan|invalid input syntax for type uuid/i.test(m); throw er; }
   return data;
 }
-let token = store.get("tpd_token"), S = null, timer = null, seen = new Set(), first = true, actx = null, busy = false;
+let off = 0, token = store.get("tpd_token"), S = null, timer = null, seen = new Set(), first = true, actx = null, busy = false;
 function toast(m, bad){ const t = $("toast"); t.textContent = m; t.classList.toggle("bad", !!bad); t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("show"), 2600); }
 function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active", s.id===id)); window.scrollTo(0,0); }
 function audio(){ try{ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume(); }catch(e){} }
@@ -114,7 +116,7 @@ function enter(){ first = true; seen = new Set(); show("main"); load(); clearInt
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token) load(); });
 async function load(){
   if(!token) return;
-  try{ S = await rpc("driver_state", {p_token:token}); }catch(e){ if(e.session) err(e); return; }
+  try{ S = await rpc("driver_state", {p_token:token}); off = S.now*1000 - Date.now(); }catch(e){ if(e.session) err(e); return; }
   const offered = S.rides.filter(r=>r.status==="offered");
   if(offered.some(r=>!seen.has(r.id)) && !first) ring();
   offered.forEach(r=>seen.add(r.id)); first = false;
@@ -127,12 +129,12 @@ function draw(){
   $("stats").innerHTML = `<div class="st"><b>${s.today_cnt}</b><small>Bugun</small></div><div class="st"><b>${som(s.today_earn)}</b><small>Bugun topdim</small></div><div class="st"><b>${s.total_cnt}</b><small>Jami</small></div>`;
   $("owe").innerHTML = s.owe > 0 ? `<div class="owe">Administratorga berishingiz kerak: <b>${som(s.owe)}</b></div>` : "";
   $("offBn").innerHTML = S.is_on ? "" : '<div class="off">Ishda emassiz — yangi buyurtmalar kelmaydi. Yuqoridagi tugmani yoqing.</div>';
-  const act = S.rides.filter(r=>["offered","accepted","onway"].includes(r.status)), done = S.rides.filter(r=>r.status==="delivered");
+  const act = S.rides.filter(r=>["offered","accepted","onway","arrived"].includes(r.status)), done = S.rides.filter(r=>r.status==="delivered");
   let h = "";
   if(act.length) h += "<h3>Buyurtmalar</h3>" + act.map(card).join("");
   else h += S.is_on ? '<div class="empty">🚕<br>Yangi buyurtma kutilmoqda…<br><small>Buyurtma kelganda ovoz chiqadi</small></div>' : "";
   if(done.length) h += "<h3>Yetkazilgan</h3>" + done.map(card).join("");
-  $("list").innerHTML = h;
+  $("list").innerHTML = h; tick();
 }
 function card(r){
   const lat = r.lat, lng = r.lng, ypt = `https://yandex.uz/maps/?rtext=~${lat},${lng}&rtt=auto`, gm = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
@@ -142,16 +144,27 @@ function card(r){
   else if(r.status === "accepted") btns = `<div class="row"><a class="lnk" href="tel:+${esc(r.phone)}">📞 Mijoz</a><a class="lnk" href="${ypt}" target="_blank" rel="noopener">🧭 Yandex</a><a class="lnk" href="${gm}" target="_blank" rel="noopener">Google</a></div>
       <div class="row"><button class="go" onclick="act('driver_start',${r.id})">🚕 Yo'lga chiqdim</button></div>`;
   else if(r.status === "onway") btns = `<div class="row"><a class="lnk" href="tel:+${esc(r.phone)}">📞 Mijoz</a><a class="lnk" href="${ypt}" target="_blank" rel="noopener">🧭 Yandex</a><a class="lnk" href="${gm}" target="_blank" rel="noopener">Google</a></div>
+      <div class="row"><button class="go" onclick="act('driver_arrive',${r.id})">📍 Yetib keldim (kutish boshlanadi)</button></div>`;
+  else if(r.status === "arrived") btns = `<div class="wt" data-a="${Date.parse(r.arrived_at)}"></div><div class="row"><a class="lnk" href="tel:+${esc(r.phone)}">📞 Mijoz</a></div>
       <div class="row"><button class="go" onclick="done(${r.id})">✓ Yetkazdim</button></div>`;
   const tr = (r.tracks||[]).map(esc).join(", ");
   return `<div class="ride ${r.status}"><div class="rh"><div><b>${r.status==="offered" ? "🔔 Yangi buyurtma" : esc(r.customer)}</b></div><span class="p">${som(r.driver_cut)}</span></div>
-    <div class="rm">📍 ${esc(r.addr)}${r.note ? "<br>💬 " + esc(r.note) : ""}<br><small>${r.dist} km · ${r.items} ta yuk · mijoz to'laydi: <b>${som(r.fare)}</b> (naqd)</small>${r.status==="offered" ? "" : "<br><small>" + tr + "</small>"}</div>
+    <div class="rm">📍 ${esc(r.addr)}${r.note ? "<br>💬 " + esc(r.note) : ""}<br><small>${r.dist} km · ${r.items} ta yuk · mijoz to'laydi: <b>${som(r.fare)}</b> (naqd)${r.wait_fee>0 ? " · shundan kutish puli " + som(r.wait_fee) : ""}</small>${r.status==="offered" ? "" : "<br><small>" + tr + "</small>"}</div>
     ${r.status!=="delivered" && pt ? `<div style="font-size:13px"><a href="${pt}" target="_blank" rel="noopener" style="color:var(--g);font-weight:700">🏢 Yuk olinadigan punkt: ${esc(S.point.name)}</a></div>` : ""}${btns}</div>`;
 }
-async function act(fn, id){
-  try{ await rpc(fn, {p_token:token, p_id:id}); await load(); toast(fn==="driver_accept" ? "Qabul qilindi" : fn==="driver_start" ? "Yo'lga chiqdingiz" : "Rad etildi"); }catch(e){ err(e); await load(); }
+function tick(){
+  if(!S) return;
+  document.querySelectorAll(".wt").forEach(e=>{
+    const el = Math.max(0, Math.floor((Date.now() + off - Number(e.dataset.a))/1000)), free = S.free_min*60, mm = x=>Math.floor(x/60) + ":" + String(x%60).padStart(2,"0");
+    if(el < free){ e.className = "wt"; e.innerHTML = "⏱ Kutish: " + mm(el) + "<br>Bepul qoldi: " + mm(free-el); }
+    else{ const pm = Math.ceil((el-free)/60); e.className = "wt pay"; e.innerHTML = "⏱ Kutish: " + mm(el) + "<br>Pullik kutish: +" + som(pm*S.wait_price) + " (har daqiqa " + som(S.wait_price) + ")"; }
+  });
 }
-async function done(id){ if(!confirm("Yuklar mijozga topshirildimi?")) return; try{ await rpc("driver_done", {p_token:token, p_id:id}); await load(); toast("Yetkazildi ✓"); }catch(e){ err(e); } }
+setInterval(tick, 1000);
+async function act(fn, id){
+  try{ await rpc(fn, {p_token:token, p_id:id}); await load(); tick(); toast(fn==="driver_accept" ? "Qabul qilindi" : fn==="driver_start" ? "Yo'lga chiqdingiz" : fn==="driver_arrive" ? "Kutish boshlandi" : "Rad etildi"); }catch(e){ err(e); await load(); }
+}
+async function done(id){ if(!confirm("Yuklar mijozga topshirildimi?")) return; try{ const r = await rpc("driver_done", {p_token:token, p_id:id}); await load(); toast("Yetkazildi ✓" + (r.wait_fee > 0 ? " · kutish puli " + som(r.wait_fee) : "")); }catch(e){ err(e); } }
 async function toggleOn(){ audio(); try{ await rpc("driver_toggle", {p_token:token, p_on:!S.is_on}); await load(); }catch(e){ err(e); } }
 if(token){ enter(); }
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
