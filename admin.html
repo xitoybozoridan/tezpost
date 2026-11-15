@@ -1429,11 +1429,11 @@ async function xlPushWeights(){
   const items = xl.hit.map(r=>({track:String(r[ti] ?? "").trim(), kg:String(r[wi] ?? "").trim()})).filter(x=>x.track && x.kg);
   if(!items.length){ toast("Og'irlik topilmadi", true); return; }
   if(!confirm(items.length + " ta yukning og'irligi TezPost'ga yoziladi (mijozlar deklaratsiya qilgan yuklarga). Davom etamizmi?")) return;
-  let upd = 0, missing = [];
+  let upd = 0, pend = 0, missing = [];
   try{
-    for(let i=0;i<items.length;i+=1000){ const r = await rpc("admin_bulk_weights", {p_token:token, p_items:items.slice(i,i+1000)}); upd += r.updated; missing = missing.concat(r.missing || []); }
+    for(let i=0;i<items.length;i+=1000){ const r = await rpc("admin_bulk_weights", {p_token:token, p_items:items.slice(i,i+1000)}); upd += r.updated; pend += (r.pending||0); missing = missing.concat(r.missing || []); }
     lsClear(); beep("done");
-    $("xlRes").insertAdjacentHTML("afterbegin", `<div class="scanbox" style="margin-bottom:10px"><b>Og'irlik yozildi: ${upd} ta yuk</b><div class="hoinfo" style="margin:6px 0 0">TezPost'da topilmadi (mijoz hali deklaratsiya qilmagan): <b>${items.length - upd}</b> ta${missing.length ? "<br>" + missing.slice(0,20).map(esc).join(", ") + (missing.length > 20 ? " ..." : "") : ""}</div></div>`);
+    $("xlRes").insertAdjacentHTML("afterbegin", `<div class="scanbox" style="margin-bottom:10px"><b>Og'irlik yozildi: ${upd} ta yuk</b><div class="hoinfo" style="margin:6px 0 0">Mijoz hali deklaratsiya qilmagan (og'irligi saqlandi, "Egasi topilmagan yuklar"da turadi): <b>${pend}</b> ta${pend ? ` <a href="#" onclick="openOrphans();return false" style="color:var(--blue);font-weight:800">Ko'rish ›</a>` : ""}</div></div>`);
   }catch(e){ handleErr(e); }
 }
 function xlCopy(){ const t = xlTracks().join("\n"); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>toast(xlTracks().length + " ta trek nusxalandi")).catch(()=>{ const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); toast(xlTracks().length + " ta trek nusxalandi"); }catch(e){ toast("Nusxalab bo'lmadi", true); } ta.remove(); }); }
