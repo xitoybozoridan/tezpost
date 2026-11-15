@@ -120,6 +120,19 @@
   .stsel.uz{color:#0A6A66} .stsel.uz select{background:#D0F0EE}
   .stsel.pickup{color:#0B5C9E} .stsel.pickup select{background:#D3E8FB}
   .stsel.done{color:#fff} .stsel.done select{background:#0B4DB5}
+  .hotop{display:block}
+  .hosum2{margin:10px 2px 2px;font-size:15px;font-weight:700;color:var(--muted,#5B6B8C);line-height:1.5}
+  .hosum2 b{color:var(--navy,#0B2B6B)}
+  .hobtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .hobtn{height:48px;padding:0 20px;border:0;border-radius:14px;font-size:16px;font-weight:800;color:#fff;cursor:pointer;flex:1 1 auto}
+  .hobtn.cash{background:#2563EB}.hobtn.cash.on{background:#127A45}
+  .hobtn.cancel{background:#E04545}.hobtn.done{background:linear-gradient(180deg,#22A862,#127A45)}
+  .hobtn:disabled{opacity:.4;cursor:not-allowed}
+  .homark{width:30px;height:30px;border-radius:9px;border:2px solid #B8C6E0;background:#fff;display:grid;place-items:center;flex:none;color:#fff;font-weight:900;font-size:18px;line-height:1}
+  .homark.on{background:#127A45;border-color:#127A45}.homark.on::after{content:"✓"}
+  .item.hoon{box-shadow:0 0 0 2px #127A45 inset}
+  html[data-view=pc] #handover .hotop{display:grid;grid-template-columns:minmax(320px,560px) minmax(420px,720px);gap:12px;align-items:start;justify-content:space-between}
+  html[data-view=pc] #handover .hotop .scanbox{max-width:none;margin:0}
   .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:22px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:40;width:max-content;max-width:90vw;text-align:center;box-shadow:0 10px 24px rgba(5,20,60,.35)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .toast.bad{background:var(--danger)}
@@ -602,17 +615,30 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
     <button class="bk" onclick="closeHo()" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
     <b style="font-size:17px;flex:1">Yuklarni topshirish</b>
   </div>
-  <div class="wrap" style="padding-bottom:110px">
-    <div class="scanbox">
-      <span class="lbl">Mijoz kodi</span>
-      <div class="scanrow">
-        <input id="hoIn" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="TP1001" enterkeyhint="search" oninput="hoTyping()">
-        <button class="go" onclick="hoFind()">Topish</button>
+  <div class="wrap">
+    <div class="hotop">
+      <div class="scanbox">
+        <span class="lbl">Mijoz kodi</span>
+        <div class="scanrow">
+          <input id="hoIn" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="TP1001" enterkeyhint="search" oninput="hoTyping()">
+          <button class="go" onclick="hoFind()">Qidirish</button>
+        </div>
+      </div>
+      <div class="scanbox hoact" id="hoAct" style="display:none">
+        <span class="lbl">Yuk IDsi (shtrix-kodni skaner qiling)</span>
+        <div class="scanrow">
+          <input id="hoScan" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Shtrix-kod yoki trek-kod" enterkeyhint="done">
+        </div>
+        <div class="hosum2" id="hoSum"></div>
+        <div class="hobtns">
+          <button class="hobtn cash" id="hoCashBtn" onclick="hoCashOn()">💵 Naqd pul</button>
+          <button class="hobtn cancel" id="hoCancelBtn" onclick="hoCancel()">Bekor qilish</button>
+          <button class="hobtn done" id="hoDoneBtn" onclick="applyHandover()">Topshirildi</button>
+        </div>
       </div>
     </div>
     <div id="hoBody"></div>
   </div>
-  <div class="actbar" id="hoBar"><div class="hosum" id="hoSum"></div><button class="btn" id="hoBtn" onclick="applyHandover()">Topshirish</button></div>
 </main>
 
 <!-- ===== SOZLAMALAR ===== -->
@@ -1574,20 +1600,24 @@ async function applyReceive(){
 }
 
 /* ====== Topshirish (mijoz kodi bo'yicha) ====== */
-let hoPaidOn = true, hoCust = null, hoItems = [], hoOther = 0, hoTimer = null;
-function openHandover(){ audio(); hoCust = null; hoItems = []; $("hoIn").value = ""; $("hoBody").innerHTML = ""; $("hoBar").classList.remove("show"); show("handover"); setTimeout(()=>$("hoIn").focus(), 120); }
+let hoCash = false, hoCust = null, hoItems = [], hoOther = 0, hoTimer = null;
+function openHandover(){ audio(); hoCust = null; hoItems = []; hoCash = false; $("hoIn").value = ""; $("hoScan").value = ""; $("hoBody").innerHTML = ""; $("hoAct").style.display = "none"; show("handover"); setTimeout(()=>$("hoIn").focus(), 120); }
 function closeHo(){ show("main"); search(); }
 $("hoIn").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoFind(); } });
+$("hoScan").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoScan(); } });
 function hoTyping(){ clearTimeout(hoTimer); const v = $("hoIn").value.replace(/\s/g,""); if(/^(tp)?\d{4,}$/i.test(v)) hoTimer = setTimeout(hoFind, 450); }
-async function hoFind(keepMsg){
+async function hoFind(){
   clearTimeout(hoTimer);
   const v = $("hoIn").value.trim(); if(!v) return;
   try{
     const r = await rpc("admin_handover_list", {p_token:token, p_code:v});
-    if(!r){ hoCust = null; hoItems = []; $("hoBar").classList.remove("show"); $("hoBody").innerHTML = `<div class="empty"><b>Mijoz topilmadi</b><p>«${esc(v)}» kodli mijoz yo'q. Kodni tekshiring (masalan TP1001).</p></div>`; beep(false); return; }
+    hoCash = false; $("hoScan").value = "";
+    if(!r){ hoCust = null; hoItems = []; $("hoAct").style.display = "none"; $("hoBody").innerHTML = `<div class="empty"><b>Mijoz topilmadi</b><p>«${esc(v)}» kodli mijoz yo'q. Kodni tekshiring (masalan TP1001).</p></div>`; beep(false); return; }
     hoCust = r.customer; hoOther = r.other; hoItems = r.items.map(x=>({...x, checked:false})); drawHo();
+    if(hoItems.length) setTimeout(()=>$("hoScan").focus(), 60);
   }catch(e){ handleErr(e); }
 }
+function hoDue(list){ return list.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Math.round(Number(x.amount||0) * Number(x.rate||0)), 0); }
 function drawHo(){
   const c = hoCust; if(!c) return;
   const sel = hoItems.filter(x=>x.checked).length;
@@ -1595,28 +1625,40 @@ function drawHo(){
     `<div class="hocust"><div class="code">${esc(c.code)}</div><div style="min-width:0"><b>${esc(c.name)}</b><a href="tel:+${esc(c.phone)}">${esc(fmtPhone(c.phone))}</a></div></div>`
     + `<div class="hoinfo">Topshirish punktida: ${hoItems.length} ta${hoOther ? " · Hali yetib kelmagan: " + hoOther + " ta" : ""}</div>`
     + (hoItems.length
-      ? `<div class="listhead"><label class="chk"><input type="checkbox" ${sel===hoItems.length?"checked":""} onchange="hoAll(this)">Hammasini belgilash</label><span class="when">${sel} / ${hoItems.length}</span></div>`
-        + hoItems.map(d=>`<div class="item"><div class="row1"><label class="chk pick"><input type="checkbox" ${d.checked?"checked":""} onchange="hoTick(${d.id},this)"></label><button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button></div>
+      ? `<div class="listhead"><b>Skaner qilingan</b><span class="when">${sel} / ${hoItems.length}</span></div>`
+        + hoItems.map(d=>`<div class="item ${d.checked?"hoon":""}"><div class="row1"><span class="homark ${d.checked?"on":""}"></span><button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button></div>
             <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}<span id="wt${d.id}">${wtHtml(d)}</span></div>${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}</div>`).join("")
       : `<div class="empty"><b>Topshiriladigan yuk yo'q</b><p>Bu mijozning yuklari hali topshirish punktiga qabul qilinmagan yoki hammasi topshirib bo'lingan.</p></div>`);
-  const chosen = hoItems.filter(x=>x.checked), kg = chosen.reduce((a,x)=>a + Number(x.weight_kg||0), 0), due = chosen.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Math.round(Number(x.amount||0) * Number(x.rate||0)), 0), nowt = chosen.filter(x=>x.weight_kg == null).length;
-  $("hoSum").innerHTML = sel ? `<span>${sel} ta · ${kgf(kg)} kg<br><span style="color:${due?"#C62828":"#127A45"}">${due ? "To'lov: " + somN(due) : "Hammasi to'langan"}${nowt ? " · og'irliksiz: " + nowt : ""}</span></span>${due ? `<label><input type="checkbox" ${hoPaidOn?"checked":""} onchange="hoPaidOn=this.checked">To'lov olindi</label>` : ""}` : "";
-  $("hoBtn").textContent = "Topshirish (" + sel + " ta)"; $("hoBar").classList.toggle("show", sel > 0);
+  $("hoAct").style.display = hoItems.length ? "" : "none";
+  hoPaint();
 }
-function hoTick(id, cb){ const x = hoItems.find(v=>v.id===id); if(x) x.checked = cb.checked; drawHo(); }
-function hoAll(cb){ hoItems.forEach(x=>x.checked = cb.checked); drawHo(); }
+function hoPaint(){
+  const chosen = hoItems.filter(x=>x.checked), sel = chosen.length, kg = chosen.reduce((a,x)=>a + Number(x.weight_kg||0), 0), due = hoDue(chosen), nowt = chosen.filter(x=>x.weight_kg == null).length;
+  $("hoSum").innerHTML = `Skaner: <b>${sel} / ${hoItems.length}</b> ta · <b>${kgf(kg)} kg</b><br>` + (sel ? (due ? `To'lov: <b style="color:#C62828">${somN(due)}</b>` : `<b style="color:#127A45">Hammasi to'langan</b>`) : "Har bir yukning shtrix-kodini skaner qiling") + (nowt ? ` · og'irliksiz: ${nowt}` : "");
+  const cb = $("hoCashBtn"); cb.disabled = !sel; cb.classList.toggle("on", hoCash); cb.textContent = hoCash ? "✓ Naqd pul olindi" : "💵 Naqd pul";
+  $("hoCancelBtn").disabled = !(sel || hoCash);
+  $("hoDoneBtn").disabled = !(sel && (hoCash || !due));
+}
+function hoScan(){
+  const raw = $("hoScan").value; $("hoScan").value = "";
+  const v = raw.toUpperCase().replace(/[^A-Z0-9]/g, ""); if(v.length < 4) return;
+  const x = hoItems.find(d=>v.includes(d.track) || (v.length >= 8 && d.track.includes(v)));
+  if(!x){ beep(false); toast("Bu yuk shu mijozning topshirish punktidagi yuklari orasida yo'q", true); $("hoScan").focus(); return; }
+  if(x.checked){ toast("Bu yuk allaqachon skaner qilingan"); beep(false); $("hoScan").focus(); return; }
+  x.checked = true; hoCash = false; beep(true); drawHo(); $("hoScan").focus();
+}
+function hoCashOn(){ if(!hoItems.some(x=>x.checked)) return; hoCash = true; hoPaint(); }
+function hoCancel(){ hoItems.forEach(x=>x.checked = false); hoCash = false; drawHo(); $("hoScan").focus(); }
 async function applyHandover(){
-  const ids = hoItems.filter(x=>x.checked).map(x=>x.id); if(!ids.length) return;
-  const ch = hoItems.filter(x=>x.checked), due = ch.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Math.round(Number(x.amount||0) * Number(x.rate||0)), 0);
-  if(!confirm(hoCust.name + " (" + hoCust.code + ") ga " + ids.length + " ta yuk topshirilsinmi?" + (due ? "\nTo'lov: " + somN(due) + (hoPaidOn ? " (olindi deb belgilanadi)" : " (to'lanmagan qoladi)") : ""))) return;
-  const b = $("hoBtn"); b.disabled = true;
+  const ch = hoItems.filter(x=>x.checked), ids = ch.map(x=>x.id); if(!ids.length) return;
+  const b = $("hoDoneBtn"); b.disabled = true;
   try{
     const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"done", p_from:["pickup"]});
     const n = (r && r.count != null) ? r.count : ids.length;
-    if(hoPaidOn){ const pid = ch.filter(x=>!x.paid && x.weight_kg != null).map(x=>x.id); if(pid.length) await rpc("admin_set_paid", {p_token:token, p_ids:pid, p_paid:true}); }
-    lsClear(); beep("done"); toast(n + " ta yuk topshirildi (Tasdiqlangan)"); await hoFind();
-  }catch(e){ handleErr(e); }
-  b.disabled = false;
+    if(hoCash){ const pid = ch.filter(x=>!x.paid && x.weight_kg != null).map(x=>x.id); if(pid.length) await rpc("admin_set_paid", {p_token:token, p_ids:pid, p_paid:true}); }
+    lsClear(); beep("done"); toast(n + " ta yuk mijozga topshirildi");
+    hoCash = false; await hoFind();
+  }catch(e){ handleErr(e); hoPaint(); }
 }
 
 /* ====== Sozlamalar: manzil va tariflar ====== */
