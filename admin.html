@@ -284,6 +284,55 @@
   html[data-view=pc] .actbar .btn,html[data-view=pc] #bar .btn{max-width:420px}
   html[data-view=pc] #receive.active,html[data-view=pc] #handover.active{max-width:none}
   html[data-view=pc] .toast{bottom:30px}
+  /* ---- Kompyuter ko'rinishi: ixcham qatorlar, butun ekran ---- */
+  html[data-view=pc] #main.screen,html[data-view=pc] #main .wrap,html[data-view=pc] .wrap{max-width:1780px}
+  html[data-view=pc] #out .item{grid-template-columns:28px 190px 74px minmax(0,1.15fr) minmax(0,1.35fr) 130px 160px;padding:6px 14px;margin-bottom:4px;border-radius:10px;gap:0 12px}
+  html[data-view=pc] #out .item .pick{grid-column:1;grid-row:1}
+  html[data-view=pc] #out .item .trk{grid-column:2;grid-row:1;font-size:14px;padding:0}
+  html[data-view=pc] #out .item .who{grid-column:3;grid-row:1;font-size:12px;padding:3px 8px}
+  html[data-view=pc] #out .item .nm{grid-column:4;grid-row:1;font-size:13.5px !important}
+  html[data-view=pc] #out .item .chips{grid-column:5;grid-row:1;gap:4px;font-size:12px}
+  html[data-view=pc] #out .item .when{grid-column:6;grid-row:1;font-size:11.5px;line-height:1.25}
+  html[data-view=pc] #out .item .stsel{grid-column:7;grid-row:1}
+  html[data-view=pc] #out .item .stsel select{font-size:12.5px;padding:5px 26px 5px 10px}
+  html[data-view=pc] #out .item .note-line{grid-column:2 / -1;grid-row:2;margin:1px 0 0;font-size:12px}
+  html[data-view=pc] #out .item .chip{font-size:11.5px;padding:2px 8px}
+  /* ---- Kompyuter ko'rinishi: barcha bo'limlar keng va ixcham ---- */
+  html[data-view=pc] #payments.screen,html[data-view=pc] #orphans.screen,html[data-view=pc] #tx.screen,html[data-view=pc] #receive.screen,html[data-view=pc] #handover.screen,html[data-view=pc] #report.screen{max-width:1780px}
+  html[data-view=pc] #receive.active,html[data-view=pc] #handover.active{max-width:1780px;margin:0 auto}
+  html[data-view=pc] #xl .wrap,html[data-view=pc] #bulkup .wrap,html[data-view=pc] #addrEdit .wrap{max-width:1780px}
+  html[data-view=pc] #thread.screen{max-width:1100px}
+  html[data-view=pc] #payments .wrap,html[data-view=pc] #orphans .wrap,html[data-view=pc] #tx .wrap,html[data-view=pc] #receive .wrap,html[data-view=pc] #handover .wrap,html[data-view=pc] #report .wrap{max-width:1780px;width:100%;margin:0 auto;padding:16px 24px 40px}
+  /* mijozlar va chatlar: ko'p ustunli panjara */
+  html[data-view=pc] #out:has(>.cust),html[data-view=pc] #out:has(>.crow){display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:8px 12px;align-items:start}
+  html[data-view=pc] #out:has(>.cust)>*:not(.cust),html[data-view=pc] #out:has(>.crow)>*:not(.crow){grid-column:1 / -1}
+  html[data-view=pc] #out .cust,html[data-view=pc] #out .crow{max-width:none;margin:0}
+  /* to'lovlar */
+  html[data-view=pc] #payments .wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:12px;align-items:start}
+  html[data-view=pc] #payments .wrap>.info,html[data-view=pc] #payments .wrap>#payPend{grid-column:1 / -1}
+  html[data-view=pc] #payments .wrap>.scanbox{margin-top:0 !important}
+  html[data-view=pc] #payPend{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:12px;align-items:start}
+  html[data-view=pc] #payPend .pbox,html[data-view=pc] #txaRides .pbox,html[data-view=pc] #txaDrivers .pbox{margin:0}
+  /* egasiz yuklar */
+  html[data-view=pc] #orphans .wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:10px 12px;align-items:start}
+  html[data-view=pc] #orphans .wrap>*{margin:0 !important}
+  html[data-view=pc] #orphans .wrap>.hoinfo,html[data-view=pc] #orphans .wrap>.scanrow,html[data-view=pc] #orphans .wrap>.listhead,html[data-view=pc] #orphans .wrap>#orList,html[data-view=pc] #orphans .wrap>.morebtn{grid-column:1 / -1}
+  html[data-view=pc] #orList{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:10px 12px;align-items:start}
+  html[data-view=pc] #orList>*{margin:0 !important}
+  html[data-view=pc] #orphans .scanrow{max-width:560px}
+  /* taksi */
+  html[data-view=pc] #tx .wrap{display:block}
+  html[data-view=pc] #txaRides,html[data-view=pc] #txaDrivers{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px;align-items:start}
+  html[data-view=pc] #txaRides>.empty,html[data-view=pc] #txaDrivers>.empty{grid-column:1 / -1}
+  html[data-view=pc] #txLockBox{max-width:520px}
+  /* qabul qilish va topshirish */
+  html[data-view=pc] #receive .scanbox,html[data-view=pc] #handover .scanbox{max-width:760px}
+  html[data-view=pc] #rcvList{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:8px 12px;align-items:start}
+  html[data-view=pc] #rcvList>.listhead,html[data-view=pc] #rcvList>.empty{grid-column:1 / -1}
+  html[data-view=pc] #rcvList>.item{margin:0}
+  html[data-view=pc] #hoBody{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:8px 12px;align-items:start}
+  html[data-view=pc] #hoBody>*{margin:0}
+  html[data-view=pc] #hoBody>.cust,html[data-view=pc] #hoBody>.listhead,html[data-view=pc] #hoBody>.empty,html[data-view=pc] #hoBody>.hoinfo,html[data-view=pc] #hoBody>div:not(.item){grid-column:1 / -1}
   @media (max-width:760px){html[data-view=pc] #main .hero{display:block}html[data-view=pc] .search{width:auto;max-width:none}html[data-view=pc] .acts{grid-template-columns:1fr 1fr}}
 
   .eyeb{flex:none;width:40px;height:40px;border-radius:13px;background:var(--blue-soft);display:grid;place-items:center;cursor:pointer}
@@ -340,14 +389,12 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
 .pbox table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}.pbox td{padding:5px 0;border-top:1px solid var(--line)}.pbox td.r{text-align:right;font-weight:700}
 .pbox .pbtn{display:flex;gap:8px}.pbox .pbtn button{flex:1;height:44px;border:0;border-radius:13px;font-weight:800;font-size:15px}
 .pbox .ok{background:linear-gradient(180deg,#22A862,#127A45);color:#fff}.pbox .no{background:#FDECEC;color:#C62828}
-html[data-view=pc] #payments .wrap{max-width:900px}
 .obox{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px}
 .obox .oh{display:flex;justify-content:space-between;align-items:center;gap:8px}.obox .oh b{font-size:15.5px;word-break:break-all}
 .obox .oc{font-size:12px;font-weight:800;border-radius:999px;padding:4px 10px;background:var(--blue-soft);color:var(--blue);white-space:nowrap}
 .obox .om{color:var(--muted);font-size:13.5px;margin:6px 0 10px;line-height:1.5}.obox .om b{color:var(--text,inherit)}
 .obox .ob{display:flex;gap:8px}.obox .ob button{height:42px;border:0;border-radius:12px;font-weight:800;font-size:14px;padding:0 14px}
 .obox .ob .go2{flex:1;background:linear-gradient(180deg,#2E6BE6,#1648B8);color:#fff}.obox .ob .no2{background:#FDECEC;color:#C62828}
-html[data-view=pc] #orphans .wrap{max-width:900px}
 .rcview{width:100%;margin-top:8px;padding:10px;border:1px solid #0B4DB5;background:#F2F7FE;color:#0B4DB5;border-radius:10px;font:inherit;font-weight:600}
 .txamapw{height:240px;border-radius:16px;overflow:hidden;border:1.5px solid var(--line);position:relative;z-index:0}
 .pbox .pbtn button{background:#E8F0FD}
@@ -618,6 +665,9 @@ html[data-view=pc] #orphans .wrap{max-width:900px}
     <b style="font-size:17px;flex:1">Taksi (uyga yetkazish)</b>
   </div>
   <div class="wrap" style="padding-bottom:40px">
+    <div class="scanbox" id="txLockBox"></div>
+    <div id="txBody" style="display:none">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button style="border:0;background:#E8F0FD;color:#0B4DB5;font-weight:800;border-radius:12px;padding:8px 14px" onclick="txRelock('')">🔒 Qulflash</button></div>
     <div class="scanbox" id="txSum"></div>
     <div class="info" style="margin-bottom:8px">Buyurtmalar</div>
     <div id="txaRides"></div>
@@ -641,6 +691,9 @@ html[data-view=pc] #orphans .wrap{max-width:900px}
       <div class="txamapw"><div id="txaMap" style="width:100%;height:100%"></div></div>
       <div style="display:flex;gap:8px;margin:8px 0"><button class="btn" style="height:42px;font-size:14px;box-shadow:none;background:#0B4DB5" onclick="txaLocate(this)">📍 Men turgan joy</button><div id="txaCoord" style="flex:1;align-self:center;font-size:12.5px;color:var(--muted)"></div></div>
       <button class="btn" style="margin-top:6px;box-shadow:none" onclick="txaSave()">Saqlash</button>
+    </div>
+    <button style="margin-top:12px;font-size:13.5px;background:none;border:0;color:var(--blue,#1A56DB);font-weight:800;padding:4px 0" onclick="txPwChg=!txPwChg;txLockDraw()">Taksi parolini o'zgartirish</button>
+    <div id="txPwBox"></div>
     </div>
   </div>
 </main>
@@ -894,9 +947,64 @@ function setOrCnt(n){ const e = $("orCnt"); if(e) e.textContent = n > 0 ? "· " 
 let txa = null, txaCtl = null, txaLat = null, txaLng = null, txaDirty = false, txaEdId = null, txaMapFor = false;
 const TXA_ST = {new:"⏳ Taksichi topilmadi", offered:"📨 Taksichiga yuborildi", accepted:"✅ Qabul qilindi", onway:"🚕 Yo'lda", arrived:"📍 Yetib keldi, kutyapti", delivered:"📦 Yetkazildi", cancelled:"✕ Bekor qilindi"};
 async function checkTx(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_tx_badge", {p_token:token}); const e = $("txCnt"); if(e) e.textContent = r.n > 0 ? "· " + r.n + " ta kutmoqda" : ""; }catch(e){} }
-async function openTx(){ txaDirty = false; show("tx"); $("txaRides").innerHTML = '<div class="skel"></div>'; await loadTx(); }
+let txaPass = null, txHas = null, txMsg = "", txPwChg = false;
+async function openTx(){
+  txaDirty = false; txaPass = null; txMsg = ""; txPwChg = false; show("tx");
+  $("txBody").style.display = "none"; $("txLockBox").style.display = "";
+  try{ const r = await rpc("admin_tx_status", {p_token:token}); txHas = r.has_pass; }catch(e){ handleErr(e); return; }
+  txLockDraw();
+}
+function txRelock(msg){
+  txaPass = null; txMsg = msg || ""; txPwChg = false;
+  $("txBody").style.display = "none"; $("txLockBox").style.display = ""; txLockDraw();
+}
+function txLockDraw(){
+  const I = (id, ph) => `<input id="${id}" type="password" class="xsel" style="padding:0 12px" placeholder="${ph}" autocomplete="new-password" maxlength="60">`;
+  const err = txMsg ? `<div class="hoinfo" style="color:#C62828;margin:8px 0 0;font-weight:700">${esc(txMsg)}</div>` : "";
+  if(txaPass !== null){
+    $("txPwBox").innerHTML = txPwChg ? `<div class="scanbox" style="margin-top:8px"><div class="xgrid"><div class="xf">${I("txOld","Eski parol")}</div><div class="xf">${I("txNew","Yangi parol (6+ belgi)")}</div></div>${err}<button class="btn" style="margin-top:8px;box-shadow:none" onclick="txSetPass(true)">Almashtirish</button></div>` : "";
+    return;
+  }
+  const box = $("txLockBox");
+  if(!txHas){
+    box.innerHTML = `<span class="lbl">🔒 Taksi bo'limi</span><div class="hoinfo" style="margin:2px 0 10px">Taksi bo'limini himoyalash uchun parol o'rnating. Parolsiz sozlamalar, taksichilar, buyurtmalar va daromadni ko'rib bo'lmaydi.</div>
+      <div class="xgrid"><div class="xf"><span class="lbl">Yangi parol (kamida 6 ta belgi)</span>${I("txNew","Yangi parol")}</div><div class="xf"><span class="lbl">Parolni takrorlang</span>${I("txNew2","Takrorlang")}</div></div>${err}
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="txSetPass(false)">Parolni o'rnatish</button>`;
+  }else{
+    box.innerHTML = `<span class="lbl">🔒 Taksi bo'limi</span><div class="hoinfo" style="margin:2px 0 10px">Ochish uchun Taksi parolini kiriting.</div>
+      <div class="xgrid"><div class="xf">${I("txPw","Taksi paroli")}</div></div>${err}
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="txUnlock()">🔓 Ochish</button>`;
+    const f = $("txPw"); if(f) f.addEventListener("keydown", e=>{ if(e.key === "Enter") txUnlock(); });
+  }
+}
+async function txUnlock(pw){
+  pw = pw || ($("txPw") && $("txPw").value); if(!pw) return;
+  try{
+    const r = await rpc("admin_tx_get", {p_token:token, p_lock:pw});
+    if(r.ok === false){ txMsg = r.msg; txHas = r.has_pass; txLockDraw(); return; }
+    txaPass = pw; txMsg = ""; $("txLockBox").style.display = "none"; $("txBody").style.display = ""; txLockDraw();
+    $("txaRides").innerHTML = '<div class="skel"></div>'; applyTx(r);
+  }catch(e){ handleErr(e); }
+}
+async function txSetPass(change){
+  const n1 = $("txNew").value, n2 = change ? n1 : $("txNew2").value;
+  if(n1 !== n2){ txMsg = "Parollar bir xil emas"; txLockDraw(); return; }
+  try{
+    const r = await rpc("admin_tx_setpass", {p_token:token, p_old: change ? $("txOld").value : "", p_new:n1});
+    if(!r.ok){ txMsg = r.msg; txLockDraw(); return; }
+    toast(change ? "Parol almashtirildi" : "Parol o'rnatildi. Endi uni eslab qoling"); txHas = true; txMsg = "";
+    if(change){ txaPass = n1; txPwChg = false; txLockDraw(); } else { txUnlock(n1); }
+  }catch(e){ handleErr(e); }
+}
+function txOk(r){ if(r && r.ok === false){ txRelock(r.msg); return false; } return true; }
 async function loadTx(){
-  try{ txa = await rpc("admin_tx_get", {p_token:token}); }catch(e){ handleErr(e); return; }
+  if(txaPass === null) return;
+  let r; try{ r = await rpc("admin_tx_get", {p_token:token, p_lock:txaPass}); }catch(e){ handleErr(e); return; }
+  if(!txOk(r)) return;
+  applyTx(r);
+}
+function applyTx(r){
+  txa = r;
   const s = txa.settings, t = txa.totals;
   $("txSum").innerHTML = `<span class="lbl">Sizning daromadingiz (taksi ulushi)</span><div style="display:flex;gap:8px;text-align:center"><div style="flex:1"><b style="font-size:17px">${somN(t.today)}</b><br><small style="color:var(--muted)">Bugun</small></div><div style="flex:1"><b style="font-size:17px">${somN(t.month)}</b><br><small style="color:var(--muted)">Shu oy</small></div><div style="flex:1"><b style="font-size:17px">${somN(t.all)}</b><br><small style="color:var(--muted)">Jami · ${t.cnt} ta</small></div></div>`;
   if(!txaDirty){
@@ -925,9 +1033,9 @@ function txaDrawRides(){
       <div class="pbtn"><button class="no" onclick="txaCancel(${r.id})">✕ Bekor qilish</button></div>` : ""}</div>`;
   }).join("") : '<div class="empty" style="margin-bottom:12px"><b>Buyurtma yo\'q</b><p>Mijoz uyga yetkazish buyurtma qilsa, shu yerda chiqadi.</p></div>';
 }
-async function txaAssign(id){ const s = $("as" + id); if(!s || !s.value) return; try{ await rpc("admin_tx_assign", {p_token:token, p_ride:id, p_driver:+s.value}); toast("Biriktirildi"); loadTx(); }catch(e){ handleErr(e); } }
-async function txaCancel(id){ if(!confirm("Buyurtma bekor qilinadi. Mijozga xabar boradi.")) return; try{ await rpc("admin_tx_cancel", {p_token:token, p_ride:id}); toast("Bekor qilindi"); loadTx(); }catch(e){ handleErr(e); } }
-async function txaSettle(id, amt){ if(!confirm(somN(amt) + " pulni taksichidan oldingizmi?")) return; try{ await rpc("admin_driver_settle", {p_token:token, p_driver:id}); toast("Hisob-kitob qilindi"); loadTx(); }catch(e){ handleErr(e); } }
+async function txaAssign(id){ const s = $("as" + id); if(!s || !s.value) return; try{ const r = await rpc("admin_tx_assign", {p_token:token, p_ride:id, p_driver:+s.value, p_lock:txaPass}); if(!txOk(r)) return; toast("Biriktirildi"); loadTx(); }catch(e){ handleErr(e); } }
+async function txaCancel(id){ if(!confirm("Buyurtma bekor qilinadi. Mijozga xabar boradi.")) return; try{ const r = await rpc("admin_tx_cancel", {p_token:token, p_ride:id, p_lock:txaPass}); if(!txOk(r)) return; toast("Bekor qilindi"); loadTx(); }catch(e){ handleErr(e); } }
+async function txaSettle(id, amt){ if(!confirm(somN(amt) + " pulni taksichidan oldingizmi?")) return; try{ const r = await rpc("admin_driver_settle", {p_token:token, p_driver:id, p_lock:txaPass}); if(!txOk(r)) return; toast("Hisob-kitob qilindi"); loadTx(); }catch(e){ handleErr(e); } }
 function txaDrvForm(id){
   txaEdId = id || null; const d = id ? txa.drivers.find(x=>x.id===id) : null;
   $("txdTitle").textContent = d ? "Taksichini tahrirlash" : "Yangi taksichi"; $("txdMsg").textContent = "";
@@ -938,8 +1046,8 @@ function txaDrvForm(id){
 function txaDrvClose(){ $("txdBack").style.display = "none"; }
 async function txaDrvSave(){
   try{
-    await rpc("admin_driver_save", {p_token:token, p_id:txaEdId, p_name:$("txdName").value, p_phone:$("txdPhone").value, p_car:$("txdCar").value, p_pass:$("txdPass").value, p_active:$("txdActive").checked});
-    txaDrvClose(); toast("Saqlandi"); loadTx();
+    const r = await rpc("admin_driver_save", {p_token:token, p_id:txaEdId, p_name:$("txdName").value, p_phone:$("txdPhone").value, p_car:$("txdCar").value, p_pass:$("txdPass").value, p_active:$("txdActive").checked, p_lock:txaPass});
+    txaDrvClose(); if(!txOk(r)) return; toast("Saqlandi"); loadTx();
   }catch(e){ if(e.session) handleErr(e); else $("txdMsg").textContent = e.message; }
 }
 function txaCoordDraw(){ $("txaCoord").textContent = txaLat != null ? "Punkt: " + txaLat.toFixed(5) + ", " + txaLng.toFixed(5) : "Punkt hali belgilanmagan"; }
@@ -958,7 +1066,8 @@ async function txaLocate(btn){
 async function txaSave(){
   const n = id => Number(String($(id).value).replace(",", ".").replace(/\s/g, ""));
   try{
-    await rpc("admin_tx_set", {p_token:token, p_on:$("txaOn").checked, p_km:n("txaKm"), p_min:n("txaMin"), p_pct:n("txaPct"), p_road:n("txaRoad"), p_pname:$("txaPName").value, p_lat:txaLat, p_lng:txaLng, p_free:n("txaFree"), p_wprice:n("txaWP")});
+    const r = await rpc("admin_tx_set", {p_token:token, p_on:$("txaOn").checked, p_km:n("txaKm"), p_min:n("txaMin"), p_pct:n("txaPct"), p_road:n("txaRoad"), p_pname:$("txaPName").value, p_lat:txaLat, p_lng:txaLng, p_free:n("txaFree"), p_wprice:n("txaWP"), p_lock:txaPass});
+    if(!txOk(r)) return;
     txaDirty = false; toast("Saqlandi"); loadTx();
   }catch(e){ handleErr(e); }
 }
