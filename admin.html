@@ -129,10 +129,18 @@
   .hobtn.cancel{background:#E04545}.hobtn.done{background:linear-gradient(180deg,#22A862,#127A45)}
   .hobtn:disabled{opacity:.4;cursor:not-allowed}
   .homark{width:30px;height:30px;border-radius:9px;border:2px solid #B8C6E0;background:#fff;display:grid;place-items:center;flex:none;color:#fff;font-weight:900;font-size:18px;line-height:1}
-  .homark.on{background:#127A45;border-color:#127A45}.homark.on::after{content:"✓"}
+  button.homark{padding:0;cursor:pointer}.homark.on{background:#127A45;border-color:#127A45}.homark.on::after{content:"✓"}
   .item.hoon{box-shadow:0 0 0 2px #127A45 inset}
   html[data-view=pc] #handover .hotop{display:grid;grid-template-columns:minmax(320px,560px) minmax(420px,720px);gap:12px;align-items:start;justify-content:space-between}
   html[data-view=pc] #handover .hotop .scanbox{max-width:none;margin:0}
+  .hotbl{overflow-x:auto;background:var(--card,#fff);border-radius:18px;box-shadow:0 2px 10px rgba(11,43,107,.06);margin-top:8px}
+  .hotbl table{width:100%;border-collapse:collapse;font-size:15px;font-weight:600;color:var(--navy,#0B2B6B)}
+  .hotbl th{padding:12px 10px;text-align:left;font-size:12px;font-weight:800;letter-spacing:.3px;color:#5B6B8C;border-bottom:1.5px solid #E3EAF7;white-space:nowrap}
+  .hotbl td{padding:10px;border-bottom:1px solid #EEF2FA;white-space:nowrap;vertical-align:middle}
+  .hotbl tbody tr:last-child td{border-bottom:0}
+  .hotbl tr.hoon{background:#EAF7F0}
+  .hotbl .trk{background:none;border:0;padding:0;font:inherit;font-weight:800;color:inherit;cursor:pointer}
+  .hoedit{border:0;background:#F1F5FD;color:var(--navy,#0B2B6B);font:inherit;font-weight:700;padding:5px 10px;border-radius:10px;cursor:pointer}.hoedit.nowt{background:#FFF1DF;color:#B24F00}
   .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:22px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:40;width:max-content;max-width:90vw;text-align:center;box-shadow:0 10px 24px rgba(5,20,60,.35)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .toast.bad{background:var(--danger)}
@@ -620,7 +628,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <div class="scanbox">
         <span class="lbl">Mijoz kodi</span>
         <div class="scanrow">
-          <input id="hoIn" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="TP1001" enterkeyhint="search" oninput="hoTyping()">
+          <input id="hoIn" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="TP1001" enterkeyhint="search">
           <button class="go" onclick="hoFind()">Qidirish</button>
         </div>
       </div>
@@ -1605,7 +1613,6 @@ function openHandover(){ audio(); hoCust = null; hoItems = []; hoCash = false; $
 function closeHo(){ show("main"); search(); }
 $("hoIn").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoFind(); } });
 $("hoScan").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoScan(); } });
-function hoTyping(){ clearTimeout(hoTimer); const v = $("hoIn").value.replace(/\s/g,""); if(/^(tp)?\d{4,}$/i.test(v)) hoTimer = setTimeout(hoFind, 450); }
 async function hoFind(){
   clearTimeout(hoTimer);
   const v = $("hoIn").value.trim(); if(!v) return;
@@ -1617,6 +1624,7 @@ async function hoFind(){
     if(hoItems.length) setTimeout(()=>$("hoScan").focus(), 60);
   }catch(e){ handleErr(e); }
 }
+function hoPpk(amt, kg){ for(const st of [0.5,0.1,0.01]){ const c = Math.round(amt/kg/st)*st; if(Math.abs(c*kg - amt) <= 0.0051) return "$" + (Math.round(c*100)/100); } return "$" + (Math.round(amt/kg*100)/100); }
 function hoDue(list){ return list.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Math.round(Number(x.amount||0) * Number(x.rate||0)), 0); }
 function drawHo(){
   const c = hoCust; if(!c) return;
@@ -1626,8 +1634,16 @@ function drawHo(){
     + `<div class="hoinfo">Topshirish punktida: ${hoItems.length} ta${hoOther ? " · Hali yetib kelmagan: " + hoOther + " ta" : ""}</div>`
     + (hoItems.length
       ? `<div class="listhead"><b>Skaner qilingan</b><span class="when">${sel} / ${hoItems.length}</span></div>`
-        + hoItems.map(d=>`<div class="item ${d.checked?"hoon":""}"><div class="row1"><span class="homark ${d.checked?"on":""}"></span><button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button></div>
-            <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}<span id="wt${d.id}">${wtHtml(d)}</span></div>${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}</div>`).join("")
+        + `<div class="hotbl"><table><thead><tr><th></th><th>TRACKCODE</th><th>Umumiy UZS</th><th>Umumiy USD</th><th>Og'irlik (Kg)</th><th>Narx 1 KG (USD)</th><th>TO'LOV</th></tr></thead><tbody>`
+        + hoItems.map(d=>{ const has = d.weight_kg != null, kg = Number(d.weight_kg||0), amt = Number(d.amount||0);
+            return `<tr class="${d.checked?"hoon":""}"><td>${d.checked ? `<button class="homark on" onclick="hoUntick(${d.id})" aria-label="Belgini olish" title="Belgini olish"></button>` : `<span class="homark"></span>`}</td>
+              <td><button class="trk" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button></td>
+              <td>${has ? Math.round(amt * Number(d.rate||0)).toLocaleString("en-US").replace(/,/g," ") : "—"}</td>
+              <td>${has ? amt.toFixed(2) : "—"}</td>
+              <td>${has ? `<button class="hoedit" onclick="editWeight(${d.id})">${kgf(kg)}</button>` : `<button class="hoedit nowt" onclick="editWeight(${d.id})">⚖ Kiriting</button>`}</td>
+              <td>${has && kg ? hoPpk(amt, kg) : "—"}</td>
+              <td>${has ? `<button class="chip paidc ${d.paid?"yes":"no"}" onclick="togglePaid(${d.id})">${d.paid?"✓ To'langan":"To'lanmagan"}</button>` : "—"}</td></tr>`; }).join("")
+        + `</tbody></table></div>`
       : `<div class="empty"><b>Topshiriladigan yuk yo'q</b><p>Bu mijozning yuklari hali topshirish punktiga qabul qilinmagan yoki hammasi topshirib bo'lingan.</p></div>`);
   $("hoAct").style.display = hoItems.length ? "" : "none";
   hoPaint();
@@ -1647,6 +1663,7 @@ function hoScan(){
   if(x.checked){ toast("Bu yuk allaqachon skaner qilingan"); beep(false); $("hoScan").focus(); return; }
   x.checked = true; hoCash = false; beep(true); drawHo(); $("hoScan").focus();
 }
+function hoUntick(id){ const x = hoItems.find(v=>v.id===id); if(!x || !x.checked) return; x.checked = false; hoCash = false; drawHo(); $("hoScan").focus(); }
 function hoCashOn(){ if(!hoItems.some(x=>x.checked)) return; hoCash = true; hoPaint(); }
 function hoCancel(){ hoItems.forEach(x=>x.checked = false); hoCash = false; drawHo(); $("hoScan").focus(); }
 async function applyHandover(){
