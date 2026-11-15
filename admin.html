@@ -84,12 +84,6 @@
   .stsel{position:relative}
   .stsel select{appearance:none;-webkit-appearance:none;border:0;outline:none;font-size:13px;font-weight:700;padding:8px 30px 8px 12px;border-radius:999px}
   .stsel::after{content:"";position:absolute;right:12px;top:50%;width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-70%) rotate(45deg);pointer-events:none}
-  .stsel.new{color:var(--blue)} .stsel.new select{background:var(--blue-soft)}
-  .stsel.china{color:#B24F00} .stsel.china select{background:var(--orange-soft)}
-  .stsel.transit{color:#8A6500} .stsel.transit select{background:#FFF4CC}
-  .stsel.uz{color:#127A45} .stsel.uz select{background:#E3F6EC}
-  .stsel.pickup{color:#0A6670} .stsel.pickup select{background:#D9F1F4}
-  .stsel.done{color:#fff} .stsel.done select{background:#127A45}
 
   /* ommaviy tanlash */
   .bulk{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border-radius:20px;padding:12px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
@@ -119,6 +113,13 @@
   .btn .sp{width:20px;height:20px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
   .setup{margin:18px 18px 0;background:#FFF4CC;color:#8A6500;border-radius:16px;padding:12px 14px;font-size:14px;font-weight:600}
 
+  .stsel.new{color:#B24F00} .stsel.new select{background:#FFE4C7}
+  .stsel.china{color:#8A6500} .stsel.china select{background:#FFF1C2}
+  .stsel.transit{color:#4F7A0A} .stsel.transit select{background:#E6F3C4}
+  .stsel.sort{color:#127A45} .stsel.sort select{background:#D3F2E0}
+  .stsel.uz{color:#0A6A66} .stsel.uz select{background:#D0F0EE}
+  .stsel.pickup{color:#0B5C9E} .stsel.pickup select{background:#D3E8FB}
+  .stsel.done{color:#fff} .stsel.done select{background:#0B4DB5}
   .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:22px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:40;width:max-content;max-width:90vw;text-align:center;box-shadow:0 10px 24px rgba(5,20,60,.35)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .toast.bad{background:var(--danger)}
@@ -562,8 +563,9 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <span class="lbl" style="margin-top:10px">Qaysi holatga o'tkazilsin</span>
       <select id="bkStatus" class="field" style="width:100%;height:46px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;font-size:15px;font-weight:700;background:#fff">
         <option value="china">Xitoy omborida</option>
-        <option value="transit">Yo'lda</option>
-        <option value="uz">Topshirish punktiga yetkazilmoqda</option>
+        <option value="transit">Jo'natildi</option>
+        <option value="sort">Saralanmoqda</option>
+        <option value="uz">Punktga yetkazilmoqda</option>
       </select>
     </div>
     <button class="btn" id="bkBtn" onclick="bkSend()" style="width:100%;max-width:420px;margin:0 auto;display:block">Yuklash</button>
@@ -751,7 +753,7 @@ try{ if(window.TP_CONFIG && TP_CONFIG.url){ const l=document.createElement("link
 /* ====== SOZLAMALAR ====== */
 const CONFIG = { url: (window.TP_CONFIG||{}).url || "", key: (window.TP_CONFIG||{}).key || "" };
 const CONFIGURED = !!(CONFIG.url && CONFIG.key);
-const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"Topshirish punktiga yetkazilmoqda", pickup:"Topshirish punktida", done:"Tasdiqlangan"};
+const STATUS = {new:"Jo'natma kutilmoqda", china:"Xitoy omborida", transit:"Jo'natildi", sort:"Saralanmoqda", uz:"Punktga yetkazilmoqda", pickup:"Topshirish punktida", done:"Mijozga topshirildi"};
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1357,11 +1359,12 @@ function zipWrite(files){
 }
 const xe = v => String(v ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const colName = i => { let s = "", n = i + 1; while(n > 0){ const m = (n-1) % 26; s = String.fromCharCode(65+m) + s; n = Math.floor((n-1)/26); } return s; };
-const XL_ST = [["","⏭ O'tkazib yuborish"],["china","Xitoy omborida"],["transit","Yo'lda"],["uz","Topshirish punktiga yetkazilmoqda"],["pickup","Topshirish punktida"],["done","Tasdiqlangan (topshirilgan)"]];
+const XL_ST = [["","⏭ O'tkazib yuborish"],["china","Xitoy omborida"],["transit","Jo'natildi"],["sort","Saralanmoqda"],["uz","Punktga yetkazilmoqda"],["pickup","Topshirish punktida"],["done","Mijozga topshirildi"]];
 function xlGuess(v){
   const t = String(v).toLowerCase();
   if(/topshiril|delivered|выдан|получен|completed|yakun|tasdiq|received by/.test(t)) return "done";
   if(/punktda|pickup|pick-up|ready|готов к выдаче|на пункте|в пункте|olib ket/.test(t)) return "pickup";
+  if(/saralan|sorting|sorted|сортир|sort/.test(t)) return "sort";
   if(/yetkazilmoqda|доставля|delivering|out for|arrived|прибы|bojxona|customs|таможн|uzbek|ўзб|o.zbek/.test(t)) return "uz";
   if(/yo.lda|transit|в пути|отправ|dispatch|shipped|sent|kuzat/.test(t)) return "transit";
   if(/xitoy|china|склад|ombor|warehouse|принят|qabul|received|stock|yiwu|yiwo|иу|guangzhou|guanchjou|shenzhen|foshan|ичжоу|гуанчжоу/.test(t)) return "china";
@@ -1563,7 +1566,7 @@ async function applyReceive(){
   const b = $("rcvBtn"); b.disabled = true;
   const backup = rcv.slice(); rcv = rcv.filter(x=>!x.checked); drawRcv(); beep("done");   // darhol tozalaymiz
   try{
-    const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"pickup", p_from:["new","china","transit","uz"]});
+    const r = await rpc("admin_bulk_status", {p_token:token, p_ids:ids, p_status:"pickup", p_from:["new","china","transit","sort","uz"]});
     const n = (r && r.count != null) ? r.count : ids.length;
     lsClear(); toast(n + " ta yuk qabul qilindi");
   }catch(e){ rcv = backup; drawRcv(); handleErr(e); }

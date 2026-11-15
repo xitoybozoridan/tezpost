@@ -71,12 +71,6 @@
   .item .top{display:flex;align-items:center;gap:8px;justify-content:space-between}
   .item .trk{font-weight:800;font-size:18px;letter-spacing:.6px;word-break:break-all}
   .st{flex:none;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
-  .st.new{background:var(--blue-soft);color:var(--blue)}
-  .st.china{background:var(--orange-soft);color:#B24F00}
-  .st.transit{background:#FFF4CC;color:#8A6500}
-  .st.uz{background:#E3F6EC;color:#127A45}
-  .st.pickup{background:#D9F1F4;color:#0A6670}
-  .st.done{background:#127A45;color:#fff}
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
   .chip{background:var(--orange-soft);color:#B24F00;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px}
   .item .when{margin-top:9px;font-size:13px;color:var(--muted)}
@@ -155,6 +149,13 @@
   .phead h3{margin:0;font-size:20px}
   .rm{margin-left:auto;background:#FDECEA;color:var(--danger);border:0;border-radius:12px;padding:7px 12px;font-size:14px;font-weight:600}
   .lbl{font-size:13px;font-weight:600;color:var(--muted);margin:2px 4px 8px;letter-spacing:.2px}
+  .st.new{background:#FFE4C7;color:#B24F00}
+  .st.china{background:#FFF1C2;color:#8A6500}
+  .st.transit{background:#E6F3C4;color:#4F7A0A}
+  .st.sort{background:#D3F2E0;color:#127A45}
+  .st.uz{background:#D0F0EE;color:#0A6A66}
+  .st.pickup{background:#D3E8FB;color:#0B5C9E}
+  .st.done{background:#0B4DB5;color:#fff}
   .stepper{display:flex;align-items:center;gap:10px;margin-bottom:16px}
   .stepper button{width:56px;height:56px;border-radius:18px;border:1.5px solid var(--line);background:#F7FAFF;color:var(--blue);font-size:28px;font-weight:600;line-height:1;display:grid;place-items:center}
   .stepper button:active{background:var(--blue-soft)}
@@ -306,6 +307,13 @@
   [data-theme=dark]{color-scheme:dark;--bg:#0A1120;--card:#121B30;--text:#E8EEFC;--muted:#8D9DC2;--line:#23304F;--blue-soft:#17264A;--orange-soft:#2C1F10;--shadow:0 6px 22px rgba(0,0,0,.4)}
   [data-theme=dark] .nav .in,[data-theme=dark] .chat-top,[data-theme=dark] .composer,[data-theme=dark] .qcard,[data-theme=dark] .trow,[data-theme=dark] .b.adm,[data-theme=dark] .tabs button.on{background:var(--card)}
   [data-theme=dark] .nav .in{box-shadow:0 -8px 28px rgba(0,0,0,.4)}
+  [data-theme=dark] .st.new{background:#3A2410;color:#FFB366}
+  [data-theme=dark] .st.china{background:#3A3010;color:#FFD966}
+  [data-theme=dark] .st.transit{background:#27340F;color:#B7E36A}
+  [data-theme=dark] .st.sort{background:#12301F;color:#5BD78F}
+  [data-theme=dark] .st.uz{background:#0F3036;color:#6FD6E0}
+  [data-theme=dark] .st.pickup{background:#10294A;color:#7DBBF5}
+  [data-theme=dark] .st.done{background:#1D5FD0;color:#fff}
   [data-theme=dark] #msgIn,[data-theme=dark] .pcard .field,[data-theme=dark] .stepper button,[data-theme=dark] .stepper input{background:#0D1629;color:var(--text)}
   [data-theme=dark] .bar{background:rgba(10,17,32,.88)}
   [data-theme=dark] .menu button:active{background:#17223D}
@@ -316,11 +324,6 @@
   .qrow{padding:4px 14px 16px;margin:0 -14px}
   [data-theme=dark] .link.back,[data-theme=dark] .all{color:#8DB4FF}
   [data-theme=dark] .chip{color:#FFB366}
-  [data-theme=dark] .st.new{background:#1B2D5C;color:#8DB4FF}
-  [data-theme=dark] .st.china{background:#3A2410;color:#FFB366}
-  [data-theme=dark] .st.transit{background:#3A3010;color:#FFD966}
-  [data-theme=dark] .st.uz{background:#12301F;color:#5BD78F}
-  [data-theme=dark] .st.pickup{background:#0F3036;color:#6FD6E0}
   [data-theme=dark] .skel{background:linear-gradient(90deg,#17223D 25%,#1E2B4B 50%,#17223D 75%);background-size:200% 100%}
   [data-theme=dark] .note-line{color:#A9B8DA}
   [data-theme=dark] .field input::placeholder,[data-theme=dark] #msgIn::placeholder{color:#5D6E93}
@@ -638,7 +641,7 @@ const CONFIG = {
   productTypes: ["Kiyim","Poyabzal","Elektronika","Aksessuarlar","Uy-ro'zg'or buyumlari","Kosmetika","O'yinchoqlar","Avto ehtiyot qismlar","Boshqa"]
 };
 const CONFIGURED = !!(CONFIG.url && CONFIG.key);
-const STATUS = {new:"Yangi", china:"Xitoy omborida", transit:"Yo'lda", uz:"Topshirish punktiga yetkazilmoqda", pickup:"Topshirish punktida", done:"Tasdiqlangan"};
+const STATUS = {new:"Jo'natma kutilmoqda", china:"Xitoy omborida", transit:"Jo'natildi", sort:"Saralanmoqda", uz:"Punktga yetkazilmoqda", pickup:"Topshirish punktida", done:"Mijozga topshirildi"};
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
