@@ -143,6 +143,16 @@
   .hoedit{border:0;background:#F1F5FD;color:var(--navy,#0B2B6B);font:inherit;font-weight:700;padding:5px 10px;border-radius:10px;cursor:pointer}.hoedit.nowt{background:#FFF1DF;color:#B24F00}
   #pkForm .go{height:46px;border:0;border-radius:12px;background:linear-gradient(180deg,#FF9A33,#F26D00);color:#fff;font-weight:800;font-size:16px}
   #pkList button.chip,#pkErr button.chip{border:0;cursor:pointer}
+  .pkwgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+  .pkwcard{border:0;width:100%;cursor:pointer;text-align:left}
+  .pkwbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.pkwbar input{height:38px;border:1.5px solid #D6DFF2;border-radius:10px;padding:0 10px;font:inherit}
+  .pkwcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:10px}
+  .pkwcards .c{background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 10px rgba(11,43,107,.06)}
+  .pkwcards .c span{display:block;font-size:11px;font-weight:800;color:#5B6B8C;text-transform:uppercase}.pkwcards .c b{display:block;font-size:20px;margin-top:2px}
+  .pkwcols{display:grid;grid-template-columns:1fr;gap:12px}
+  .pkwrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;margin-bottom:6px}.pkwt{font-family:ui-monospace,Menlo,Consolas,monospace}
+  html[data-view=pc] #pkw .wrap{max-width:1780px;margin:0 auto;padding:16px 24px 40px}
+  html[data-view=pc] .pkwcols{grid-template-columns:1.2fr 1fr;align-items:start}
   .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:22px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:40;width:max-content;max-width:90vw;text-align:center;box-shadow:0 10px 24px rgba(5,20,60,.35)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .toast.bad{background:var(--danger)}
@@ -322,7 +332,7 @@
   html[data-view=pc] #out .item .note-line{grid-column:2 / -1;grid-row:2;margin:1px 0 0;font-size:12px}
   html[data-view=pc] #out .item .chip{font-size:11.5px;padding:2px 8px}
   /* ---- Kompyuter ko'rinishi: barcha bo'limlar keng va ixcham ---- */
-  html[data-view=pc] #payments.screen,html[data-view=pc] #orphans.screen,html[data-view=pc] #tx.screen,html[data-view=pc] #receive.screen,html[data-view=pc] #handover.screen,html[data-view=pc] #report.screen{max-width:1780px}
+  html[data-view=pc] #payments.screen,html[data-view=pc] #orphans.screen,html[data-view=pc] #tx.screen,html[data-view=pc] #pkw.screen,html[data-view=pc] #pk.screen,html[data-view=pc] #receive.screen,html[data-view=pc] #handover.screen,html[data-view=pc] #report.screen{max-width:1780px}
   html[data-view=pc] #receive.active,html[data-view=pc] #handover.active{max-width:1780px;margin:0 auto}
   html[data-view=pc] #xl .wrap,html[data-view=pc] #bulkup .wrap,html[data-view=pc] #addrEdit .wrap{max-width:1780px}
   html[data-view=pc] #thread.screen{max-width:1100px}
@@ -709,12 +719,22 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
   </div>
   <div class="wrap" style="padding-bottom:40px">
     <div class="info" style="margin-bottom:8px">Punkt ilovasi: <b id="pkLink"></b></div>
+    <button class="go" style="width:100%;height:50px;border:0;border-radius:14px;background:linear-gradient(180deg,#2B6BE6,#0B4DB5);color:#fff;font-weight:800;font-size:16px;margin-bottom:10px" onclick="openPkw()">👁 Punkt kuzatuvi</button>
     <div class="scanbox" id="pkForm"></div>
     <div class="info" style="margin:14px 4px 8px">Punktlar</div>
     <div id="pkList"></div>
     <div class="info" style="margin:14px 4px 8px">Xato punkt (boshqa punktga tegishli skaner qilingan yuklar)</div>
     <div id="pkErr"></div>
   </div>
+</main>
+
+<main id="pkw" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="pkwStop();show('pk')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1" id="pkwTitle">Punkt kuzatuvi</b>
+    <button class="chip" style="border:0;cursor:pointer" onclick="pkwLoad()">⟳</button>
+  </div>
+  <div class="wrap" style="padding-bottom:40px" id="pkwBody"></div>
 </main>
 
 <main id="tx" class="screen">
@@ -1698,6 +1718,34 @@ async function applyHandover(){
     lsClear(); beep("done"); toast(n + " ta yuk mijozga topshirildi");
     hoCash = false; await hoFind();
   }catch(e){ handleErr(e); hoPaint(); }
+}
+
+/* ====== Punkt kuzatuvi ====== */
+let pkwId = null, pkwDate = "", pkwTimer = null;
+const pkwToday = () => new Date(Date.now() + 5*3600*1000).toISOString().slice(0,10);
+const pkwFmt = n => Math.round(Number(n||0)).toLocaleString("en-US").replace(/,/g," ");
+const pkwTime = s => { if(!s) return "—"; const d = new Date(s), p = n=>String(n).padStart(2,"0"); return p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds()); };
+async function openPkw(){
+  pkwId = null; pkwStop(); show("pkw"); $("pkwTitle").textContent = "Punkt kuzatuvi";
+  try{
+    const list = await rpc("admin_punkts", {p_token:token});
+    $("pkwBody").innerHTML = list.length ? `<div class="info" style="margin-bottom:8px">Kuzatmoqchi bo'lgan punktni tanlang</div><div class="pkwgrid">` + list.map(p=>`<button class="item pkwcard" onclick="pkwOpen(${p.id})"><div class="row1"><b style="flex:1;font-size:17px;text-align:left">${esc(p.name)}</b><span class="chip" style="${p.active?"":"background:#FDE8E8;color:#C62828"}">${p.active?"Faol":"O'chiq"}</span></div><div class="chips"><span class="chip">Punktda: ${p.at_punkt}</span><span class="chip">Jami: ${p.total}</span>${p.errors?`<span class="chip" style="background:#FDE8E8;color:#C62828">Xato: ${p.errors}</span>`:""}</div><div style="margin-top:8px;color:#0B4DB5;font-weight:800;text-align:left">👁 Kuzatish ›</div></button>`).join("") + `</div>` : `<div class="empty"><b>Hali punkt yo'q</b></div>`;
+  }catch(e){ handleErr(e); }
+}
+function pkwOpen(id){ pkwId = id; pkwDate = pkwToday(); pkwLoad(); pkwStop(); pkwTimer = setInterval(()=>{ if(document.getElementById("pkw").classList.contains("active") && pkwId && pkwDate === pkwToday()) pkwLoad(true); }, 15000); }
+function pkwStop(){ clearInterval(pkwTimer); pkwTimer = null; }
+function pkwShift(n){ const d = new Date(pkwDate + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); pkwDate = d.toISOString().slice(0,10); pkwLoad(); }
+async function pkwLoad(quiet){
+  if(!pkwId) { openPkw(); return; }
+  try{
+    const r = await rpc("admin_punkt_watch", {p_token:token, p_punkt:pkwId, p_date:pkwDate});
+    $("pkwTitle").textContent = "👁 " + r.punkt.name;
+    const K = {qabul:["📥 Qabul qildi","#D3E8FB","#0B5C9E"], topshirish:["📤 Topshirdi","#D3F2E0","#127A45"], musodara:["🚫 Musodara","#FDE8E8","#C62828"], xato:["⚠️ Xato punkt","#FFF1DF","#B24F00"]};
+    $("pkwBody").innerHTML = `<div class="pkwbar"><button class="chip" style="border:0;cursor:pointer" onclick="pkwShift(-1)">‹</button><input type="date" value="${pkwDate}" onchange="if(this.value){pkwDate=this.value;pkwLoad()}"><button class="chip" style="border:0;cursor:pointer" onclick="pkwShift(1)">›</button><button class="chip" style="border:0;cursor:pointer" onclick="pkwDate=pkwToday();pkwLoad()">Bugun</button><span class="when" style="margin-left:auto">${pkwDate === pkwToday() ? "● jonli (15 soniyada yangilanadi)" : ""}</span></div>
+      <div class="pkwcards"><div class="c"><span>Qabul qilingan</span><b>${r.received}</b></div><div class="c"><span>Topshirilgan</span><b>${r.handed}</b></div><div class="c"><span>Og'irlik</span><b>${Math.round(r.kg*1000)/1000} kg</b></div><div class="c"><span>Jami (so'm)</span><b>${pkwFmt(r.total_uzs)}</b></div><div class="c"><span>Naqd olindi</span><b style="color:#127A45">${pkwFmt(r.cash_uzs)}</b></div><div class="c"><span>Oldindan to'langan</span><b>${pkwFmt(r.prepaid_uzs)}</b></div><div class="c"><span>To'lanmagan</span><b style="color:#C62828">${pkwFmt(r.debt_uzs)}</b></div><div class="c"><span>Hozir punktda</span><b>${r.at_punkt}</b></div><div class="c"><span>Ochiq xatolar</span><b style="color:${r.errors_open?"#C62828":"inherit"}">${r.errors_open}</b></div><div class="c"><span>Musodara (jami)</span><b>${r.conf_total}</b></div></div>
+      <div class="pkwcols"><div><div class="info" style="margin:6px 2px 8px">Ish jurnali (${r.feed.length})</div>${r.feed.length ? r.feed.map(f=>{ const k = K[f.kind]||[f.kind,"#EEF3FD","#0B4DB5"]; return `<div class="item pkwrow"><span class="chip" style="background:${k[1]};color:${k[2]}">${k[0]}</span><b class="pkwt">${esc(f.track)}</b><span class="nm">${esc(f.customer_code||"")} ${esc(f.customer_name||"")}</span>${f.note?`<span class="chip">${esc(f.note)}</span>`:""}<span class="when" style="margin-left:auto">${pkwTime(f.at)}</span></div>`; }).join("") : `<div class="empty"><b>Bu kunda harakat yo'q</b></div>`}</div>
+      <div><div class="info" style="margin:6px 2px 8px">Hozir punktdagi yuklar (${r.stock.length})</div>${r.stock.length ? r.stock.map(x=>`<div class="item pkwrow"><b class="pkwt">${esc(x.track)}</b><span class="nm">${esc(x.customer_code)} ${esc(x.customer_name)}</span>${x.confiscated?`<span class="chip" style="background:#FDE8E8;color:#C62828">Musodara</span>`:""}<span class="chip">${x.weight_kg!=null?Math.round(x.weight_kg*1000)/1000+" kg":"og'irliksiz"}</span><span class="when" style="margin-left:auto">${x.received_at?pkwTime(x.received_at):""}</span></div>`).join("") : `<div class="empty"><b>Punktda yuk yo'q</b></div>`}</div></div>`;
+  }catch(e){ if(!quiet) handleErr(e); }
 }
 
 /* ====== Punktlar ====== */
