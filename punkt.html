@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B2B6B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="punkt-manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>TezPost Punkt</title>
+<style>
+  :root{--navy:#0B2B6B;--blue:#2563EB;--bg:#F3F6FC;--card:#fff;--line:#E3EAF7;--muted:#5B6B8C;--ok:#127A45;--bad:#C62828;--orange:#FF7A00}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--navy);font-size:15px}
+  button{font:inherit;cursor:pointer}
+  input,select{font:inherit;color:inherit}
+  [hidden]{display:none!important}
+  /* kirish */
+  #login{min-height:100%;display:grid;place-items:center;padding:20px}
+  .lbox{width:100%;max-width:380px;background:#fff;border-radius:22px;padding:26px;box-shadow:0 8px 30px rgba(11,43,107,.12)}
+  .lbox img{width:64px;height:64px;border-radius:18px;display:block;margin:0 auto 10px}
+  .lbox h1{margin:0 0 4px;text-align:center;font-size:22px}
+  .lbox p{margin:0 0 18px;text-align:center;color:var(--muted);font-size:14px}
+  .lbox label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:10px 2px 5px}
+  .lbox input{width:100%;height:50px;border:2px solid var(--line);border-radius:14px;padding:0 14px;font-size:17px;background:#F8FAFE;outline:none}
+  .lbox input:focus{border-color:var(--blue)}
+  .lbox .go{width:100%;height:52px;margin-top:18px;border:0;border-radius:14px;background:linear-gradient(180deg,#FF9A33,#F26D00);color:#fff;font-weight:800;font-size:17px}
+  .lerr{color:var(--bad);font-weight:700;text-align:center;margin-top:12px;min-height:20px;font-size:14px}
+  /* qobiq */
+  header.top{height:58px;display:flex;align-items:center;gap:10px;padding:0 14px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+  header.top img{width:36px;height:36px;border-radius:10px}
+  header.top b{font-size:17px}
+  .sp{flex:1}
+  .pname{font-weight:800;color:var(--blue);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38vw}
+  .hb{height:38px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:700;color:var(--navy)}
+  .shell{display:flex;min-height:calc(100vh - 58px)}
+  nav#nav{width:250px;flex:none;background:#fff;border-right:1px solid var(--line);padding:12px 10px;position:sticky;top:58px;height:calc(100vh - 58px);overflow:auto}
+  nav#nav button{display:flex;align-items:center;gap:12px;width:100%;height:46px;border:0;background:none;border-radius:12px;padding:0 14px;font-weight:700;font-size:15px;color:var(--navy);text-align:left;text-transform:uppercase;letter-spacing:.2px}
+  nav#nav button .ic{font-size:19px;width:24px;text-align:center}
+  nav#nav button.on{background:#EEF3FD;color:var(--blue)}
+  nav#nav button:hover{background:#F3F6FC}
+  nav#nav .bd{margin-left:auto;background:var(--bad);color:#fff;border-radius:99px;font-size:12px;padding:2px 8px}
+  main#view{flex:1;min-width:0;padding:16px 18px 40px}
+  /* umumiy */
+  .panel{background:var(--card);border-radius:18px;box-shadow:0 2px 10px rgba(11,43,107,.06);padding:14px}
+  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .in{height:46px;border:2px solid var(--line);border-radius:12px;padding:0 14px;background:#fff;outline:none;min-width:0;font-size:16px}
+  .in:focus{border-color:var(--blue)}
+  .grow{flex:1 1 220px}
+  .btn{height:46px;padding:0 20px;border:0;border-radius:12px;background:var(--blue);color:#fff;font-weight:800;font-size:15px}
+  .btn.sec{background:#fff;color:var(--navy);border:1.5px solid var(--line)}
+  .btn.ok{background:linear-gradient(180deg,#22A862,#127A45)}.btn.red{background:#E04545}.btn.org{background:linear-gradient(180deg,#FF9A33,#F26D00)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .tw{overflow-x:auto;background:var(--card);border-radius:18px;box-shadow:0 2px 10px rgba(11,43,107,.06)}
+  table{width:100%;border-collapse:collapse;font-size:14px;font-weight:600}
+  th{padding:12px 10px;text-align:left;font-size:12px;font-weight:800;letter-spacing:.3px;color:var(--muted);border-bottom:1.5px solid var(--line);white-space:nowrap;text-transform:uppercase}
+  td{padding:10px;border-bottom:1px solid #EEF2FA;white-space:nowrap;vertical-align:middle}
+  tbody tr:last-child td{border-bottom:0}
+  td.r,th.r{text-align:right}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700}
+  .empty{padding:36px 10px;text-align:center;color:var(--muted);font-weight:600}
+  .st{display:inline-block;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:800}
+  .st.new{background:#FFE4C7;color:#B24F00}.st.china{background:#FFF1C2;color:#8A6500}.st.transit{background:#E6F3C4;color:#4F7A0A}
+  .st.sort{background:#D3F2E0;color:#127A45}.st.uz{background:#D0F0EE;color:#0A6A66}.st.pickup{background:#D3E8FB;color:#0B5C9E}.st.done{background:#0B4DB5;color:#fff}
+  .tag{display:inline-block;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:800;background:#EEF3FD;color:var(--blue)}
+  .tag.bad{background:#FDE8E8;color:var(--bad)}.tag.ok{background:#E3F6EC;color:var(--ok)}.tag.warn{background:#FFF1DF;color:#B24F00}
+  .pager{display:flex;align-items:center;gap:10px;justify-content:flex-end;margin-top:12px;color:var(--muted);font-weight:700}
+  .pager button{height:38px;min-width:42px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-weight:800;color:var(--navy)}
+  .pager button:disabled{opacity:.35}
+  .dd{position:relative}
+  .dd .menu{position:absolute;top:50px;right:0;z-index:20;background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(11,43,107,.22);padding:6px;min-width:220px;max-height:340px;overflow:auto}
+  .dd .menu button{display:block;width:100%;border:0;background:none;text-align:left;padding:10px 12px;border-radius:9px;font-weight:700;color:var(--navy)}
+  .dd .menu button:hover,.dd .menu button.on{background:#EEF3FD;color:var(--blue)}
+  .sum{font-size:15px;font-weight:700;color:var(--muted);line-height:1.6}.sum b{color:var(--navy)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px}
+  .cards .c{background:#fff;border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(11,43,107,.06)}
+  .cards .c span{display:block;font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase}
+  .cards .c b{display:block;font-size:22px;margin-top:4px}
+  .scanbox{background:#fff;border-radius:18px;box-shadow:0 2px 10px rgba(11,43,107,.06);padding:14px}
+  .scanbox .lbl{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
+  .scanrow{display:flex;gap:8px}.scanrow .in{flex:1}
+  .two{display:grid;grid-template-columns:minmax(320px,560px) minmax(380px,1fr);gap:12px;align-items:start;margin-bottom:12px}
+  .hobtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .hobtn{height:48px;padding:0 20px;border:0;border-radius:14px;font-size:16px;font-weight:800;color:#fff;flex:1 1 auto}
+  .hobtn.cash{background:#2563EB}.hobtn.cash.on{background:#127A45}.hobtn.cancel{background:#E04545}.hobtn.done{background:linear-gradient(180deg,#22A862,#127A45)}
+  .hobtn:disabled{opacity:.4;cursor:not-allowed}
+  .homark{width:28px;height:28px;border-radius:8px;border:2px solid #B8C6E0;background:#fff;display:inline-grid;place-items:center;color:#fff;font-weight:900;font-size:17px;padding:0;vertical-align:middle}
+  .homark.on{background:var(--ok);border-color:var(--ok);cursor:pointer}.homark.on::after{content:"✓"}
+  tr.hoon{background:#EAF7F0}
+  .cust{background:var(--navy);color:#fff;border-radius:18px;padding:12px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px}
+  .cust .code{background:var(--orange);border-radius:99px;padding:6px 14px;font-weight:800}
+  .cust a{color:#B9CAEE;text-decoration:none;display:block;font-size:14px}
+  .hint{color:var(--muted);font-weight:600;font-size:14px;margin:6px 2px}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1b2a4a;color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;z-index:99;max-width:92vw;opacity:0;pointer-events:none;transition:opacity .2s;text-align:center}
+  #toast.on{opacity:1}#toast.bad{background:#D32F2F}
+  .ldr{padding:30px;text-align:center;color:var(--muted);font-weight:700}
+  @media (max-width:900px){
+    .shell{display:block}
+    nav#nav{width:auto;height:auto;position:sticky;top:58px;z-index:25;display:flex;gap:4px;overflow-x:auto;padding:6px;border-right:0;border-bottom:1px solid var(--line)}
+    nav#nav button{width:auto;flex:none;height:42px;padding:0 12px;font-size:12px;gap:6px}
+    nav#nav button .ic{font-size:17px;width:auto}
+    main#view{padding:12px 10px 40px}
+    .two{grid-template-columns:1fr}
+    .pname{max-width:30vw;font-size:13px}
+    header.top b{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="login" hidden>
+  <div class="lbox">
+    <img src="logo.jpg" alt="">
+    <h1>TezPost Punkt</h1>
+    <p>Punkt xodimi uchun kirish</p>
+    <label>Login</label><input id="lgIn" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <label>Parol</label><input id="lgPw" type="password" autocomplete="current-password">
+    <button class="go" onclick="doLogin()">Kirish</button>
+    <div class="lerr" id="lgErr"></div>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <header class="top">
+    <img src="logo.jpg" alt=""><b>TezPost</b>
+    <span class="sp"></span>
+    <span class="pname" id="pName"></span>
+    <button class="hb" onclick="refresh()">⟳ Refresh</button>
+    <button class="hb" onclick="logout()">Chiqish</button>
+  </header>
+  <div class="shell">
+    <nav id="nav"></nav>
+    <main id="view"></main>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="config.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const CONFIG = { url: (window.TP_CONFIG||{}).url || "", key: (window.TP_CONFIG||{}).key || "" };
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const STATUS = {new:"Jo'natma kutilmoqda", china:"Xitoy omborida", transit:"Jo'natildi", sort:"Saralanmoqda", uz:"Punktga yetkazilmoqda", pickup:"Topshirish punktida", done:"Mijozga topshirildi"};
+const fmt = n => Math.round(Number(n||0)).toLocaleString("en-US").replace(/,/g," ");
+const kgf = n => String(Math.round(Number(n||0)*1000)/1000);
+const dt = s => { if(!s) return "—"; const d = new Date(s); const p = n=>String(n).padStart(2,"0"); return p(d.getDate())+"."+p(d.getMonth()+1)+"."+String(d.getFullYear()).slice(2)+" "+p(d.getHours())+":"+p(d.getMinutes()); };
+const norm = t => String(t||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+let token = ""; try{ token = localStorage.getItem("tpp_token") || ""; }catch(e){}
+let me = null, page = "cust", soundOn = true;
+
+async function rpc(name, args){
+  let res;
+  try{ res = await fetch(CONFIG.url + "/rest/v1/rpc/" + name, {method:"POST", headers:{"apikey":CONFIG.key,"Content-Type":"application/json"}, body:JSON.stringify(args||{})}); }
+  catch(e){ const err = new Error("Internet yo'q yoki server javob bermayapti"); err.offline = true; throw err; }
+  let data = null; try{ data = await res.json(); }catch(e){}
+  if(!res.ok){ const msg = (data && data.message) || "Xatolik yuz berdi"; const err = new Error(msg); err.session = /Sessiya tugagan|invalid input syntax for type uuid/i.test(msg); throw err; }
+  return data;
+}
+function err(e){ if(e && e.session){ toast("Sessiya tugadi, qayta kiring", true); logout(true); } else toast((e && e.message) || "Xatolik", true); }
+let tt = null;
+function toast(m, bad){ const t = $("toast"); t.textContent = m; t.className = "on" + (bad ? " bad" : ""); clearTimeout(tt); tt = setTimeout(()=>t.className = "", 2600); }
+
+/* ovoz */
+let actx = null;
+function audio(){ try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); if(actx.state === "suspended") actx.resume(); }catch(e){} }
+function beep(kind){
+  if(!soundOn) return; audio(); if(!actx) return;
+  const tone=(f,t0,d,type,vol)=>{ const o=actx.createOscillator(), g=actx.createGain(), t=actx.currentTime+t0; o.type=type||"sine"; o.frequency.value=f; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||.3,t+.02); g.gain.exponentialRampToValueAtTime(0.0001,t+d); o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+.02); };
+  if(kind==="ok"){ tone(880,0,.14,"sine",.35); tone(1320,.12,.28,"sine",.35); }
+  else if(kind==="dup"){ tone(520,0,.12,"square",.18); tone(390,.16,.12,"square",.18); tone(520,.32,.12,"square",.18); }
+  else if(kind==="miss"){ tone(140,0,.55,"sawtooth",.25); }
+  else if(kind==="done"){ tone(660,0,.12,"sine",.3); tone(880,.11,.12,"sine",.3); tone(1180,.22,.3,"sine",.3); }
+}
+
+/* kirish */
+async function doLogin(){
+  const l = $("lgIn").value.trim(), p = $("lgPw").value; $("lgErr").textContent = "";
+  if(!l || !p){ $("lgErr").textContent = "Login va parolni kiriting"; return; }
+  try{
+    const r = await rpc("punkt_login", {p_login:l, p_pass:p});
+    if(r.error){ $("lgErr").textContent = r.error; return; }
+    token = r.token; try{ localStorage.setItem("tpp_token", token); }catch(e){}
+    $("lgPw").value = ""; await start();
+  }catch(e){ $("lgErr").textContent = e.message; }
+}
+$("lgPw").addEventListener("keydown", e=>{ if(e.key === "Enter") doLogin(); });
+$("lgIn").addEventListener("keydown", e=>{ if(e.key === "Enter") $("lgPw").focus(); });
+async function logout(silent){
+  if(token && !silent){ try{ await rpc("punkt_logout", {p_token:token}); }catch(e){} }
+  token = ""; me = null; try{ localStorage.removeItem("tpp_token"); }catch(e){}
+  $("app").hidden = true; $("login").hidden = false;
+}
+async function start(){
+  if(!CONFIG.url || !CONFIG.key){ $("login").hidden = false; $("lgErr").textContent = "Ilova sozlanmagan (config.js)"; return; }
+  if(!token){ $("login").hidden = false; return; }
+  try{ me = await rpc("punkt_me", {p_token:token}); }
+  catch(e){ if(e.session){ logout(true); return; } $("login").hidden = false; $("lgErr").textContent = e.message; return; }
+  $("login").hidden = true; $("app").hidden = false; $("pName").textContent = me.name;
+  drawNav(); go(page);
+}
+const PAGES = [["cust","👥","Mijozlar"],["cargo","📦","Yuklar"],["err","⚠️","Xato punkt"],["rcv","📥","Qabul qilish"],["ho","📤","Topshirish"],["kassa","💵","Kassa"],["conf","🚫","Musodara"]];
+function drawNav(){
+  $("nav").innerHTML = PAGES.map(([k,ic,t])=>`<button class="${k===page?"on":""}" onclick="go('${k}')"><span class="ic">${ic}</span>${t}${k==="err" && me && me.errors ? `<span class="bd">${me.errors}</span>` : ""}</button>`).join("");
+}
+function go(k){ page = k; drawNav(); audio(); ({cust:vCust, cargo:vCargo, err:vErr, rcv:vRcv, ho:vHo, kassa:vKassa, conf:vConf})[k](); window.scrollTo(0,0); }
+async function refresh(){ try{ me = await rpc("punkt_me", {p_token:token}); drawNav(); }catch(e){ err(e); return; } go(page); }
+const loading = () => { $("view").innerHTML = `<div class="ldr">Yuklanmoqda…</div>`; };
+const tbl = (head, rows, empty) => rows.length ? `<div class="tw"><table><thead><tr>${head.map(h=>`<th${h[0]==="~"?' class="r"':""}>${esc(h.replace(/^~/,""))}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>` : `<div class="panel empty">${empty||"Ma'lumot yo'q"}</div>`;
+
+/* ===== Mijozlar ===== */
+let custQ = "";
+async function vCust(){
+  $("view").innerHTML = `<div class="bar"><input class="in grow" id="cq" placeholder="Kod, ism yoki telefon" value="${esc(custQ)}"><button class="btn" onclick="custGo()">Qidirish</button></div><div id="cl"><div class="ldr">Yuklanmoqda…</div></div>`;
+  $("cq").addEventListener("keydown", e=>{ if(e.key === "Enter") custGo(); });
+  custLoad();
+}
+function custGo(){ custQ = $("cq").value.trim(); custLoad(); }
+async function custLoad(){
+  try{
+    const r = await rpc("punkt_customers", {p_token:token, p_q:custQ});
+    $("cl").innerHTML = tbl(["№","Kod","Ism","Telefon","~Yuklar","~Shu punktda","Ro'yxatdan o'tgan"], r.map((c,i)=>`<tr><td>${i+1}</td><td><span class="tag">${esc(c.code)}</span></td><td>${esc(c.name)}</td><td>+${esc(c.phone)}</td><td class="r">${c.cargo_count}</td><td class="r">${c.at_punkt}</td><td>${dt(c.created_at)}</td></tr>`), "Mijoz topilmadi");
+  }catch(e){ err(e); }
+}
+
+/* ===== Yuklar ===== */
+let cgQ = "", cgPunkt = null, cgNo = false, cgOff = 0, cgMenu = false;
+const CG_LIM = 50;
+function vCargo(){
+  const nm = cgNo ? "Punktsiz" : (cgPunkt ? ((me.punkts.find(p=>p.id===cgPunkt)||{}).name || "") : "");
+  $("view").innerHTML = `<div class="bar">
+      <input class="in grow" id="gq" placeholder="Trek-kod, mijoz kodi, ism yoki telefon" value="${esc(cgQ)}">
+      <button class="btn" onclick="cgGo()">Qidirish</button>
+      <div class="dd"><button class="btn sec" onclick="cgMenuToggle(event)">⊕ Punkt${nm ? ": " + esc(nm) : ""}</button><div class="menu" id="cgMenu" hidden></div></div>
+      ${nm ? `<button class="btn sec" onclick="cgPick(null,false)">× Tozalash</button>` : ""}
+    </div><div id="gl"><div class="ldr">Yuklanmoqda…</div></div>`;
+  $("gq").addEventListener("keydown", e=>{ if(e.key === "Enter") cgGo(); });
+  cgLoad();
+}
+function cgMenuToggle(ev){
+  ev.stopPropagation(); const m = $("cgMenu");
+  m.innerHTML = `<button class="${!cgPunkt&&!cgNo?"on":""}" onclick="cgPick(null,false)">Barcha punktlar</button><button class="${cgNo?"on":""}" onclick="cgPick(null,true)">Punktsiz (qabul qilinmagan)</button>`
+    + me.punkts.map(p=>`<button class="${cgPunkt===p.id?"on":""}" onclick="cgPick(${p.id},false)">${esc(p.name)}</button>`).join("");
+  m.hidden = !m.hidden;
+}
+document.addEventListener("click", ()=>{ const m = $("cgMenu"); if(m) m.hidden = true; });
+function cgPick(id, no){ cgPunkt = id; cgNo = no; cgOff = 0; vCargo(); }
+function cgGo(){ cgQ = $("gq").value.trim(); cgOff = 0; cgLoad(); }
+async function cgLoad(){
+  try{
+    const r = await rpc("punkt_list", {p_token:token, p_q:cgQ, p_punkt:cgPunkt, p_nopunkt:cgNo, p_limit:CG_LIM, p_offset:cgOff});
+    const pages = Math.max(1, Math.ceil(r.total / CG_LIM)), cur = Math.floor(cgOff / CG_LIM) + 1;
+    $("gl").innerHTML = tbl(["№","Trackcode","Tez ID","~Og'irlik (Kg)","~Narx 1 KG (USD)","~Umumiy USD","~Umumiy UZS","Punkt","Status","Vaqt"],
+      r.items.map((d,i)=>{ const has = d.weight_kg != null;
+        return `<tr><td>${cgOff+i+1}</td><td class="mono">${esc(d.track)}${d.confiscated?` <span class="tag bad">musodara</span>`:""}</td><td><span class="tag">${esc(d.customer_code)}</span></td>
+          <td class="r">${has?kgf(d.weight_kg):"—"}</td><td class="r">${has&&d.sell_rate!=null?Number(d.sell_rate):"—"}</td><td class="r">${has?Number(d.amount).toFixed(2):"—"}</td><td class="r">${has?fmt(d.amount*d.rate):"—"}</td>
+          <td>${d.punkt?esc(d.punkt):`<span class="hint">—</span>`}</td><td><span class="st ${d.status}">${esc(STATUS[d.status]||d.status)}</span></td><td>${dt(d.created_at)}</td></tr>`; }), "Yuk topilmadi")
+      + `<div class="pager"><span>Jami: ${fmt(r.total)}</span><button ${cgOff?"":"disabled"} onclick="cgOff=Math.max(0,cgOff-CG_LIM);cgLoad()">‹</button><span>Sahifa ${cur} / ${pages}</span><button ${cur<pages?"":"disabled"} onclick="cgOff+=CG_LIM;cgLoad()">›</button></div>`;
+  }catch(e){ err(e); }
+}
+
+/* ===== Xato punkt ===== */
+async function vErr(){
+  loading();
+  try{
+    const r = await rpc("punkt_errors", {p_token:token});
+    me.errors = r.length; drawNav();
+    $("view").innerHTML = `<p class="hint">Bu yerga siz skaner qilgan, lekin boshqa punktga tegishli yuklar tushadi. Bosh admin ularni to'g'ri punktga yo'naltiradi.</p>`
+      + tbl(["№","Trackcode","Mijoz","Yuk turgan punkt","Vaqt",""], r.map((e,i)=>`<tr><td>${i+1}</td><td class="mono">${esc(e.track)}</td><td>${esc(e.customer_code||"")} ${esc(e.customer_name||"")}</td><td><span class="tag bad">${esc(e.owner||"—")}</span></td><td>${dt(e.created_at)}</td><td><button class="btn sec" style="height:34px" onclick="errClose(${e.id})">Yopish</button></td></tr>`), "Xato punkt yo'q 👍");
+  }catch(e){ err(e); }
+}
+async function errClose(id){ try{ await rpc("punkt_err_close", {p_token:token, p_id:id}); vErr(); }catch(e){ err(e); } }
+
+/* ===== Qabul ===== */
+let rcv = [], rcvUnk = [], rcvBusy = new Set();
+function vRcv(){
+  $("view").innerHTML = `<div class="two"><div class="scanbox"><span class="lbl">Trek-kodni skaner qiling yoki kiriting</span>
+      <div class="scanrow"><input class="in" id="rsIn" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Trek-kod" enterkeyhint="done"><button class="btn" onclick="rcvScan()">Qo'shish</button></div>
+      <div class="sum" id="rcvSum" style="margin-top:8px"></div>
+      <div class="hobtns"><button class="hobtn done" id="rcvGo" onclick="rcvApply()">Qabul qilish</button><button class="hobtn cancel" onclick="rcvClear()">Tozalash</button></div></div><div></div></div><div id="rcvList"></div>`;
+  $("rsIn").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); rcvScan(); } });
+  rcvDraw(); setTimeout(()=>$("rsIn").focus(), 80);
+}
+async function rcvScan(){
+  const inp = $("rsIn"), v = inp.value.trim(); inp.value = ""; inp.focus(); if(!v) return;
+  const n = norm(v);
+  if(rcvBusy.has(n) || rcv.some(x=>norm(x.track) === n) || rcvUnk.some(x=>norm(x) === n)){ beep("dup"); toast("Bu yuk ro'yxatda bor", true); return; }
+  rcvBusy.add(n);
+  try{
+    const d = await rpc("punkt_scan", {p_token:token, p_track:v});
+    if(!d){ rcvUnk.unshift(v); beep("miss"); toast("Bazada yo'q: " + v + " (egasiz yuk sifatida yoziladi)", true); }
+    else if(d.status === "done"){ beep("dup"); toast("Allaqachon topshirilgan: " + d.track, true); }
+    else if(d.confiscated){ beep("dup"); toast("Bu yuk musodara qilingan: " + d.track, true); }
+    else if(d.punkt_id && !d.mine){ beep("dup"); toast("Bu yuk boshqa punktga tegishli: " + d.punkt + " (Xato punktga yozildi)", true); me.errors = (me.errors||0) + 1; drawNav(); }
+    else if(d.status === "pickup" && d.mine){ beep("dup"); toast("Allaqachon qabul qilingan: " + d.track, true); }
+    else { rcv.unshift(d); beep("ok"); }
+    rcvDraw();
+  }catch(e){ err(e); }
+  rcvBusy.delete(n);
+}
+function rcvDraw(){
+  if(!$("rcvList")) return;
+  $("rcvSum").innerHTML = `Skanerlandi: <b>${rcv.length}</b> ta` + (rcvUnk.length ? ` · Bazada yo'q: <b style="color:var(--bad)">${rcvUnk.length}</b>` : "");
+  $("rcvGo").disabled = !(rcv.length || rcvUnk.length);
+  $("rcvList").innerHTML = (rcv.length ? tbl(["№","Trackcode","Mijoz","Hozirgi status",""], rcv.map((d,i)=>`<tr><td>${i+1}</td><td class="mono">${esc(d.track)}</td><td><span class="tag">${esc(d.customer_code)}</span> ${esc(d.customer_name)}</td><td><span class="st ${d.status}">${esc(STATUS[d.status]||d.status)}</span></td><td><button class="btn sec" style="height:34px" onclick="rcvDrop(${d.id})">×</button></td></tr>`)) : "")
+    + (rcvUnk.length ? `<p class="hint">Bazada topilmagan treklar (qabul qilinsa «Egasi topilmagan yuklar»ga tushadi):</p>` + tbl(["Trackcode",""], rcvUnk.map((t,i)=>`<tr><td class="mono">${esc(t)}</td><td><button class="btn sec" style="height:34px" onclick="rcvUnk.splice(${i},1);rcvDraw()">×</button></td></tr>`)) : "")
+    + (!rcv.length && !rcvUnk.length ? `<div class="panel empty">Yuklarning shtrix-kodini skaner qiling</div>` : "");
+}
+function rcvDrop(id){ rcv = rcv.filter(x=>x.id !== id); rcvDraw(); }
+function rcvClear(){ if((rcv.length || rcvUnk.length) && !confirm("Ro'yxat tozalansinmi?")) return; rcv = []; rcvUnk = []; rcvDraw(); $("rsIn").focus(); }
+async function rcvApply(){
+  if(!rcv.length && !rcvUnk.length) return;
+  const b = $("rcvGo"); b.disabled = true;
+  try{
+    const r = await rpc("punkt_receive", {p_token:token, p_ids:rcv.map(x=>x.id), p_tracks:rcvUnk});
+    beep("done"); toast(r.count + " ta yuk qabul qilindi" + (r.unknown ? ", " + r.unknown + " ta egasiz" : ""));
+    rcv = []; rcvUnk = []; rcvDraw();
+  }catch(e){ err(e); rcvDraw(); }
+}
+
+/* ===== Topshirish ===== */
+let hoCash = false, hoCust = null, hoItems = [], hoOther = 0;
+function vHo(){
+  $("view").innerHTML = `<div class="two"><div class="scanbox"><span class="lbl">Mijoz kodi</span><div class="scanrow"><input class="in" id="hoIn" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="TP1001" enterkeyhint="search"><button class="btn org" onclick="hoFind()">Qidirish</button></div></div>
+    <div class="scanbox" id="hoAct" hidden><span class="lbl">Yuk IDsi (shtrix-kodni skaner qiling)</span><div class="scanrow"><input class="in" id="hoScan" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Shtrix-kod yoki trek-kod" enterkeyhint="done"></div>
+      <div class="sum" id="hoSum" style="margin:8px 2px 0"></div>
+      <div class="hobtns"><button class="hobtn cash" id="hoCashBtn" onclick="hoCashOn()">💵 Naqd pul</button><button class="hobtn cancel" id="hoCancelBtn" onclick="hoCancel()">Bekor qilish</button><button class="hobtn done" id="hoDoneBtn" onclick="hoApply()">Topshirildi</button></div></div></div><div id="hoBody"></div>`;
+  $("hoIn").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoFind(); } });
+  $("hoScan").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoScan(); } });
+  if(hoCust) hoDraw(); setTimeout(()=>$("hoIn").focus(), 80);
+}
+async function hoFind(){
+  const v = $("hoIn").value.trim(); if(!v) return;
+  try{
+    const r = await rpc("punkt_handover_list", {p_token:token, p_code:v});
+    hoCash = false; $("hoScan").value = "";
+    if(!r){ hoCust = null; hoItems = []; $("hoAct").hidden = true; $("hoBody").innerHTML = `<div class="panel empty"><b>Mijoz topilmadi</b><br>«${esc(v)}» kodli mijoz yo'q. Kodni tekshiring (masalan TP1001).</div>`; beep("miss"); return; }
+    hoCust = r.customer; hoOther = r.other; hoItems = r.items.map(x=>({...x, checked:false})); hoDraw();
+    if(hoItems.length) setTimeout(()=>$("hoScan").focus(), 60);
+  }catch(e){ err(e); }
+}
+function hoDue(list){ return list.filter(x=>!x.paid && x.weight_kg != null).reduce((a,x)=>a + Math.round(Number(x.amount||0) * Number(x.rate||0)), 0); }
+function hoPpk(amt, kg){ for(const st of [0.5,0.1,0.01]){ const c = Math.round(amt/kg/st)*st; if(Math.abs(c*kg - amt) <= 0.0051) return "$" + (Math.round(c*100)/100); } return "$" + (Math.round(amt/kg*100)/100); }
+function hoDraw(){
+  const c = hoCust; if(!c || !$("hoBody")) return;
+  const sel = hoItems.filter(x=>x.checked).length;
+  $("hoBody").innerHTML = `<div class="cust"><span class="code">${esc(c.code)}</span><div><b>${esc(c.name)}</b><a href="tel:+${esc(c.phone)}">+${esc(c.phone)}</a></div></div>`
+    + `<div class="hint">Topshirish punktida: ${hoItems.length} ta${hoOther ? " · Boshqa joyda / hali yetib kelmagan: " + hoOther + " ta" : ""}</div>`
+    + (hoItems.length ? tbl(["","Trackcode","~Umumiy UZS","~Umumiy USD","~Og'irlik (Kg)","~Narx 1 KG (USD)","To'lov"], hoItems.map(d=>{ const has = d.weight_kg != null, kg = Number(d.weight_kg||0), amt = Number(d.amount||0);
+        return `<tr class="${d.checked?"hoon":""}"><td>${d.checked?`<button class="homark on" onclick="hoUntick(${d.id})" title="Belgini olish"></button>`:`<span class="homark"></span>`}</td><td class="mono">${esc(d.track)}</td>
+          <td class="r">${has?fmt(amt*Number(d.rate||0)):"—"}</td><td class="r">${has?amt.toFixed(2):"—"}</td><td class="r">${has?kgf(kg):"—"}</td><td class="r">${has&&kg?hoPpk(amt,kg):"—"}</td>
+          <td>${has?`<span class="tag ${d.paid?"ok":"bad"}">${d.paid?"✓ To'langan":"To'lanmagan"}</span>`:"—"}</td></tr>`; }))
+      : `<div class="panel empty"><b>Topshiriladigan yuk yo'q</b><br>Bu mijozning yuklari hali shu punktga qabul qilinmagan yoki hammasi topshirib bo'lingan.</div>`);
+  $("hoAct").hidden = !hoItems.length; hoPaint();
+}
+function hoPaint(){
+  if(!$("hoSum")) return;
+  const ch = hoItems.filter(x=>x.checked), sel = ch.length, kg = ch.reduce((a,x)=>a + Number(x.weight_kg||0), 0), due = hoDue(ch);
+  $("hoSum").innerHTML = `Skaner: <b>${sel} / ${hoItems.length}</b> ta · <b>${kgf(kg)} kg</b><br>` + (sel ? (due ? `To'lov: <b style="color:var(--bad)">${fmt(due)} so'm</b>` : `<b style="color:var(--ok)">Hammasi to'langan</b>`) : "Har bir yukning shtrix-kodini skaner qiling");
+  const cb = $("hoCashBtn"); cb.disabled = !sel; cb.classList.toggle("on", hoCash); cb.textContent = hoCash ? "✓ Naqd pul olindi" : "💵 Naqd pul";
+  $("hoCancelBtn").disabled = !(sel || hoCash);
+  $("hoDoneBtn").disabled = !(sel && (hoCash || !due));
+}
+function hoScan(){
+  const raw = $("hoScan").value; $("hoScan").value = "";
+  const v = norm(raw); if(v.length < 4) return;
+  const x = hoItems.find(d=>v.includes(norm(d.track)) || (v.length >= 8 && norm(d.track).includes(v)));
+  if(!x){ beep("dup"); toast("Bu yuk shu mijozning topshirish punktidagi yuklari orasida yo'q", true); $("hoScan").focus(); return; }
+  if(x.checked){ toast("Bu yuk allaqachon skaner qilingan"); beep("dup"); $("hoScan").focus(); return; }
+  x.checked = true; hoCash = false; beep("ok"); hoDraw(); $("hoScan").focus();
+}
+function hoUntick(id){ const x = hoItems.find(v=>String(v.id)===String(id)); if(!x || !x.checked) return; x.checked = false; hoCash = false; hoDraw(); $("hoScan").focus(); }
+function hoCashOn(){ if(!hoItems.some(x=>x.checked)) return; hoCash = true; hoPaint(); }
+function hoCancel(){ hoItems.forEach(x=>x.checked = false); hoCash = false; hoDraw(); $("hoScan").focus(); }
+async function hoApply(){
+  const ids = hoItems.filter(x=>x.checked).map(x=>x.id); if(!ids.length) return;
+  $("hoDoneBtn").disabled = true;
+  try{
+    const r = await rpc("punkt_handover_done", {p_token:token, p_ids:ids, p_cash:hoCash});
+    beep("done"); toast(r.count + " ta yuk mijozga topshirildi");
+    hoCash = false; $("hoIn").value = hoCust.code; await hoFind();
+  }catch(e){ err(e); hoPaint(); }
+}
+
+/* ===== Kassa ===== */
+let kDate = "";
+const todayStr = () => { const d = new Date(Date.now() + 5*3600*1000); return d.toISOString().slice(0,10); };
+function shiftDay(n){ const d = new Date(kDate + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); kDate = d.toISOString().slice(0,10); vKassa(); }
+async function vKassa(){
+  if(!kDate) kDate = todayStr();
+  $("view").innerHTML = `<div class="bar"><button class="btn sec" onclick="shiftDay(-1)">‹</button><input class="in" type="date" id="kd" value="${kDate}"><button class="btn sec" onclick="shiftDay(1)">›</button><button class="btn sec" onclick="kDate=todayStr();vKassa()">Bugun</button></div><div id="kb"><div class="ldr">Yuklanmoqda…</div></div>`;
+  $("kd").addEventListener("change", e=>{ if(e.target.value){ kDate = e.target.value; vKassa(); } });
+  try{
+    const r = await rpc("punkt_kassa", {p_token:token, p_date:kDate});
+    $("kb").innerHTML = `<div class="cards"><div class="c"><span>Topshirilgan yuk</span><b>${r.count} ta</b></div><div class="c"><span>Og'irlik</span><b>${kgf(r.kg)} kg</b></div><div class="c"><span>Jami (UZS)</span><b>${fmt(r.total_uzs)}</b></div><div class="c"><span>Naqd olindi (UZS)</span><b style="color:var(--ok)">${fmt(r.cash_uzs)}</b></div><div class="c"><span>Oldindan to'langan</span><b>${fmt(r.prepaid_uzs)}</b></div><div class="c"><span>To'lanmagan</span><b style="color:var(--bad)">${fmt(r.debt_uzs)}</b></div></div>`
+      + tbl(["№","Trackcode","Mijoz","~Og'irlik (Kg)","~USD","~UZS","To'lov","Vaqt"], r.items.map((d,i)=>`<tr><td>${i+1}</td><td class="mono">${esc(d.track)}</td><td><span class="tag">${esc(d.customer_code)}</span> ${esc(d.customer_name)}</td><td class="r">${d.weight_kg!=null?kgf(d.weight_kg):"—"}</td><td class="r">${Number(d.usd).toFixed(2)}</td><td class="r">${fmt(d.uzs)}</td><td>${d.paid?(d.cash?`<span class="tag ok">Naqd</span>`:`<span class="tag">Oldindan</span>`):`<span class="tag bad">To'lanmagan</span>`}</td><td>${dt(d.done_at)}</td></tr>`), "Bu kunda topshirilgan yuk yo'q");
+  }catch(e){ err(e); }
+}
+
+/* ===== Musodara ===== */
+async function vConf(){
+  $("view").innerHTML = `<div class="two"><div class="scanbox"><span class="lbl">Musodara qilingan yuk</span><div class="scanrow"><input class="in" id="cfT" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Trek-kod"></div><div class="scanrow" style="margin-top:8px"><input class="in" id="cfN" placeholder="Sabab (ixtiyoriy)"><button class="btn red" onclick="confAdd()">Qo'shish</button></div></div><div></div></div><div id="cfL"><div class="ldr">Yuklanmoqda…</div></div>`;
+  $("cfT").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); $("cfN").focus(); } });
+  $("cfN").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); confAdd(); } });
+  confLoad();
+}
+async function confLoad(){
+  try{
+    const r = await rpc("punkt_conf_list", {p_token:token});
+    $("cfL").innerHTML = tbl(["№","Trackcode","Mijoz","Sabab","Punkt","Vaqt",""], r.map((d,i)=>`<tr><td>${i+1}</td><td class="mono">${esc(d.track)}</td><td><span class="tag">${esc(d.customer_code)}</span> ${esc(d.customer_name)}</td><td>${esc(d.conf_note||"—")}</td><td>${esc(d.punkt||"—")}</td><td>${dt(d.conf_at)}</td><td><button class="btn sec" style="height:34px" onclick="confRemove(${d.id})">Qaytarish</button></td></tr>`), "Musodara qilingan yuk yo'q");
+  }catch(e){ err(e); }
+}
+async function confAdd(){
+  const t = $("cfT").value.trim(), n = $("cfN").value.trim(); if(!t){ toast("Trek-kodni kiriting", true); return; }
+  try{ await rpc("punkt_conf_add", {p_token:token, p_track:t, p_note:n}); beep("done"); toast("Musodaraga qo'shildi"); $("cfT").value = ""; $("cfN").value = ""; $("cfT").focus(); confLoad(); }catch(e){ err(e); }
+}
+async function confRemove(id){
+  if(!confirm("Yuk musodaradan qaytarilsinmi?")) return;
+  try{ await rpc("punkt_conf_remove", {p_token:token, p_id:id}); confLoad(); }catch(e){ err(e); }
+}
+
+if("serviceWorker" in navigator){ window.addEventListener("load", ()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+start();
+</script>
+</body>
+</html>

@@ -141,6 +141,8 @@
   .hotbl tr.hoon{background:#EAF7F0}
   .hotbl .trk{background:none;border:0;padding:0;font:inherit;font-weight:800;color:inherit;cursor:pointer}
   .hoedit{border:0;background:#F1F5FD;color:var(--navy,#0B2B6B);font:inherit;font-weight:700;padding:5px 10px;border-radius:10px;cursor:pointer}.hoedit.nowt{background:#FFF1DF;color:#B24F00}
+  #pkForm .go{height:46px;border:0;border-radius:12px;background:linear-gradient(180deg,#FF9A33,#F26D00);color:#fff;font-weight:800;font-size:16px}
+  #pkList button.chip,#pkErr button.chip{border:0;cursor:pointer}
   .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:22px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:40;width:max-content;max-width:90vw;text-align:center;box-shadow:0 10px 24px rgba(5,20,60,.35)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .toast.bad{background:var(--danger)}
@@ -661,6 +663,11 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <span class="st"><b>Mijoz to'lovlari <span class="paydot show" id="payDot2" style="position:static;display:none;margin-left:6px;vertical-align:middle"></span></b><small>Karta rekvizitlari va mijozlar yuborgan to'lovlarni tasdiqlash</small></span>
       <span class="ch">›</span>
     </button>
+    <button class="setrow" onclick="openPk()">
+      <span class="si" style="background:#0B4DB5"><svg viewBox="0 0 24 24"><path d="M12 21s7-5.6 7-11a7 7 0 0 0-14 0c0 5.4 7 11 7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg></span>
+      <span class="st"><b>Punktlar <span id="pkCnt" style="color:var(--muted);font-weight:700"></span></b><small>Punkt ilovasi uchun login/parol va xato punktlar</small></span>
+      <span class="ch">›</span>
+    </button>
     <button class="setrow" onclick="openTx()">
       <span class="si" style="background:#F26A00"><svg viewBox="0 0 24 24"><path d="M5 16l1.5-5.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 16M4 16h16v3h-2v-1.5H6V19H4zM9 6h6l1 3H8z"/></svg></span>
       <span class="st"><b>Taksi: uyga yetkazish <span id="txCnt" style="color:var(--muted);font-weight:700"></span></b><small>Taksichilar, narx, ulushingiz va buyurtmalar</small></span>
@@ -695,6 +702,21 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
 </main>
 
 <!-- ===== TAKSI (UYGA YETKAZISH) ===== -->
+<main id="pk" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Punktlar</b>
+  </div>
+  <div class="wrap" style="padding-bottom:40px">
+    <div class="info" style="margin-bottom:8px">Punkt ilovasi: <b id="pkLink"></b></div>
+    <div class="scanbox" id="pkForm"></div>
+    <div class="info" style="margin:14px 4px 8px">Punktlar</div>
+    <div id="pkList"></div>
+    <div class="info" style="margin:14px 4px 8px">Xato punkt (boshqa punktga tegishli skaner qilingan yuklar)</div>
+    <div id="pkErr"></div>
+  </div>
+</main>
+
 <main id="tx" class="screen">
   <div class="th-top">
     <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -860,7 +882,7 @@ function handleErr(e){
   if(e.session){ forceLogout(); toast("Qaytadan kiring", true); }
   else toast(e.message, true);
 }
-function enter(){ show("main"); search(); pollBadge(); checkPay(); checkOrphans(); checkTx(); }
+function enter(){ show("main"); search(); pollBadge(); checkPay(); checkOrphans(); checkTx(); checkPk(); }
 setInterval(()=>{ if(!document.hidden){ checkPay(); checkTx(); } }, 30000);
 
 /* ====== Qidiruv ====== */
@@ -947,7 +969,7 @@ function cargoCard(d){
     <div class="row1">${pick}<button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button>
       <button class="who" onclick="openCustomer('${esc(d.customer_code)}')">${esc(d.customer_code)}</button></div>
     <div class="nm" style="margin-top:6px;font-size:15px;font-weight:600">${esc(d.customer_name)} <a style="color:var(--blue);text-decoration:none;font-weight:600" href="tel:+${esc(d.customer_phone)}">${esc(fmtPhone(d.customer_phone))}</a></div>
-    <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}<span id="wt${d.id}">${wtHtml(d)}</span></div>
+    <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}<span id="wt${d.id}">${wtHtml(d)}</span>${d.punkt?`<span class="chip">📍 ${esc(d.punkt)}</span>`:""}${d.confiscated?`<span class="chip" style="background:#FDE8E8;color:#C62828">Musodara</span>`:""}</div>
     ${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}
     <div class="row3"><span class="when">${when(d.created_at)}</span>
       <span class="stsel ${esc(d.status)}" id="s${d.id}"><select onchange="setStatus(${d.id},this)" data-prev="${esc(d.status)}">${opts}</select></span></div>
@@ -1636,7 +1658,7 @@ function drawHo(){
       ? `<div class="listhead"><b>Skaner qilingan</b><span class="when">${sel} / ${hoItems.length}</span></div>`
         + `<div class="hotbl"><table><thead><tr><th></th><th>TRACKCODE</th><th>Umumiy UZS</th><th>Umumiy USD</th><th>Og'irlik (Kg)</th><th>Narx 1 KG (USD)</th><th>TO'LOV</th></tr></thead><tbody>`
         + hoItems.map(d=>{ const has = d.weight_kg != null, kg = Number(d.weight_kg||0), amt = Number(d.amount||0);
-            return `<tr class="${d.checked?"hoon":""}"><td>${d.checked ? `<button class="homark on" onclick="hoUntick(${d.id})" aria-label="Belgini olish" title="Belgini olish"></button>` : `<span class="homark"></span>`}</td>
+            return `<tr class="${d.checked?"hoon":""}"><td ${d.checked ? `onclick="hoUntick(${d.id})" style="cursor:pointer"` : ""}>${d.checked ? `<button class="homark on" onclick="event.stopPropagation();hoUntick(${d.id})" aria-label="Belgini olish" title="Belgini olish"></button>` : `<span class="homark"></span>`}</td>
               <td><button class="trk" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button></td>
               <td>${has ? Math.round(amt * Number(d.rate||0)).toLocaleString("en-US").replace(/,/g," ") : "—"}</td>
               <td>${has ? amt.toFixed(2) : "—"}</td>
@@ -1663,7 +1685,7 @@ function hoScan(){
   if(x.checked){ toast("Bu yuk allaqachon skaner qilingan"); beep(false); $("hoScan").focus(); return; }
   x.checked = true; hoCash = false; beep(true); drawHo(); $("hoScan").focus();
 }
-function hoUntick(id){ const x = hoItems.find(v=>v.id===id); if(!x || !x.checked) return; x.checked = false; hoCash = false; drawHo(); $("hoScan").focus(); }
+function hoUntick(id){ const x = hoItems.find(v=>String(v.id)===String(id)); if(!x || !x.checked) return; x.checked = false; hoCash = false; drawHo(); $("hoScan").focus(); }
 function hoCashOn(){ if(!hoItems.some(x=>x.checked)) return; hoCash = true; hoPaint(); }
 function hoCancel(){ hoItems.forEach(x=>x.checked = false); hoCash = false; drawHo(); $("hoScan").focus(); }
 async function applyHandover(){
@@ -1676,6 +1698,49 @@ async function applyHandover(){
     lsClear(); beep("done"); toast(n + " ta yuk mijozga topshirildi");
     hoCash = false; await hoFind();
   }catch(e){ handleErr(e); hoPaint(); }
+}
+
+/* ====== Punktlar ====== */
+let pkData = [], pkEdit = null;
+async function checkPk(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_punkts", {p_token:token}); const n = r.reduce((a,x)=>a + Number(x.errors||0), 0); const e = $("pkCnt"); if(e) e.textContent = n > 0 ? "· " + n + " ta xato" : (r.length ? "· " + r.length + " ta" : ""); }catch(e){} }
+async function openPk(){ show("pk"); $("pkLink").textContent = location.origin + location.pathname.replace(/[^/]*$/, "") + "punkt.html"; pkEdit = null; await loadPk(); }
+async function loadPk(){
+  try{
+    pkData = await rpc("admin_punkts", {p_token:token});
+    const errs = await rpc("admin_punkt_errors", {p_token:token});
+    drawPkForm(); drawPkList(); drawPkErr(errs); checkPk();
+  }catch(e){ handleErr(e); }
+}
+function drawPkForm(){
+  const p = pkEdit ? pkData.find(x=>x.id === pkEdit) : null;
+  $("pkForm").innerHTML = `<span class="lbl">${p ? "Punktni tahrirlash" : "Yangi punkt qo'shish"}</span>
+    <div class="scanrow" style="margin-bottom:8px"><input id="pkName" placeholder="Punkt nomi (masalan FF-400 Farg'ona)" value="${esc(p ? p.name : "")}"></div>
+    <div class="scanrow" style="margin-bottom:8px"><input id="pkLogin" autocapitalize="none" autocomplete="off" placeholder="Login" value="${esc(p ? p.login : "")}"><input id="pkPass" autocomplete="off" placeholder="${p ? "Yangi parol (bo'sh = o'zgarmaydi)" : "Parol (kamida 6 ta)"}"></div>
+    <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin:6px 2px 10px"><input type="checkbox" id="pkAct" ${!p || p.active ? "checked" : ""} style="width:20px;height:20px"> Faol (kira oladi)</label>
+    <div style="display:flex;gap:8px"><button class="go" style="flex:1" onclick="pkSave()">${p ? "Saqlash" : "Qo'shish"}</button>${p ? `<button class="go" style="background:#8A97B3" onclick="pkEdit=null;drawPkForm()">Bekor</button>` : ""}</div>`;
+}
+function drawPkList(){
+  $("pkList").innerHTML = pkData.length ? pkData.map(p=>`<div class="item"><div class="row1"><b style="flex:1;font-size:16px">${esc(p.name)}</b><span class="chip" style="${p.active ? "" : "background:#FDE8E8;color:#C62828"}">${p.active ? "Faol" : "O'chiq"}</span></div>
+      <div class="chips"><span class="chip">🔑 ${esc(p.login)}</span><span class="chip">Punktda: ${p.at_punkt}</span><span class="chip">Jami: ${p.total}</span>${p.errors ? `<span class="chip" style="background:#FDE8E8;color:#C62828">Xato: ${p.errors}</span>` : ""}</div>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="chip" onclick="pkEdit=${p.id};drawPkForm();window.scrollTo(0,0)">✎ Tahrirlash</button><button class="chip" style="color:#C62828" onclick="pkDel(${p.id})">O'chirish</button></div></div>`).join("") : `<div class="empty"><b>Hali punkt yo'q</b><p>Yuqoridan birinchi punktni qo'shing.</p></div>`;
+}
+function drawPkErr(errs){
+  $("pkErr").innerHTML = errs.length ? errs.map(e=>`<div class="item"><div class="row1"><b style="flex:1">${esc(e.track)}</b><span class="when">${esc(e.customer_code||"")}</span></div>
+      <div style="margin-top:6px;font-size:14px;font-weight:600">Skaner qilgan: <b>${esc(e.punkt)}</b> · Yuk turgan: <b>${esc(e.owner||"—")}</b></div>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><select id="pe${e.id}" style="height:38px;border-radius:10px;border:1.5px solid #D6DFF2;padding:0 8px">${pkData.map(p=>`<option value="${p.id}" ${p.id === e.punkt_id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>
+      <button class="chip" onclick="pkFix(${e.id}, true)">Shu punktga yo'naltirish</button><button class="chip" onclick="pkFix(${e.id}, false)">Shunchaki yopish</button></div></div>`).join("") : `<div class="empty"><b>Xato yuk yo'q</b></div>`;
+}
+async function pkSave(){
+  const name = $("pkName").value.trim(), login = $("pkLogin").value.trim(), pass = $("pkPass").value, act = $("pkAct").checked;
+  try{ await rpc("admin_punkt_save", {p_token:token, p_id:pkEdit, p_name:name, p_login:login, p_pass:pass, p_active:act}); toast(pkEdit ? "Saqlandi" : "Punkt qo'shildi"); pkEdit = null; await loadPk(); }
+  catch(e){ handleErr(e); }
+}
+async function pkDel(id){
+  if(!confirm("Punkt o'chirilsinmi? Yuklar saqlanadi, faqat punktga bog'lanishi olib tashlanadi.")) return;
+  try{ await rpc("admin_punkt_del", {p_token:token, p_id:id}); toast("O'chirildi"); await loadPk(); }catch(e){ handleErr(e); }
+}
+async function pkFix(id, move){
+  try{ await rpc("admin_punkt_err_fix", {p_token:token, p_id:id, p_punkt: move ? Number($("pe"+id).value) : null}); toast("Bajarildi"); await loadPk(); }catch(e){ handleErr(e); }
 }
 
 /* ====== Sozlamalar: manzil va tariflar ====== */
