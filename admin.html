@@ -153,6 +153,36 @@
   .pkwrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;margin-bottom:6px}.pkwt{font-family:ui-monospace,Menlo,Consolas,monospace}
   html[data-view=pc] #pkw .wrap{max-width:1780px;margin:0 auto;padding:16px 24px 40px}
   html[data-view=pc] .pkwcols{grid-template-columns:1.2fr 1fr;align-items:start}
+  /* ===== yagona menyu (yon panel) ===== */
+  #snav{position:fixed;left:0;top:0;bottom:0;width:262px;z-index:60;background:#fff;border-right:1px solid #E3EAF7;display:none;flex-direction:column;overflow-y:auto;padding:10px 10px 18px;box-shadow:6px 0 30px rgba(11,43,107,.12);transform:translateX(-105%);transition:transform .25s}
+  body.in #snav{display:flex}
+  #snav.open{transform:none}
+  #snavBk{position:fixed;inset:0;background:rgba(5,15,40,.45);z-index:55;display:none}
+  #snavBk.open{display:block}
+  #snav .sh{display:flex;align-items:center;gap:10px;padding:8px 10px 12px}
+  #snav .sh img{width:38px;height:38px;border-radius:11px}
+  #snav .sh b{font-size:17px;color:var(--navy)}
+  #snav button.ni{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;border:0;background:none;border-radius:12px;padding:0 12px;font:inherit;font-weight:700;font-size:15px;color:#0B2B6B;text-align:left;cursor:pointer}
+  #snav button.ni .ic{width:34px;height:34px;border-radius:10px;background:#F1F5FD;color:#4F6FB0;display:grid;place-items:center;flex:none;transition:.15s}
+  #snav button.ni:hover{background:#F3F6FC}
+  #snav button.ni.on{background:#EEF3FD;color:#2563EB}
+  #snav button.ni.on .ic{background:linear-gradient(180deg,#3B7BF0,#1F55D6);color:#fff;box-shadow:0 4px 10px rgba(37,99,235,.35)}
+  #snav button.ni:hover .ic{background:#E3ECFC}
+  #snav .nb{margin-left:auto;background:#E04545;color:#fff;border-radius:99px;font-size:12px;padding:2px 8px;font-weight:800}
+  #snav .nb:empty{display:none}
+  #snav .sep{height:1px;background:#E3EAF7;margin:8px 6px}
+  .mbtn{width:36px;height:36px;border:0;border-radius:11px;background:rgba(255,255,255,.14);color:#fff;font-size:20px;display:grid;place-items:center;flex:none;cursor:pointer;line-height:1;padding:0}
+  #main .hero .acts,#main .hero .tabs{display:none}
+  html[data-view=pc] body.in{padding-left:262px}
+  html[data-view=pc] #snav{transform:none}
+  html[data-view=pc] .mbtn,html[data-view=pc] #snavBk{display:none!important}
+  html[data-view=pc] #main .hero{grid-template-areas:"top top top" "search search search"}
+  html[data-view=pc] #receive.active,html[data-view=pc] #handover.active,html[data-view=pc] #thread.active{left:262px;width:auto}
+  html[data-view=pc] #bar,html[data-view=pc] .actbar{left:262px}
+  [data-theme=dark] #snav{background:#10182B;border-color:#1E2A44}
+  [data-theme=dark] #snav button.ni{color:#DCE6FF}[data-theme=dark] #snav button.ni:hover{background:#18223A}[data-theme=dark] #snav button.ni.on{background:#1A2A4D;color:#7DA7FF}[data-theme=dark] #snav button.ni .ic{background:#18223A;color:#8FA6D6}[data-theme=dark] #snav button.ni.on .ic{background:linear-gradient(180deg,#3B7BF0,#1F55D6);color:#fff}[data-theme=dark] #snav .sh b{color:#fff}
+  svg.ico{display:inline-block;vertical-align:-3px;flex:none}
+  .chip svg.ico{margin-right:4px;vertical-align:-2px}
   .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:22px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:40;width:max-content;max-width:90vw;text-align:center;box-shadow:0 10px 24px rgba(5,20,60,.35)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .toast.bad{background:var(--danger)}
@@ -438,6 +468,8 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
 <body>
 
 <!-- ===== KIRISH ===== -->
+<nav id="snav" aria-label="Menyu"></nav><div id="snavBk" onclick="navClose()"></div>
+
 <main id="login" class="screen">
   <section class="hero" style="padding-bottom:44px">
     <div class="top">
@@ -562,7 +594,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <div id="xlStep2" style="display:none">
         <span class="lbl" style="margin-top:12px">2. Mijoz kodini yozing (bo'sh qoldirsangiz, fayldagi hamma yuk)</span>
         <div class="scanrow"><input id="xlCode" inputmode="numeric" autocomplete="off" placeholder="Masalan: 41124" oninput="xlRun()" onkeydown="if(event.key==='Enter')xlRun()"></div>
-        <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;color:var(--blue);font-size:14px">⚙ Ustunlar (avtomatik tanlangan, xato bo'lsa o'zgartiring)</summary>
+        <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;color:var(--blue);font-size:14px">Ustunlar (avtomatik tanlangan, xato bo'lsa o'zgartiring)</summary>
           <div class="xgrid" style="margin-top:8px">
             <div class="xf"><span class="lbl">Mijoz kodi ustuni</span><select id="xlCol" class="field xsel" onchange="xlRun()"></select></div>
             <div class="xf"><span class="lbl">Yuk holati ustuni</span><select id="xlStatCol" class="field xsel" onchange="xl.sel.clear();xlRun()"></select></div>
@@ -574,7 +606,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
     </div>
     <div id="xlSync"></div>
     <div id="xlDone"></div>
-    <details id="xlMore" style="margin-top:14px;display:none"><summary style="cursor:pointer;font-weight:800;color:var(--blue);font-size:14.5px;padding:6px 2px">📥 Yuklab olish va ro'yxatni ko'rish (ixtiyoriy)</summary>
+    <details id="xlMore" style="margin-top:14px;display:none"><summary style="cursor:pointer;font-weight:800;color:var(--blue);font-size:14.5px;padding:6px 2px">Yuklab olish va ro'yxatni ko'rish (ixtiyoriy)</summary>
       <div class="scanbox" style="margin-top:8px"><span class="lbl">Faqat shu holatdagi yuklar (tanlamasangiz hammasi)</span>
         <div id="xlChips" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
       <div id="xlRes" style="margin-top:10px"></div>
@@ -612,7 +644,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
   <div class="th-top">
     <button class="bk" onclick="closeRcv()" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
     <b style="font-size:17px;flex:1">Yuklarni qabul qilish</b>
-    <button class="bk" id="sndBtn" onclick="toggleSound()" aria-label="Ovoz" style="font-size:18px">🔊</button>
+    <button class="bk" id="sndBtn" onclick="toggleSound()" aria-label="Ovoz" style="display:grid;place-items:center"></button>
   </div>
   <div class="wrap" style="padding-bottom:110px">
     <div class="scanbox">
@@ -651,7 +683,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
         </div>
         <div class="hosum2" id="hoSum"></div>
         <div class="hobtns">
-          <button class="hobtn cash" id="hoCashBtn" onclick="hoCashOn()">💵 Naqd pul</button>
+          <button class="hobtn cash" id="hoCashBtn" onclick="hoCashOn()"><span id="hoCashT"></span></button>
           <button class="hobtn cancel" id="hoCancelBtn" onclick="hoCancel()">Bekor qilish</button>
           <button class="hobtn done" id="hoDoneBtn" onclick="applyHandover()">Topshirildi</button>
         </div>
@@ -719,7 +751,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
   </div>
   <div class="wrap" style="padding-bottom:40px">
     <div class="info" style="margin-bottom:8px">Punkt ilovasi: <b id="pkLink"></b></div>
-    <button class="go" style="width:100%;height:50px;border:0;border-radius:14px;background:linear-gradient(180deg,#2B6BE6,#0B4DB5);color:#fff;font-weight:800;font-size:16px;margin-bottom:10px" onclick="openPkw()">👁 Punkt kuzatuvi</button>
+    <button class="go" style="width:100%;height:50px;border:0;border-radius:14px;background:linear-gradient(180deg,#2B6BE6,#0B4DB5);color:#fff;font-weight:800;font-size:16px;margin-bottom:10px" onclick="openPkw()"><span id="pkwBtnT"></span></button>
     <div class="scanbox" id="pkForm"></div>
     <div class="info" style="margin:14px 4px 8px">Punktlar</div>
     <div id="pkList"></div>
@@ -745,7 +777,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
   <div class="wrap" style="padding-bottom:40px">
     <div class="scanbox" id="txLockBox"></div>
     <div id="txBody" style="display:none">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button style="border:0;background:#E8F0FD;color:#0B4DB5;font-weight:800;border-radius:12px;padding:8px 14px" onclick="txRelock('')">🔒 Qulflash</button></div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button style="border:0;background:#E8F0FD;color:#0B4DB5;font-weight:800;border-radius:12px;padding:8px 14px" onclick="txRelock('')">Qulflash</button></div>
     <div class="scanbox" id="txSum"></div>
     <div class="info" style="margin-bottom:8px">Buyurtmalar</div>
     <div id="txaRides"></div>
@@ -767,7 +799,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <div class="hoinfo" style="margin:8px 0;line-height:1.5">Narx = masofa (to'g'ri chiziq × yo'l koeffitsienti) × 1 km narxi, minimal narxdan kam bo'lmaydi. Ulushingiz shu narxdan olinadi, qolgani taksichiniki. Taksichi «Yetib keldim» bosgach bepul kutish boshlanadi, undan keyingi har daqiqa kutish puli narxga qo'shiladi (u ham ulush bo'yicha bo'linadi).</div>
       <span class="lbl" style="margin-top:6px">Topshirish punkti joylashuvi (mijozlar o'zgartira olmaydi)</span>
       <div class="txamapw"><div id="txaMap" style="width:100%;height:100%"></div></div>
-      <div style="display:flex;gap:8px;margin:8px 0"><button class="btn" style="height:42px;font-size:14px;box-shadow:none;background:#0B4DB5" onclick="txaLocate(this)">📍 Men turgan joy</button><div id="txaCoord" style="flex:1;align-self:center;font-size:12.5px;color:var(--muted)"></div></div>
+      <div style="display:flex;gap:8px;margin:8px 0"><button class="btn" style="height:42px;font-size:14px;box-shadow:none;background:#0B4DB5" onclick="txaLocate(this)">Men turgan joy</button><div id="txaCoord" style="flex:1;align-self:center;font-size:12.5px;color:var(--muted)"></div></div>
       <button class="btn" style="margin-top:6px;box-shadow:none" onclick="txaSave()">Saqlash</button>
     </div>
     <button style="margin-top:12px;font-size:13.5px;background:none;border:0;color:var(--blue,#1A56DB);font-weight:800;padding:4px 0" onclick="txPwChg=!txPwChg;txLockDraw()">Taksi parolini o'zgartirish</button>
@@ -868,8 +900,83 @@ function toast(msg, bad){
 }
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active", s.id===id));
+  document.body.classList.toggle("in", id !== "login");
   window.scrollTo({top:0,left:0,behavior:"instant"});
+  navClose(); navMark();
 }
+/* ===== yagona menyu ===== */
+const ICONS = {
+  box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3.3 7.5L12 12l8.7-4.5M12 12v9"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  down:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+  up:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
+  card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
+  help:'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/>',
+  car:'<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M9 17h6"/>',
+  pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+  chart:'<path d="M3 3v18h18M7 16v-5M12 16V7M17 16v-3"/>',
+  layers:'<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>',
+  sheet:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/>',
+  globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/>',
+  sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  out:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/>',
+  warn:'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  ban:'<circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/>',
+  key:'<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L21 2M16 7l3 3M18 5l2 2"/>',
+  scale:'<path d="M12 3v18M5 7h14M5 7l-3 8a3 3 0 0 0 6 0L5 7zM19 7l-3 8a3 3 0 0 0 6 0l-3-8z"/>',
+  filter:'<path d="M22 3H2l8 9.5V19l4 2v-8.5L22 3z"/>'
+};
+function ico(n, s){ return `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:${s||18}px;height:${s||18}px">${ICONS[n]||""}</svg>`; }
+function sndPaint(){ const b=$("sndBtn"); if(b) b.innerHTML = `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M11 5L6 9H2v6h4l5 4V5z"/>${soundOn ? '<path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>' : '<path d="M22 9l-6 6M16 9l6 6"/>'}</svg>`; }
+const NAV = [
+  ["cargo","box","Yuklar","show('main');setTab('cargo')"],
+  ["cust","users","Mijozlar","show('main');setTab('cust')"],
+  ["chat","chat","Chatlar","show('main');setTab('chat')","tBadge"],
+  ["rcv","down","Qabul qilish","openReceive()"],
+  ["ho","up","Topshirish","openHandover()"],
+  ["pay","card","Mijoz to'lovlari","openPayments()","payDot"],
+  ["orph","help","Egasi topilmagan yuklar","openOrphans()","orCnt"],
+  ["tx","car","Taksi: uyga yetkazish","openTx()","txCnt"],
+  ["pk","pin","Punktlar","openPk()","pkCnt"],
+  ["rep","chart","Hisobot va foyda","openReport()"],
+  ["bulk","layers","Ommaviy yuklash","openBulk()"],
+  ["xl","sheet","Excel'dan mijozni ajratish","openXl()"],
+  ["addr","globe","Xitoy manzili va tariflar","openAddrEdit()"],
+  ["set","sliders","Sozlamalar","show('settings');checkPay();checkOrphans()"]
+];
+const NAV_SEP = {rep:1, set:1};
+function navBuild(){
+  const el = $("snav"); if(!el) return;
+  el.innerHTML = `<div class="sh"><img alt="" src="icon-192.png"><b>TezPost Admin</b></div>` + NAV.map(n=>(NAV_SEP[n[0]] ? '<div class="sep"></div>' : "") + `<button class="ni" data-k="${n[0]}" onclick="${n[3]}"><span class="ic">${ico(n[1],20)}</span>${n[2]}<span class="nb" data-b="${n[4]||""}"></span></button>`).join("")
+    + '<div class="sep"></div>' + `<button class="ni" onclick="logout()"><span class="ic">${ico("out",20)}</span>Chiqish</button>`;
+}
+function navMark(){
+  const el = $("snav"); if(!el) return;
+  const act = document.querySelector(".screen.active"); const id = act ? act.id : "";
+  const map = {receive:"rcv", handover:"ho", payments:"pay", orphans:"orph", tx:"tx", pk:"pk", pkw:"pk", report:"rep", bulkup:"bulk", xl:"xl", addrEdit:"addr", settings:"set", thread:"chat"};
+  let tb = "cargo"; try{ tb = tab; }catch(e){}
+  const key = id === "main" ? tb : (map[id] || "");
+  el.querySelectorAll("button.ni[data-k]").forEach(b=>b.classList.toggle("on", b.dataset.k === key));
+  navBadges();
+}
+function navBadges(){
+  document.querySelectorAll("#snav .nb[data-b]").forEach(nb=>{
+    const id = nb.dataset.b; if(!id) return; const src = $(id); let t = "";
+    if(src){ const tx = src.textContent || ""; if(id === "payDot") t = src.classList.contains("show") ? "●" : ""; else if(id === "pkCnt") t = /xato/.test(tx) ? tx.replace(/[^0-9]/g, "") : ""; else t = tx.replace(/[^0-9]/g, ""); if(t === "0") t = ""; }
+    nb.textContent = t;
+  });
+}
+function navOpen(){ $("snav").classList.add("open"); $("snavBk").classList.add("open"); }
+function navClose(){ const a = $("snav"), b = $("snavBk"); if(a) a.classList.remove("open"); if(b) b.classList.remove("open"); }
+function navMenuBtns(){
+  const b = '<button class="mbtn" aria-label="Menyu" onclick="navOpen()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:22px;height:22px"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>';
+  document.querySelectorAll(".th-top").forEach(h=>{ if(!h.querySelector(".mbtn")) h.insertAdjacentHTML("beforeend", b); });
+  const top = document.querySelector("#main .hero .top"); if(top && !top.querySelector(".mbtn")) top.insertAdjacentHTML("afterbegin", b);
+}
+navBuild(); navMenuBtns(); setInterval(navBadges, 3000);
 function toggleEye(btn){ const i = btn.parentElement.querySelector("input"); i.type = i.type === "password" ? "text" : "password"; }
 
 /* ====== Kirish ====== */
@@ -919,7 +1026,7 @@ function setTab(t){
   $("tCargo").classList.toggle("on", t==="cargo");
   $("tCust").classList.toggle("on", t==="cust");
   $("tChat").classList.toggle("on", t==="chat");
-  search();
+  navMark(); search();
 }
 function openCustomer(code){
   $("q").value = code; $("qx").classList.add("show");
@@ -962,8 +1069,8 @@ const somN = n => Math.round(Number(n||0)).toLocaleString("en-US").replace(/,/g,
 const money = n => "$" + (Math.round(Number(n||0)*100)/100).toFixed(2).replace(/\.00$/,"");
 const kgf = n => String(Math.round(Number(n||0)*1000)/1000);
 function wtHtml(d){
-  if(d.weight_kg == null) return `<button class="chip wtc nowt" onclick="editWeight(${d.id})">⚖ Og'irlik kiriting</button>`;
-  return `<button class="chip wtc" onclick="editWeight(${d.id})">⚖ ${kgf(d.weight_kg)} kg · ${som(d.amount, d.rate)}</button><button class="chip paidc ${d.paid?"yes":"no"}" onclick="togglePaid(${d.id})">${d.paid?"✓ To'langan":"To'lanmagan"}</button>`;
+  if(d.weight_kg == null) return `<button class="chip wtc nowt" onclick="editWeight(${d.id})">${ico("scale",14)} Og'irlik kiriting</button>`;
+  return `<button class="chip wtc" onclick="editWeight(${d.id})">${ico("scale",14)} ${kgf(d.weight_kg)} kg · ${som(d.amount, d.rate)}</button><button class="chip paidc ${d.paid?"yes":"no"}" onclick="togglePaid(${d.id})">${d.paid?"✓ To'langan":"To'lanmagan"}</button>`;
 }
 function findCargo(id){ return (cState && (cState.declarations||[]).find(x=>x.id===id)) || hoItems.find(x=>x.id===id) || rcv.find(x=>x.id===id) || null; }
 function paintWt(id){ const d = findCargo(id), el = $("wt"+id); if(d && el) el.innerHTML = wtHtml(d); if($("handover").classList.contains("active")) drawHo(); }
@@ -989,7 +1096,7 @@ function cargoCard(d){
     <div class="row1">${pick}<button class="trk" style="flex:1" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button>
       <button class="who" onclick="openCustomer('${esc(d.customer_code)}')">${esc(d.customer_code)}</button></div>
     <div class="nm" style="margin-top:6px;font-size:15px;font-weight:600">${esc(d.customer_name)} <a style="color:var(--blue);text-decoration:none;font-weight:600" href="tel:+${esc(d.customer_phone)}">${esc(fmtPhone(d.customer_phone))}</a></div>
-    <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}<span id="wt${d.id}">${wtHtml(d)}</span>${d.punkt?`<span class="chip">📍 ${esc(d.punkt)}</span>`:""}${d.confiscated?`<span class="chip" style="background:#FDE8E8;color:#C62828">Musodara</span>`:""}</div>
+    <div class="chips">${(d.products||[]).map(p=>`<span class="chip">${esc(p.type)} × ${Number(p.qty)||1}</span>`).join("")}<span id="wt${d.id}">${wtHtml(d)}</span>${d.punkt?`<span class="chip">${ico("pin",14)}${esc(d.punkt)}</span>`:""}${d.confiscated?`<span class="chip" style="background:#FDE8E8;color:#C62828">Musodara</span>`:""}</div>
     ${d.note?`<div class="note-line">${esc(d.note)}</div>`:""}
     <div class="row3"><span class="when">${when(d.created_at)}</span>
       <span class="stsel ${esc(d.status)}" id="s${d.id}"><select onchange="setStatus(${d.id},this)" data-prev="${esc(d.status)}">${opts}</select></span></div>
@@ -1023,7 +1130,7 @@ let orOff = 0, orT = null;
 function setOrCnt(n){ const e = $("orCnt"); if(e) e.textContent = n > 0 ? "· " + n + " ta" : ""; }
 /* ====== TAKSI ====== */
 let txa = null, txaCtl = null, txaLat = null, txaLng = null, txaDirty = false, txaEdId = null, txaMapFor = false;
-const TXA_ST = {new:"⏳ Taksichi topilmadi", offered:"📨 Taksichiga yuborildi", accepted:"✅ Qabul qilindi", onway:"🚕 Yo'lda", arrived:"📍 Yetib keldi, kutyapti", delivered:"📦 Yetkazildi", cancelled:"✕ Bekor qilindi"};
+const TXA_ST = {new:"Taksichi topilmadi", offered:"Taksichiga yuborildi", accepted:"Qabul qilindi", onway:"Yo'lda", arrived:"Yetib keldi, kutyapti", delivered:"Yetkazildi", cancelled:"✕ Bekor qilindi"};
 async function checkTx(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_tx_badge", {p_token:token}); const e = $("txCnt"); if(e) e.textContent = r.n > 0 ? "· " + r.n + " ta kutmoqda" : ""; }catch(e){} }
 let txaPass = null, txHas = null, txMsg = "", txPwChg = false;
 async function openTx(){
@@ -1045,13 +1152,13 @@ function txLockDraw(){
   }
   const box = $("txLockBox");
   if(!txHas){
-    box.innerHTML = `<span class="lbl">🔒 Taksi bo'limi</span><div class="hoinfo" style="margin:2px 0 10px">Taksi bo'limini himoyalash uchun parol o'rnating. Parolsiz sozlamalar, taksichilar, buyurtmalar va daromadni ko'rib bo'lmaydi.</div>
+    box.innerHTML = `<span class="lbl">Taksi bo'limi</span><div class="hoinfo" style="margin:2px 0 10px">Taksi bo'limini himoyalash uchun parol o'rnating. Parolsiz sozlamalar, taksichilar, buyurtmalar va daromadni ko'rib bo'lmaydi.</div>
       <div class="xgrid"><div class="xf"><span class="lbl">Yangi parol (kamida 6 ta belgi)</span>${I("txNew","Yangi parol")}</div><div class="xf"><span class="lbl">Parolni takrorlang</span>${I("txNew2","Takrorlang")}</div></div>${err}
       <button class="btn" style="margin-top:10px;box-shadow:none" onclick="txSetPass(false)">Parolni o'rnatish</button>`;
   }else{
-    box.innerHTML = `<span class="lbl">🔒 Taksi bo'limi</span><div class="hoinfo" style="margin:2px 0 10px">Ochish uchun Taksi parolini kiriting.</div>
+    box.innerHTML = `<span class="lbl">Taksi bo'limi</span><div class="hoinfo" style="margin:2px 0 10px">Ochish uchun Taksi parolini kiriting.</div>
       <div class="xgrid"><div class="xf">${I("txPw","Taksi paroli")}</div></div>${err}
-      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="txUnlock()">🔓 Ochish</button>`;
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="txUnlock()">Ochish</button>`;
     const f = $("txPw"); if(f) f.addEventListener("keydown", e=>{ if(e.key === "Enter") txUnlock(); });
   }
 }
@@ -1096,9 +1203,9 @@ function applyTx(r){
 function setTxCnt(n){ const e = $("txCnt"); if(e) e.textContent = n > 0 ? "· " + n + " ta kutmoqda" : ""; }
 function txaDrawDrivers(){
   const ds = txa.drivers;
-  $("txaDrivers").innerHTML = ds.length ? ds.map(d=>`<div class="pbox"><div class="ph"><div><b>${esc(d.name)} ${d.active ? (d.is_on ? "🟢" : "⚪") : "🚫"}</b><small>${esc(d.phone)}${d.car ? " · " + esc(d.car) : ""}</small></div><span class="pt" style="font-size:16px">${d.delivered} ta</span></div>
+  $("txaDrivers").innerHTML = ds.length ? ds.map(d=>`<div class="pbox"><div class="ph"><div><b>${esc(d.name)} ${d.active ? (d.is_on ? "· onlayn" : "") : ""}</b><small>${esc(d.phone)}${d.car ? " · " + esc(d.car) : ""}</small></div><span class="pt" style="font-size:16px">${d.delivered} ta</span></div>
     <div style="font-size:13px;color:var(--muted);margin:6px 0">Bugun: <b>${d.today}</b> ta · Ochiq: <b>${d.open}</b> · Topgani: <b>${somN(d.earned)}</b><br>Sizga berishi kerak: <b style="color:${d.owe>0?"#C62828":"inherit"}">${somN(d.owe)}</b></div>
-    <div class="pbtn"><button style="background:#E8F0FD;color:#0B4DB5" onclick="txaDrvForm(${d.id})">✎ Tahrirlash</button>${d.owe>0 ? `<button class="ok" onclick="txaSettle(${d.id},${d.owe})">💵 Oldim</button>` : ""}</div></div>`).join("")
+    <div class="pbtn"><button style="background:#E8F0FD;color:#0B4DB5" onclick="txaDrvForm(${d.id})">✎ Tahrirlash</button>${d.owe>0 ? `<button class="ok" onclick="txaSettle(${d.id},${d.owe})">Oldim</button>` : ""}</div></div>`).join("")
     : '<div class="empty" style="margin-bottom:12px"><b>Taksichi yo\'q</b><p>Pastdagi tugma bilan taksichi qo\'shing. U driver.html ilovasi orqali telefon va parol bilan kiradi.</p></div>';
 }
 function txaDrawRides(){
@@ -1106,7 +1213,7 @@ function txaDrawRides(){
   $("txaRides").innerHTML = rs.length ? rs.map(r=>{
     const open = ["new","offered","accepted","onway","arrived"].includes(r.status);
     return `<div class="pbox"><div class="ph"><div><b>${esc(r.customer)} · ${esc(r.code)}</b><small>${esc(r.phone||"")} · ${when(r.created_at)}</small></div><span class="pt" style="font-size:17px">${somN(r.fare)}</span></div>
-      <div style="font-size:13.5px;margin:6px 0"><b>${esc(TXA_ST[r.status]||r.status)}</b>${r.driver ? " · " + esc(r.driver) : ""}<br>📍 ${esc(r.addr)} · ${r.dist} km<br>📦 ${r.items} ta yuk${r.note ? " · " + esc(r.note) : ""}<br>${r.wait_fee>0 ? "<br>⏱ Kutish puli: <b>" + somN(r.wait_fee) + "</b>" : ""}<br><span style="color:var(--muted)">Sizga: ${somN(r.admin_cut)} · Taksichiga: ${somN(r.driver_cut)}</span></div>
+      <div style="font-size:13.5px;margin:6px 0"><b>${esc(TXA_ST[r.status]||r.status)}</b>${r.driver ? " · " + esc(r.driver) : ""}<br>${esc(r.addr)} · ${r.dist} km<br>${r.items} ta yuk${r.note ? " · " + esc(r.note) : ""}<br>${r.wait_fee>0 ? "<br>⏱ Kutish puli: <b>" + somN(r.wait_fee) + "</b>" : ""}<br><span style="color:var(--muted)">Sizga: ${somN(r.admin_cut)} · Taksichiga: ${somN(r.driver_cut)}</span></div>
       ${open ? `<div style="display:flex;gap:8px;margin-bottom:8px"><select id="as${r.id}" class="xsel" style="flex:1">${act.map(d=>`<option value="${d.id}" ${d.id===r.driver_id?"selected":""}>${esc(d.name)}${d.is_on?"":" (ishda emas)"}</option>`).join("")}</select><button style="height:46px;border:0;border-radius:13px;background:#0B4DB5;color:#fff;font-weight:800;padding:0 14px" onclick="txaAssign(${r.id})">Biriktirish</button></div>
       <div class="pbtn"><button class="no" onclick="txaCancel(${r.id})">✕ Bekor qilish</button></div>` : ""}</div>`;
   }).join("") : '<div class="empty" style="margin-bottom:12px"><b>Buyurtma yo\'q</b><p>Mijoz uyga yetkazish buyurtma qilsa, shu yerda chiqadi.</p></div>';
@@ -1155,8 +1262,8 @@ async function openOrphans(){ $("orQ").value = ""; show("orphans"); await loadOr
 function orRow(d){
   const t = esc(d.track);
   return `<div class="obox" data-t="${t}"><div class="oh"><b>${t}</b><span class="oc">${esc(d.status ? (STATUS[d.status]||d.status) : "Holat yo'q")}</span></div>
-    <div class="om">${d.weight_kg != null ? `⚖ <b>${kgf(d.weight_kg)} kg</b>${d.amount_uzs != null ? " · taxminan <b>" + somN(d.amount_uzs) + "</b>" : ""}` : "Og'irligi yo'q"} · ${when(d.created_at)}</div>
-    <div class="ob"><button class="go2" onclick="orAssign(this.closest('.obox').dataset.t)">👤 Mijozga biriktirish</button><button class="no2" onclick="orDel(this.closest('.obox').dataset.t)">🗑</button></div></div>`;
+    <div class="om">${d.weight_kg != null ? `<b>${kgf(d.weight_kg)} kg</b>${d.amount_uzs != null ? " · taxminan <b>" + somN(d.amount_uzs) + "</b>" : ""}` : "Og'irligi yo'q"} · ${when(d.created_at)}</div>
+    <div class="ob"><button class="go2" onclick="orAssign(this.closest('.obox').dataset.t)">Mijozga biriktirish</button><button class="no2" onclick="orDel(this.closest('.obox').dataset.t)"></button></div></div>`;
 }
 async function loadOrphans(reset){
   if(reset){ orOff = 0; $("orList").innerHTML = '<div class="skel"></div>'; }
@@ -1195,7 +1302,7 @@ async function loadPayments(){
     $("pyCard").value = r.card || ""; $("pyHolder").value = r.holder || ""; $("pyNote").value = r.note || "";
     $("payPend").innerHTML = (r.pending||[]).length ? r.pending.map(p=>`<div class="pbox"><div class="ph"><div><b>${esc(p.code)} · ${esc(p.name)}</b><small>${esc(p.phone||"")} · ${when(p.created_at)}</small></div><span class="pt">${somN(p.total)}</span></div>
       <table>${(p.tracks||[]).map(t=>`<tr><td>${esc(t.track)}</td><td class="r" style="font-weight:500">${kgf(t.kg)} kg</td><td class="r">${somN(t.amount)}</td></tr>`).join("")}</table>
-      ${p.has_receipt ? `<button class="rcview" onclick="viewReceipt(${p.id},this)">🧾 Chekni ko'rish</button>` : ""}
+      ${p.has_receipt ? `<button class="rcview" onclick="viewReceipt(${p.id},this)">Chekni ko'rish</button>` : ""}
       <div class="pbtn"><button class="no" onclick="payDecide(${p.id},false)">✕ Kelmadi</button><button class="ok" onclick="payDecide(${p.id},true)">✓ Tushdi, tasdiqlash</button></div></div>`).join("")
       : `<div class="empty"><b>Kutilayotgan to'lov yo'q</b><p>Mijoz to'lov qildim deb yuborsa, shu yerda chiqadi.</p></div>`;
   }catch(e){ $("payPend").innerHTML = ""; handleErr(e); }
@@ -1218,22 +1325,22 @@ function pmDraw(){
   const box = $("pmBox"); if(!box) return;
   const I = (id, ph) => `<input id="${id}" type="password" class="xsel" style="padding:0 12px" placeholder="${ph}" autocomplete="new-password" maxlength="60">`;
   const err = pmMsg ? `<div class="hoinfo" style="color:#C62828;margin:8px 0 0;font-weight:700">${esc(pmMsg)}</div>` : "";
-  const head = `<span class="lbl">🔒 Payme (onlayn to'lov)</span>`;
+  const head = `<span class="lbl">Payme (onlayn to'lov)</span>`;
   if(!pmHas){
     box.innerHTML = head + `<div class="hoinfo" style="margin:2px 0 10px">Payme sozlamalarini himoyalash uchun parol o'rnating. Parolsiz Merchant ID ko'rinmaydi va o'zgartirib bo'lmaydi.</div>
       <div class="xgrid"><div class="xf"><span class="lbl">Yangi parol (kamida 6 ta belgi)</span>${I("pmNew1","Yangi parol")}</div><div class="xf"><span class="lbl">Parolni takrorlang</span>${I("pmNew2","Takrorlang")}</div></div>${err}
       <button class="btn" style="margin-top:10px;box-shadow:none" onclick="pmSetPass(false)">Parolni o'rnatish</button>`;
   }else if(pmPass === null){
-    box.innerHTML = head + `<div class="hoinfo" style="margin:2px 0 10px">Holati: <b>${pmOn ? "yoqilgan ✅" : "o'chirilgan"}</b>. Sozlamalarni ko'rish uchun parolni kiriting.</div>
+    box.innerHTML = head + `<div class="hoinfo" style="margin:2px 0 10px">Holati: <b>${pmOn ? "yoqilgan " : "o'chirilgan"}</b>. Sozlamalarni ko'rish uchun parolni kiriting.</div>
       <div class="xgrid"><div class="xf">${I("pmPass","Payme paroli")}</div></div>${err}
-      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="pmUnlock()">🔓 Ochish</button>`;
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="pmUnlock()">Ochish</button>`;
   }else{
     let ep = ""; try{ ep = new URL(window.TP_CONFIG.url).origin + "/functions/v1/payme"; }catch(e){}
     box.innerHTML = head + `<div class="xgrid">
         <div class="xf"><span class="lbl">Merchant ID (Payme kassasidan)</span><input id="pmMerchant" class="xsel" style="padding:0 12px" placeholder="Bo'sh = o'chirilgan" maxlength="60" autocomplete="off" value="${esc(pmCfg.merchant||"")}"></div>
         <div class="xf"><span class="lbl">Rejim</span><label class="xsyc" style="margin:0;height:46px"><input type="checkbox" id="pmTest" ${pmCfg.test?"checked":""}> Test rejim (sinov uchun)</label></div>
         <div class="xf xwide"><span class="lbl">Payme kassasiga yoziladigan Endpoint manzil</span><input class="xsel" style="padding:0 12px" readonly onclick="this.select()" value="${esc(ep)}"></div></div>${err}
-      <div style="display:flex;gap:8px;margin-top:10px"><button class="btn" style="flex:1;box-shadow:none" onclick="savePayme()">Saqlash</button><button class="btn" style="flex:0 0 auto;width:auto;padding:0 16px;box-shadow:none;background:#E8EEF8;color:#1A3E8F" onclick="pmLock()">🔒 Qulflash</button></div>
+      <div style="display:flex;gap:8px;margin-top:10px"><button class="btn" style="flex:1;box-shadow:none" onclick="savePayme()">Saqlash</button><button class="btn" style="flex:0 0 auto;width:auto;padding:0 16px;box-shadow:none;background:#E8EEF8;color:#1A3E8F" onclick="pmLock()">Qulflash</button></div>
       <button style="margin-top:10px;font-size:13.5px;background:none;border:0;color:var(--blue,#1A56DB);font-weight:800;padding:4px 0" onclick="pmChg=!pmChg;pmMsg='';pmDraw()">Parolni o'zgartirish</button>
       ${pmChg ? `<div class="xgrid" style="margin-top:8px"><div class="xf">${I("pmOld","Eski parol")}</div><div class="xf">${I("pmNew1","Yangi parol")}</div></div><button class="btn" style="margin-top:8px;box-shadow:none" onclick="pmSetPass(true)">Parolni almashtirish</button>` : ""}`;
   }
@@ -1299,7 +1406,7 @@ async function loadReport(){
       <div class="kpi"><small>To'langan</small><b style="color:#127A45">${somN(r.paid_uzs)}</b></div>
       <div class="kpi ${Number(r.debt_uzs)?"warn":""}"><small>To'lanmagan (qarz)</small><b>${somN(r.debt_uzs)}</b></div>
       <div class="kpi"><small>Og'irligi kiritilgan</small><b>${r.weighed} / ${r.cargos}</b></div></div>
-      ${r.no_weight ? `<div class="info" style="margin-bottom:10px">Og'irligi kiritilmagan ${r.no_weight} ta yuk hisobga kirmagan. Og'irlikni yuk kartasidagi «⚖» tugmasi yoki Sozlamalar → «Excel'dan ajratish» orqali kiriting.</div>` : ""}
+      ${r.no_weight ? `<div class="info" style="margin-bottom:10px">Og'irligi kiritilmagan ${r.no_weight} ta yuk hisobga kirmagan. Og'irlikni yuk kartasidagi «» tugmasi yoki Sozlamalar → «Excel'dan ajratish» orqali kiriting.</div>` : ""}
       ${r.months.length ? `<div class="info">Oylar bo'yicha</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Oy</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Summa</th><th class="r">Foyda</th></tr>${r.months.map(m=>`<tr><td>${esc(m.month)}</td><td class="r">${m.cargos}</td><td class="r">${kgf(m.kg)}</td><td class="r">${somN(m.revenue_uzs)}</td><td class="r"><b>${somN(m.profit_uzs)}</b></td></tr>`).join("")}</table></div>` : ""}
       ${r.debtors.length ? `<div class="info">Qarzdorlar (to'lanmagan yuklar)</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Mijoz</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Qarz</th></tr>${r.debtors.map(c=>`<tr style="cursor:pointer" onclick="openCustomer('${esc(c.code)}')"><td><b>${esc(c.code)}</b> ${esc(c.name)}</td><td class="r">${c.cargos}</td><td class="r">${kgf(c.kg)}</td><td class="r"><b style="color:#C62828">${somN(c.debt_uzs)}</b></td></tr>`).join("")}</table></div>` : ""}`;
   }catch(e){ $("rpBody").innerHTML = ""; handleErr(e); }
@@ -1476,15 +1583,15 @@ function xlSyncPanel(byCode, si){
   if(wi >= 0 && n){
     let kg = 0, cntW = 0; byCode.forEach(r=>{ const v = parseFloat(String(r[wi] ?? "").replace(",",".")); if(isFinite(v) && v > 0){ kg += v; cntW++; } });
     const R = xl.rates, kgS = (Math.round(kg*1000)/1000).toString();
-    sumH = `<div class="hoinfo" style="margin:10px 0 0;font-size:14.5px;line-height:1.6;background:var(--blue-soft);border-radius:12px;padding:10px 12px">⚖ Og'irligi bor: <b>${cntW} ta</b> · jami <b>${kgS} kg</b>`
-      + (R && cntW ? `<br>💵 Mijozdan olinadi: <b>${somN(kg * R.sell * R.usd)}</b> <span style="color:var(--muted)">(${R.sell}$ × ${kgS} kg × ${somN(R.usd)})</span>` : "")
+    sumH = `<div class="hoinfo" style="margin:10px 0 0;font-size:14.5px;line-height:1.6;background:var(--blue-soft);border-radius:12px;padding:10px 12px">Og'irligi bor: <b>${cntW} ta</b> · jami <b>${kgS} kg</b>`
+      + (R && cntW ? `<br>Mijozdan olinadi: <b>${somN(kg * R.sell * R.usd)}</b> <span style="color:var(--muted)">(${R.sell}$ × ${kgS} kg × ${somN(R.usd)})</span>` : "")
       + (cntW < n ? `<br><span style="color:var(--muted)">Og'irligi yo'q: ${n - cntW} ta</span>` : "") + `</div>`;
   }
   box.innerHTML = `<div class="scanbox" style="margin-top:12px"><span class="lbl">3. TezPost'ni avtomatik yangilash · ${n} ta yuk</span>
     ${si >= 0 ? `<div class="hoinfo" style="margin:4px 0 8px">Excel'dagi har bir holatga TezPost holatini tanlang. Bir marta tanlasangiz, eslab qoladi.</div><div class="xsy">${rowsH}</div>` : `<div class="hoinfo">Holat ustuni tanlanmagan, faqat og'irlik yoziladi.</div>`}
     ${sumH}
     <label class="xsyc"><input type="checkbox" id="xlSyW" ${keepW && wi >= 0 ? "checked" : ""} ${wi < 0 ? "disabled" : ""} onchange="xlSyncPanel(xl.byCode,+$('xlStatCol').value)"> Og'irlikni ham yozish ${wi < 0 ? "(og'irlik ustuni tanlanmagan)" : ""}</label>
-    <button class="btn" id="xlSyBtn" style="margin-top:10px;background:linear-gradient(180deg,#22A862,#127A45);box-shadow:none" onclick="xlSync()">🔄 TezPost'ni yangilash · ${n} ta qator</button></div>`;
+    <button class="btn" id="xlSyBtn" style="margin-top:10px;background:linear-gradient(180deg,#22A862,#127A45);box-shadow:none" onclick="xlSync()">TezPost'ni yangilash · ${n} ta qator</button></div>`;
 }
 async function xlSync(){
   const items = xlSyncRows();
@@ -1496,10 +1603,10 @@ async function xlSync(){
   try{
     for(let i=0;i<items.length;i+=2000){ const r = await rpc("admin_sync", {p_token:token, p_items:items.slice(i,i+2000)}); for(const k in t) t[k] += r[k] || 0; }
     lsClear(); beep("done");
-    $("xlDone").innerHTML = `<div class="scanbox" style="margin-top:12px"><b style="font-size:16px">✅ Tayyor: ${items.length} ta qator yuborildi</b>
-      <div class="hoinfo" style="margin:8px 0 0;font-size:14px;line-height:1.7">✅ Holati o'zgardi: <b>${t.status_updated}</b><br>⚖ Og'irligi yozildi: <b>${t.weight_updated}</b><br>🕓 Mijoz hali deklaratsiya qilmagan (saqlandi, qo'shganda avtomatik o'zgaradi): <b>${t.pending}</b>${t.pending ? ` <a href="#" onclick="openOrphans();return false" style="color:var(--blue);font-weight:800">Ko'rish ›</a>` : ""}<br>📦 TezPost'da topilgan yuklar: <b>${t.found}</b></div></div>`;
+    $("xlDone").innerHTML = `<div class="scanbox" style="margin-top:12px"><b style="font-size:16px">Tayyor: ${items.length} ta qator yuborildi</b>
+      <div class="hoinfo" style="margin:8px 0 0;font-size:14px;line-height:1.7">Holati o'zgardi: <b>${t.status_updated}</b><br>Og'irligi yozildi: <b>${t.weight_updated}</b><br>Mijoz hali deklaratsiya qilmagan (saqlandi, qo'shganda avtomatik o'zgaradi): <b>${t.pending}</b>${t.pending ? ` <a href="#" onclick="openOrphans();return false" style="color:var(--blue);font-weight:800">Ko'rish ›</a>` : ""}<br>TezPost'da topilgan yuklar: <b>${t.found}</b></div></div>`;
   }catch(e){ handleErr(e); }
-  b.disabled = false; b.textContent = "🔄 TezPost'ni yangilash · " + (xl.byCode||[]).length + " ta qator";
+  b.disabled = false; b.textContent = "TezPost'ni yangilash · " + (xl.byCode||[]).length + " ta qator";
 }
 function xlTracks(){ const ti = +$("xlTrkCol").value; return xl.hit.map(r=>String(r[ti] ?? "").trim()).filter(Boolean); }
 async function xlPushWeights(){
@@ -1558,7 +1665,7 @@ async function bkSend(){
     const r = await rpc("admin_bulk_tracks", {p_token:token, p_tracks:list, p_status:st});
     lsClear(); beep("done");
     $("bkRes").innerHTML = `<div class="scanbox" style="margin-top:12px"><b style="font-size:16px">Tayyor: ${r.total} ta trek-kod</b>
-      <div class="hoinfo" style="margin:8px 0 0;font-size:14px;line-height:1.7">✅ Holati o'zgardi: <b>${r.updated}</b><br>⏭ Allaqachon shu holatda yoki oldinda: <b>${r.skipped}</b><br>🕓 Tizimda hali yo'q (saqlandi, mijoz qo'shganda avtomatik o'zgaradi): <b>${r.pending}</b></div></div>`;
+      <div class="hoinfo" style="margin:8px 0 0;font-size:14px;line-height:1.7">Holati o'zgardi: <b>${r.updated}</b><br>⏭ Allaqachon shu holatda yoki oldinda: <b>${r.skipped}</b><br>Tizimda hali yo'q (saqlandi, mijoz qo'shganda avtomatik o'zgaradi): <b>${r.pending}</b></div></div>`;
     $("bkText").value = ""; bkCount();
   }catch(e){ handleErr(e); }
   b.disabled = false; b.textContent = "Yuklash";
@@ -1580,7 +1687,7 @@ function beep(kind){
 function speak(){}
 function toggleSound(){
   soundOn = !soundOn; try{ localStorage.setItem("tp_sound", soundOn ? "1" : "0"); }catch(e){}
-  $("sndBtn").textContent = soundOn ? "🔊" : "🔇"; toast(soundOn ? "Ovoz yoqildi" : "Ovoz o'chirildi");
+  sndPaint(); toast(soundOn ? "Ovoz yoqildi" : "Ovoz o'chirildi");
   if(soundOn){ beep(true); }
 }
 function toggleKb(){
@@ -1589,7 +1696,7 @@ function toggleKb(){
 }
 const normTrack = t => String(t||"").replace(/\s/g,"").toUpperCase();
 function openReceive(){
-  audio(); show("receive"); $("sndBtn").textContent = soundOn ? "🔊" : "🔇";
+  audio(); show("receive"); sndPaint();
   drawRcv(); setTimeout(()=>$("scanIn").focus(), 120);
 }
 function closeRcv(){
@@ -1682,7 +1789,7 @@ function drawHo(){
               <td><button class="trk" onclick="copyTrack('${esc(d.track)}')">${esc(d.track)}</button></td>
               <td>${has ? Math.round(amt * Number(d.rate||0)).toLocaleString("en-US").replace(/,/g," ") : "—"}</td>
               <td>${has ? amt.toFixed(2) : "—"}</td>
-              <td>${has ? `<button class="hoedit" onclick="editWeight(${d.id})">${kgf(kg)}</button>` : `<button class="hoedit nowt" onclick="editWeight(${d.id})">⚖ Kiriting</button>`}</td>
+              <td>${has ? `<button class="hoedit" onclick="editWeight(${d.id})">${kgf(kg)}</button>` : `<button class="hoedit nowt" onclick="editWeight(${d.id})">${ico("scale",14)} Kiriting</button>`}</td>
               <td>${has && kg ? hoPpk(amt, kg) : "—"}</td>
               <td>${has ? `<button class="chip paidc ${d.paid?"yes":"no"}" onclick="togglePaid(${d.id})">${d.paid?"✓ To'langan":"To'lanmagan"}</button>` : "—"}</td></tr>`; }).join("")
         + `</tbody></table></div>`
@@ -1693,7 +1800,7 @@ function drawHo(){
 function hoPaint(){
   const chosen = hoItems.filter(x=>x.checked), sel = chosen.length, kg = chosen.reduce((a,x)=>a + Number(x.weight_kg||0), 0), due = hoDue(chosen), nowt = chosen.filter(x=>x.weight_kg == null).length;
   $("hoSum").innerHTML = `Skaner: <b>${sel} / ${hoItems.length}</b> ta · <b>${kgf(kg)} kg</b><br>` + (sel ? (due ? `To'lov: <b style="color:#C62828">${somN(due)}</b>` : `<b style="color:#127A45">Hammasi to'langan</b>`) : "Har bir yukning shtrix-kodini skaner qiling") + (nowt ? ` · og'irliksiz: ${nowt}` : "");
-  const cb = $("hoCashBtn"); cb.disabled = !sel; cb.classList.toggle("on", hoCash); cb.textContent = hoCash ? "✓ Naqd pul olindi" : "💵 Naqd pul";
+  const cb = $("hoCashBtn"); cb.disabled = !sel; cb.classList.toggle("on", hoCash); $("hoCashT").innerHTML = hoCash ? ico("cash",20) + " Naqd pul olindi" : ico("cash",20) + " Naqd pul";
   $("hoCancelBtn").disabled = !(sel || hoCash);
   $("hoDoneBtn").disabled = !(sel && (hoCash || !due));
 }
@@ -1729,7 +1836,7 @@ async function openPkw(){
   pkwId = null; pkwStop(); show("pkw"); $("pkwTitle").textContent = "Punkt kuzatuvi";
   try{
     const list = await rpc("admin_punkts", {p_token:token});
-    $("pkwBody").innerHTML = list.length ? `<div class="info" style="margin-bottom:8px">Kuzatmoqchi bo'lgan punktni tanlang</div><div class="pkwgrid">` + list.map(p=>`<button class="item pkwcard" onclick="pkwOpen(${p.id})"><div class="row1"><b style="flex:1;font-size:17px;text-align:left">${esc(p.name)}</b><span class="chip" style="${p.active?"":"background:#FDE8E8;color:#C62828"}">${p.active?"Faol":"O'chiq"}</span></div><div class="chips"><span class="chip">Punktda: ${p.at_punkt}</span><span class="chip">Jami: ${p.total}</span>${p.errors?`<span class="chip" style="background:#FDE8E8;color:#C62828">Xato: ${p.errors}</span>`:""}</div><div style="margin-top:8px;color:#0B4DB5;font-weight:800;text-align:left">👁 Kuzatish ›</div></button>`).join("") + `</div>` : `<div class="empty"><b>Hali punkt yo'q</b></div>`;
+    $("pkwBody").innerHTML = list.length ? `<div class="info" style="margin-bottom:8px">Kuzatmoqchi bo'lgan punktni tanlang</div><div class="pkwgrid">` + list.map(p=>`<button class="item pkwcard" onclick="pkwOpen(${p.id})"><div class="row1"><b style="flex:1;font-size:17px;text-align:left">${esc(p.name)}</b><span class="chip" style="${p.active?"":"background:#FDE8E8;color:#C62828"}">${p.active?"Faol":"O'chiq"}</span></div><div class="chips"><span class="chip">Punktda: ${p.at_punkt}</span><span class="chip">Jami: ${p.total}</span>${p.errors?`<span class="chip" style="background:#FDE8E8;color:#C62828">Xato: ${p.errors}</span>`:""}</div><div style="margin-top:8px;color:#0B4DB5;font-weight:800;text-align:left">Kuzatish ›</div></button>`).join("") + `</div>` : `<div class="empty"><b>Hali punkt yo'q</b></div>`;
   }catch(e){ handleErr(e); }
 }
 function pkwOpen(id){ pkwId = id; pkwDate = pkwToday(); pkwLoad(); pkwStop(); pkwTimer = setInterval(()=>{ if(document.getElementById("pkw").classList.contains("active") && pkwId && pkwDate === pkwToday()) pkwLoad(true); }, 15000); }
@@ -1739,8 +1846,8 @@ async function pkwLoad(quiet){
   if(!pkwId) { openPkw(); return; }
   try{
     const r = await rpc("admin_punkt_watch", {p_token:token, p_punkt:pkwId, p_date:pkwDate});
-    $("pkwTitle").textContent = "👁 " + r.punkt.name;
-    const K = {qabul:["📥 Qabul qildi","#D3E8FB","#0B5C9E"], topshirish:["📤 Topshirdi","#D3F2E0","#127A45"], musodara:["🚫 Musodara","#FDE8E8","#C62828"], xato:["⚠️ Xato punkt","#FFF1DF","#B24F00"]};
+    $("pkwTitle").innerHTML = ico("eye",20) + " " + esc(r.punkt.name);
+    const K = {qabul:[ico("down",14) + "Qabul qildi","#D3E8FB","#0B5C9E"], topshirish:[ico("up",14) + "Topshirdi","#D3F2E0","#127A45"], musodara:[ico("ban",14) + "Musodara","#FDE8E8","#C62828"], xato:[ico("warn",14) + "Xato punkt","#FFF1DF","#B24F00"]};
     $("pkwBody").innerHTML = `<div class="pkwbar"><button class="chip" style="border:0;cursor:pointer" onclick="pkwShift(-1)">‹</button><input type="date" value="${pkwDate}" onchange="if(this.value){pkwDate=this.value;pkwLoad()}"><button class="chip" style="border:0;cursor:pointer" onclick="pkwShift(1)">›</button><button class="chip" style="border:0;cursor:pointer" onclick="pkwDate=pkwToday();pkwLoad()">Bugun</button><span class="when" style="margin-left:auto">${pkwDate === pkwToday() ? "● jonli (15 soniyada yangilanadi)" : ""}</span></div>
       <div class="pkwcards"><div class="c"><span>Qabul qilingan</span><b>${r.received}</b></div><div class="c"><span>Topshirilgan</span><b>${r.handed}</b></div><div class="c"><span>Og'irlik</span><b>${Math.round(r.kg*1000)/1000} kg</b></div><div class="c"><span>Jami (so'm)</span><b>${pkwFmt(r.total_uzs)}</b></div><div class="c"><span>Naqd olindi</span><b style="color:#127A45">${pkwFmt(r.cash_uzs)}</b></div><div class="c"><span>Oldindan to'langan</span><b>${pkwFmt(r.prepaid_uzs)}</b></div><div class="c"><span>To'lanmagan</span><b style="color:#C62828">${pkwFmt(r.debt_uzs)}</b></div><div class="c"><span>Hozir punktda</span><b>${r.at_punkt}</b></div><div class="c"><span>Ochiq xatolar</span><b style="color:${r.errors_open?"#C62828":"inherit"}">${r.errors_open}</b></div><div class="c"><span>Musodara (jami)</span><b>${r.conf_total}</b></div></div>
       <div class="pkwcols"><div><div class="info" style="margin:6px 2px 8px">Ish jurnali (${r.feed.length})</div>${r.feed.length ? r.feed.map(f=>{ const k = K[f.kind]||[f.kind,"#EEF3FD","#0B4DB5"]; return `<div class="item pkwrow"><span class="chip" style="background:${k[1]};color:${k[2]}">${k[0]}</span><b class="pkwt">${esc(f.track)}</b><span class="nm">${esc(f.customer_code||"")} ${esc(f.customer_name||"")}</span>${f.note?`<span class="chip">${esc(f.note)}</span>`:""}<span class="when" style="margin-left:auto">${pkwTime(f.at)}</span></div>`; }).join("") : `<div class="empty"><b>Bu kunda harakat yo'q</b></div>`}</div>
@@ -1751,7 +1858,7 @@ async function pkwLoad(quiet){
 /* ====== Punktlar ====== */
 let pkData = [], pkEdit = null;
 async function checkPk(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_punkts", {p_token:token}); const n = r.reduce((a,x)=>a + Number(x.errors||0), 0); const e = $("pkCnt"); if(e) e.textContent = n > 0 ? "· " + n + " ta xato" : (r.length ? "· " + r.length + " ta" : ""); }catch(e){} }
-async function openPk(){ show("pk"); $("pkLink").textContent = location.origin + location.pathname.replace(/[^/]*$/, "") + "punkt.html"; pkEdit = null; await loadPk(); }
+async function openPk(){ show("pk"); $("pkwBtnT").innerHTML = ico("eye",20) + " Punkt kuzatuvi"; $("pkLink").textContent = location.origin + location.pathname.replace(/[^/]*$/, "") + "punkt.html"; pkEdit = null; await loadPk(); }
 async function loadPk(){
   try{
     pkData = await rpc("admin_punkts", {p_token:token});
@@ -1769,7 +1876,7 @@ function drawPkForm(){
 }
 function drawPkList(){
   $("pkList").innerHTML = pkData.length ? pkData.map(p=>`<div class="item"><div class="row1"><b style="flex:1;font-size:16px">${esc(p.name)}</b><span class="chip" style="${p.active ? "" : "background:#FDE8E8;color:#C62828"}">${p.active ? "Faol" : "O'chiq"}</span></div>
-      <div class="chips"><span class="chip">🔑 ${esc(p.login)}</span><span class="chip">Punktda: ${p.at_punkt}</span><span class="chip">Jami: ${p.total}</span>${p.errors ? `<span class="chip" style="background:#FDE8E8;color:#C62828">Xato: ${p.errors}</span>` : ""}</div>
+      <div class="chips"><span class="chip">${ico("key",14)}${esc(p.login)}</span><span class="chip">Punktda: ${p.at_punkt}</span><span class="chip">Jami: ${p.total}</span>${p.errors ? `<span class="chip" style="background:#FDE8E8;color:#C62828">Xato: ${p.errors}</span>` : ""}</div>
       <div style="display:flex;gap:8px;margin-top:8px"><button class="chip" onclick="pkEdit=${p.id};drawPkForm();window.scrollTo(0,0)">✎ Tahrirlash</button><button class="chip" style="color:#C62828" onclick="pkDel(${p.id})">O'chirish</button></div></div>`).join("") : `<div class="empty"><b>Hali punkt yo'q</b><p>Yuqoridan birinchi punktni qo'shing.</p></div>`;
 }
 function drawPkErr(errs){
@@ -1938,7 +2045,7 @@ function renderCargo(r){
   const single = cs.length === 1 && q && !trackQ;
   if(cs.length) html += `<div class="info">Mijoz${cs.length>1?"lar":""}</div>` + cs.map(c=>custCard(c,cs.length>1, single ? (showCargo?"open":"closed") : null)).join("");
   if(single && !showCargo){
-    out.innerHTML = html + `<div class="empty" style="padding:16px"><p style="margin:0">Yuklarini ko'rish uchun yuqoridagi 👁 tugmasini bosing.</p></div>`;
+    out.innerHTML = html + `<div class="empty" style="padding:16px"><p style="margin:0">Yuklarini ko'rish uchun yuqoridagi ko'z tugmasini bosing.</p></div>`;
     updateBar(); return;
   }
   if(single && showCargo) html += `<div class="cfilt"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="cf" placeholder="Shu mijozning yukini trek raqam bilan qidirish" autocomplete="off" autocapitalize="characters" oninput="cargoFilter()" value="${esc(cfVal)}"></div><div id="cfEmpty" class="info" style="display:none">Bunday trek raqamli yuk topilmadi</div>`;
