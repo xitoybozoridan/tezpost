@@ -378,11 +378,6 @@
   html[data-view=pc] #payPend{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:12px;align-items:start}
   html[data-view=pc] #payPend .pbox,html[data-view=pc] #txaRides .pbox,html[data-view=pc] #txaDrivers .pbox{margin:0}
   /* egasiz yuklar */
-  html[data-view=pc] #orphans .wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:10px 12px;align-items:start}
-  html[data-view=pc] #orphans .wrap>*{margin:0 !important}
-  html[data-view=pc] #orphans .wrap>.hoinfo,html[data-view=pc] #orphans .wrap>.scanrow,html[data-view=pc] #orphans .wrap>.listhead,html[data-view=pc] #orphans .wrap>#orList,html[data-view=pc] #orphans .wrap>.morebtn{grid-column:1 / -1}
-  html[data-view=pc] #orList{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:10px 12px;align-items:start}
-  html[data-view=pc] #orList>*{margin:0 !important}
   html[data-view=pc] #orphans .scanrow{max-width:560px}
   /* taksi */
   html[data-view=pc] #tx .wrap{display:block}
@@ -457,6 +452,10 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
 .obox .oh{display:flex;justify-content:space-between;align-items:center;gap:8px}.obox .oh b{font-size:15.5px;word-break:break-all}
 .obox .oc{font-size:12px;font-weight:800;border-radius:999px;padding:4px 10px;background:var(--blue-soft);color:var(--blue);white-space:nowrap}
 .obox .om{color:var(--muted);font-size:13.5px;margin:6px 0 10px;line-height:1.5}.obox .om b{color:var(--text,inherit)}
+.obox{display:grid;grid-template-columns:minmax(0,1.5fr) auto minmax(0,1.6fr) auto;align-items:center;gap:10px 16px}
+.obox .oh{display:contents}.obox .om{margin:0}.obox .ob{width:auto}.obox .ob .go2{flex:none;padding:0 18px}.obox .ob .no2{width:42px;padding:0;display:grid;place-items:center}
+@media (max-width:760px){.obox{grid-template-columns:1fr auto}.obox .oh b{grid-column:1}.obox .oc{grid-column:2;justify-self:end}.obox .om{grid-column:1 / -1}.obox .ob{grid-column:1 / -1}.obox .ob .go2{flex:1}}
+.pager{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap;margin:12px 0 4px}.pager button{min-width:40px;height:40px;border:0;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-weight:800;color:var(--blue);padding:0 12px;cursor:pointer}.pager button.on{background:linear-gradient(180deg,#2E6BE6,#1648B8);color:#fff}.pager button:disabled{opacity:.4;cursor:default}
 .obox .ob{display:flex;gap:8px}.obox .ob button{height:42px;border:0;border-radius:12px;font-weight:800;font-size:14px;padding:0 14px}
 .obox .ob .go2{flex:1;background:linear-gradient(180deg,#2E6BE6,#1648B8);color:#fff}.obox .ob .no2{background:#FDECEC;color:#C62828}
 .rcview{width:100%;margin-top:8px;padding:10px;border:1px solid #0B4DB5;background:#F2F7FE;color:#0B4DB5;border-radius:10px;font:inherit;font-weight:600}
@@ -575,7 +574,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
     <div class="scanrow" style="margin-bottom:10px"><input id="orQ" placeholder="Trek-kod bo'yicha qidirish" oninput="orSearch()" autocomplete="off"></div>
     <div class="listhead"><b id="orHead">...</b><button id="orAll" onclick="orDelAll()" style="display:none;height:38px;padding:0 12px;border:0;border-radius:12px;background:#FDECEC;color:#C62828;font-weight:800">Hammasini o'chirish</button></div>
     <div id="orList"></div>
-    <button class="morebtn" id="orMore" style="display:none" onclick="loadOrphans(false)">Yana ko'rsatish</button>
+    <div class="pager" id="orPager"></div>
   </div>
 </main>
 
@@ -927,6 +926,8 @@ const ICONS = {
   ban:'<circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/>',
   key:'<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L21 2M16 7l3 3M18 5l2 2"/>',
   scale:'<path d="M12 3v18M5 7h14M5 7l-3 8a3 3 0 0 0 6 0L5 7zM19 7l-3 8a3 3 0 0 0 6 0l-3-8z"/>',
+  trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/>',
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
   filter:'<path d="M22 3H2l8 9.5V19l4 2v-8.5L22 3z"/>'
 };
 function ico(n, s){ return `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:${s||18}px;height:${s||18}px">${ICONS[n]||""}</svg>`; }
@@ -1263,24 +1264,35 @@ function orRow(d){
   const t = esc(d.track);
   return `<div class="obox" data-t="${t}"><div class="oh"><b>${t}</b><span class="oc">${esc(d.status ? (STATUS[d.status]||d.status) : "Holat yo'q")}</span></div>
     <div class="om">${d.weight_kg != null ? `<b>${kgf(d.weight_kg)} kg</b>${d.amount_uzs != null ? " · taxminan <b>" + somN(d.amount_uzs) + "</b>" : ""}` : "Og'irligi yo'q"} · ${when(d.created_at)}</div>
-    <div class="ob"><button class="go2" onclick="orAssign(this.closest('.obox').dataset.t)">Mijozga biriktirish</button><button class="no2" onclick="orDel(this.closest('.obox').dataset.t)"></button></div></div>`;
+    <div class="ob"><button class="go2" onclick="orAssign(this.closest('.obox').dataset.t)">${ico("user",16)} Mijozga biriktirish</button><button class="no2" onclick="orDel(this.closest('.obox').dataset.t)" aria-label="O'chirish">${ico("trash",18)}</button></div></div>`;
 }
 async function loadOrphans(reset){
-  if(reset){ orOff = 0; $("orList").innerHTML = '<div class="skel"></div>'; }
+  if(reset) orPg = 0;
+  $("orList").innerHTML = '<div class="skel"></div>';
   try{
-    const q = $("orQ").value, r = await rpc("admin_orphans", {p_token:token, p_q:q, p_limit:30, p_offset:orOff});
+    const q = $("orQ").value, r = await rpc("admin_orphans", {p_token:token, p_q:q, p_limit:10, p_offset:orPg*10});
+    if(r.total && !r.items.length && orPg > 0){ orPg = Math.max(0, Math.ceil(r.total/10)-1); return loadOrphans(false); }
     if(!q.trim()) setOrCnt(r.total);
     const html = r.items.map(orRow).join("");
-    if(reset) $("orList").innerHTML = html || `<div class="empty"><b>${q.trim() ? "Topilmadi" : "Egasi topilmagan yuk yo'q"}</b><p>Hammasi mijozlarga biriktirilgan.</p></div>`; else $("orList").insertAdjacentHTML("beforeend", html);
-    orOff += r.items.length;
+    $("orList").innerHTML = html || `<div class="empty"><b>${q.trim() ? "Topilmadi" : "Egasi topilmagan yuk yo'q"}</b><p>Hammasi mijozlarga biriktirilgan.</p></div>`;
     $("orHead").textContent = r.total + " ta yuk";
-    $("orMore").style.display = orOff < r.total ? "" : "none";
+    orPager(r.total);
     $("orAll").style.display = r.total > 0 && !q.trim() ? "" : "none";
   }catch(e){ handleErr(e); }
 }
+let orPg = 0;
+function orPager(total){
+  const n = Math.ceil(total/10), el = $("orPager"); if(n <= 1){ el.innerHTML = ""; return; }
+  let h = `<button ${orPg===0?"disabled":""} onclick="orGo(${orPg-1})">‹</button>`;
+  const pages = []; for(let i=0;i<n;i++) if(i===0||i===n-1||Math.abs(i-orPg)<=1) pages.push(i);
+  let last = -1; pages.forEach(i=>{ if(i-last>1) h += `<span style="color:var(--muted)">…</span>`; h += `<button class="${i===orPg?"on":""}" onclick="orGo(${i})">${i+1}</button>`; last = i; });
+  h += `<button ${orPg>=n-1?"disabled":""} onclick="orGo(${orPg+1})">›</button>`;
+  el.innerHTML = h;
+}
+function orGo(i){ orPg = i; loadOrphans(false); window.scrollTo(0,0); }
 async function orAssign(track){
   const code = prompt("Qaysi mijozga biriktiramiz? Mijoz kodini kiriting (masalan 1001 yoki TP1001)"); if(!code || !code.trim()) return;
-  try{ const r = await rpc("admin_orphan_assign", {p_token:token, p_track:track, p_code:code.trim()}); lsClear(); beep("ok"); toast("Biriktirildi: " + r.code + " · " + r.name); loadOrphans(true); }catch(e){ handleErr(e); }
+  try{ const r = await rpc("admin_orphan_assign", {p_token:token, p_track:track, p_code:code.trim()}); lsClear(); beep("ok"); toast("Biriktirildi: " + r.code + " · " + r.name); loadOrphans(false); }catch(e){ handleErr(e); }
 }
 async function orDel(track){
   if(!confirm(track + " ro'yxatdan o'chiriladi. Davom etamizmi?")) return;
