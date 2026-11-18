@@ -173,12 +173,17 @@
   #snav .sep{height:1px;background:#E3EAF7;margin:8px 6px}
   .mbtn{width:36px;height:36px;border:0;border-radius:11px;background:rgba(255,255,255,.14);color:#fff;font-size:20px;display:grid;place-items:center;flex:none;cursor:pointer;line-height:1;padding:0}
   #main .hero .acts,#main .hero .tabs{display:none}
+  @media (min-width:900px){
   html[data-view=pc] body.in{padding-left:262px}
   html[data-view=pc] #snav{transform:none}
-  html[data-view=pc] .mbtn,html[data-view=pc] #snavBk{display:none!important}
+  html[data-view=pc] .mbtn,html[data-view=pc] #snavBk,html[data-view=pc] #snavX{display:none!important}
+  }
+  #snavX{margin-left:auto;width:38px;height:38px;border:0;border-radius:11px;background:#EEF3FD;color:#0B4DB5;display:grid;place-items:center;cursor:pointer;flex:none}
   html[data-view=pc] #main .hero{grid-template-areas:"top top top" "search search search"}
+  @media (min-width:900px){
   html[data-view=pc] #receive.active,html[data-view=pc] #handover.active,html[data-view=pc] #thread.active{left:262px;width:auto}
   html[data-view=pc] #bar,html[data-view=pc] .actbar{left:262px}
+  }
   [data-theme=dark] #snav{background:#10182B;border-color:#1E2A44}
   [data-theme=dark] #snav button.ni{color:#DCE6FF}[data-theme=dark] #snav button.ni:hover{background:#18223A}[data-theme=dark] #snav button.ni.on{background:#1A2A4D;color:#7DA7FF}[data-theme=dark] #snav button.ni .ic{background:#18223A;color:#8FA6D6}[data-theme=dark] #snav button.ni.on .ic{background:linear-gradient(180deg,#3B7BF0,#1F55D6);color:#fff}[data-theme=dark] #snav .sh b{color:#fff}
   svg.ico{display:inline-block;vertical-align:-3px;flex:none}
@@ -217,6 +222,92 @@
   .lb .lp{font-size:2.1em}.lb .lcode{font-size:2.5em}
   .lb .ltrk{font-size:.95em;text-align:center;font-weight:600;word-break:break-all;border-top:.08em solid #000;padding-top:.25em}
   .lb .lsm{font-size:.9em;font-weight:600}
+  .lb img.lg{width:2.3em;height:2.3em;border-radius:.55em;flex:none;object-fit:cover}
+  .lb .cd{text-align:center;font-weight:900;line-height:1.05;white-space:nowrap}
+  /* 1: qora sarlavha */
+  .lb.t1 .h1{background:#000;color:#fff;margin:calc(var(--p)*-1) calc(var(--p)*-1) 0;padding:.55em .8em;display:flex;align-items:center;gap:.6em}
+  .lb.t1 .h1 img{background:#fff}.lb.t1 .h1 b{font-size:1.3em;letter-spacing:.08em;display:block;line-height:1}.lb.t1 .h1 i{font-style:normal;font-size:.7em;letter-spacing:.38em;display:block;margin-top:.2em}
+  .lb.t1 .h1 span{margin-left:auto;font-weight:900;font-size:1.15em;border:.14em solid #fff;border-radius:.35em;padding:.1em .55em}
+  .lb.t1 .pt{font-size:2em;font-weight:900;line-height:1.05}
+  .lb.t1 .cd{background:#000;color:#fff;font-size:2.7em;letter-spacing:.06em;padding:.12em .2em;border-radius:.22em}
+  /* 2: ramkali */
+  .lb.t2{border:.35em solid #000 !important;border-radius:1.3em}
+  .lb.t2 .h2{display:flex;align-items:center;gap:.5em}.lb.t2 .h2 b{font-size:1.25em;letter-spacing:.06em}
+  .lb.t2 .pill{margin-left:auto;background:#000;color:#fff;font-weight:900;font-size:1.3em;border-radius:99em;padding:.18em .8em;white-space:nowrap}
+  .lb.t2 .dash{border-top:.14em dashed #000}.lb.t2 .cd{font-size:2em;letter-spacing:.02em}
+  .lb.t2 .ltrk{border:0;font-family:"Courier New",monospace;font-size:1.05em;font-weight:900;padding:0}
+  /* 3: yon panel */
+  .lb.t3{flex-direction:row}
+  .lb.t3 .side{width:3.3em;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;padding:.7em 0;gap:.8em;flex:none}
+  .lb.t3 .side img{width:2.3em;height:2.3em;background:#fff}
+  .lb.t3 .vt{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:900;letter-spacing:.3em;font-size:.95em;white-space:nowrap}
+  .lb.t3 .mn{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box}
+  .lb.t3 .cd{font-size:2.5em}
+  /* 4: premium minimal */
+  .lb.t4{padding:calc(var(--p)*.5) !important}
+  .lb.t4 .in4{border:.1em solid #000;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;padding:.6em .7em}
+  .lb.t4 .h4{display:flex;justify-content:center;align-items:center;gap:.5em}.lb.t4 .h4 img{width:1.8em;height:1.8em}
+  .lb.t4 .h4 b{letter-spacing:.35em;font-size:1.05em}.lb.t4 .h4 i{font-style:normal;letter-spacing:.35em;font-size:.65em;border:.1em solid #000;padding:.05em .4em}
+  .lb.t4 .hl{border-top:.07em solid #000}.lb.t4 .tg4{display:inline-block;border:.13em solid #000;border-radius:.35em;padding:.1em .6em;font-size:1.5em;font-weight:900}
+  .lb.t4 .ty4,.lb.t5 .ty4,.lb.t6 .ty4{font-size:.9em;letter-spacing:.4em;font-weight:800;margin-top:.3em}
+  .lb.t4 .cd{font-size:2.5em;letter-spacing:.14em;font-weight:800}
+  /* 5: chipta */
+  .lb.t5{border-radius:.9em}
+  .lb.t5 .h5{display:flex;align-items:center;gap:.5em;margin:calc(var(--p)*-1) calc(var(--p)*-1) 0;padding:.5em .8em;border-bottom:.15em solid #000}
+  .lb.t5 .h5 b{font-size:1.2em;letter-spacing:.08em}.lb.t5 .h5 i{font-style:normal;font-size:.65em;letter-spacing:.3em}
+  .lb.t5 .tab{margin-left:auto;background:#000;color:#fff;font-weight:900;font-size:1.35em;padding:.2em .7em;border-radius:.4em;white-space:nowrap}
+  .lb.t5 .cd{font-size:2em;letter-spacing:.03em}.lb.t5 .perf{border-top:.14em dashed #000;position:relative;margin:.2em 0}
+  .lb.t5 .perf span{position:absolute;left:0;top:-.75em;background:#fff;padding-right:.3em;font-size:1em}
+  .lb.t5 .ltrk{border:0;font-family:"Courier New",monospace;font-weight:900;padding:0}
+  /* 6: katta kod */
+  .lb.t6 .h6{display:flex;justify-content:space-between;align-items:center}
+  .lb.t6 .tab{background:#000;color:#fff;font-weight:900;font-size:1.7em;padding:.15em .7em;border-radius:.35em;white-space:nowrap}
+  .lb.t6 .cd{font-size:3.6em;letter-spacing:.02em}.lb.t6 .qrow{display:grid;gap:.4em;justify-items:center}
+  .lb.t6 .qrow{min-width:0}.lb.t6 .qrow .lq{width:100% !important;max-width:var(--qs);aspect-ratio:1;height:auto !important}
+  /* 7: qora premium */
+  .lb.t7{background:#000;color:#fff;border-radius:1.2em}
+  .lb.t7 .lq{border-radius:.55em;overflow:hidden}
+  .lb.t7 .h7{display:flex;align-items:center;gap:.6em}.lb.t7 .h7 img{background:#fff}
+  .lb.t7 .h7 b{font-size:1.3em;letter-spacing:.1em;display:block;line-height:1}.lb.t7 .h7 i{font-style:normal;font-size:.62em;letter-spacing:.45em;display:block;margin-top:.25em;opacity:.9}
+  .lb.t7 .h7 span{margin-left:auto;border:.13em solid #fff;border-radius:99em;padding:.08em .7em;font-weight:900;font-size:1em}
+  .lb.t7 .hl7{border-top:.08em solid #fff;opacity:.55}
+  .lb.t7 .pl7{display:inline-block;background:#fff;color:#000;border-radius:99em;padding:.1em .85em;font-weight:900;font-size:1.25em;margin-bottom:.3em;white-space:nowrap}
+  .lb.t7 .cd{font-size:2.1em;letter-spacing:.04em}.lb.t7 .ltrk{border:0;color:#fff;font-family:"Courier New",monospace;font-weight:700;padding:0}
+  /* 8: diagonal */
+  .lb.t8 .dg{position:absolute;left:0;top:0;width:100%;height:8.6em;background:#000;clip-path:polygon(0 0,100% 0,100% 38%,0 100%)}
+  .lb.t8 .dgb{position:absolute;left:0;right:0;bottom:0;height:5em;background:#000;clip-path:polygon(0 70%,100% 0,100% 100%,0 100%)}
+  .lb.t8 .h8{position:absolute;left:var(--p);right:var(--p);top:var(--p);display:flex;align-items:center;gap:.5em;color:#fff}
+  .lb.t8 .h8 img{background:#fff}.lb.t8 .h8 b{font-size:1.3em;letter-spacing:.08em}
+  .lb.t8 .pill8{margin-left:auto;background:#fff;color:#000;font-weight:900;font-size:1.35em;border-radius:.4em;padding:.1em .6em;white-space:nowrap}
+  .lb.t8 .cd{font-size:2.3em}.lb.t8 .f8{position:absolute;left:0;right:0;bottom:var(--p);text-align:center;color:#fff;font-weight:800;font-size:.9em}
+  .lb.t8 .ltrk{border:0;font-family:"Courier New",monospace;font-weight:900;padding:0}
+  /* 9: medalyon */
+  .lb.t9{border-radius:1em}
+  .lb.t9 .h9{background:#e6e6e6;margin:calc(var(--p)*-1) calc(var(--p)*-1) 0;padding:.6em .8em 3.2em;display:flex;justify-content:center;align-items:center;gap:.5em}
+  .lb.t9 .h9 b{font-size:1.25em;letter-spacing:.1em}.lb.t9 .h9 i{font-style:normal;font-size:.62em;letter-spacing:.35em;border:.1em solid #000;padding:.05em .4em}
+  .lb.t9 .bd9{display:flex;justify-content:center;margin-top:-2.2em;position:relative}
+  .lb.t9 .bd9 span{width:5.6em;height:5.6em;border-radius:50%;background:#000;color:#fff;box-shadow:0 0 0 .3em #fff,0 0 0 .42em #000;display:grid;place-items:center;text-align:center;font-weight:900;font-size:1.35em;line-height:1.05;padding:.3em;box-sizing:border-box;word-break:break-word}
+  .lb.t9 .bx9{border:.2em solid #000;border-radius:.6em;font-size:1.9em;padding:.12em .3em}
+  /* 10: ikki yarim */
+  .lb.t10 .top10{background:#000;color:#fff;margin:calc(var(--p)*-1) calc(var(--p)*-1) 0;padding:.8em .9em 1.1em;border-radius:0 0 1.6em 1.6em;display:flex;flex-direction:column;align-items:center;gap:.6em}
+  .lb.t10 .r10{display:flex;align-items:center;gap:.5em;width:100%}.lb.t10 .r10 img{background:#fff}.lb.t10 .r10 b{font-size:1.25em;letter-spacing:.08em}
+  .lb.t10 .pill10{margin-left:auto;background:#fff;color:#000;font-weight:900;font-size:1.3em;border-radius:99em;padding:.1em .8em;white-space:nowrap}
+  .lb.t10 .ty10{font-size:.8em;letter-spacing:.5em;font-weight:800;opacity:.9}.lb.t10 .cd{font-size:3.2em;letter-spacing:.03em}
+  .lb.t10 .qrow{display:grid;gap:.4em;justify-items:center;min-width:0}.lb.t10 .qrow .lq{width:100% !important;max-width:var(--qs);aspect-ratio:1;height:auto !important}
+  /* 11: kartochka */
+  .lb.t11{background:#e8e8e8;border-radius:1.5em;gap:.5em;justify-content:flex-start}
+  .lb.t11 .cx{background:#fff;border-radius:1em;padding:.6em .7em}
+  .lb.t11 .h11{display:flex;align-items:center;gap:.5em}.lb.t11 .h11 b{font-size:1.2em;letter-spacing:.07em}.lb.t11 .h11 i{font-style:normal;font-size:.62em;letter-spacing:.3em}
+  .lb.t11 .h11 span{margin-left:auto;font-weight:900;border:.13em solid #000;border-radius:.35em;padding:.05em .5em}
+  .lb.t11 .mid11{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3em}
+  .lb.t11 .pl11{background:#000;color:#fff;font-weight:900;font-size:1.5em;border-radius:99em;padding:.1em .9em;white-space:nowrap}
+  .lb.t11 .cd{font-size:2.7em;letter-spacing:.04em}.lb.t11 .ltrk{font-family:"Courier New",monospace;font-weight:900;border:0}
+  /* 12: lenta */
+  .lb.t12 .rb12{position:absolute;top:1.9em;right:-3.4em;width:12em;transform:rotate(45deg);background:#000;color:#fff;text-align:center;font-weight:900;font-size:.95em;padding:.3em 0;letter-spacing:.04em}
+  .lb.t12 .h12{display:flex;align-items:center;gap:.5em}.lb.t12 .h12 b{font-size:1.3em;letter-spacing:.08em;display:block;line-height:1}.lb.t12 .h12 i{font-style:normal;font-size:.62em;letter-spacing:.4em;display:block;margin-top:.25em}
+  .lb.t12 .cw12{text-align:center;margin-top:.6em}.lb.t12 .cd{font-size:3em;letter-spacing:.03em}
+  .lb.t12 .bar12{height:.5em;background:#000;border-radius:99em;margin:.3em auto 0;width:70%}
+  .lb.t12 .ltrk{font-family:"Courier New",monospace;font-weight:900;border:0}
   #lblPrint{display:none}
   @media print{
     body.lblp>*:not(#lblPrint){display:none !important}
@@ -2257,10 +2348,12 @@ function qrMatrix(text){ const Q=__rq('index'); for(let t=2;t<=40;t++){ try{ con
 function qrSvg(text){ const m=qrMatrix(text); if(!m) return ''; const n=m.length; let p=''; m.forEach((row,r)=>{ let c=0; while(c<n){ if(row[c]==='1'){ let e=c; while(e<n&&row[e]==='1')e++; p+='M'+c+' '+r+'h'+(e-c)+'v1h-'+(e-c)+'z'; c=e; } else c++; } }); return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 ${n+4} ${n+4}" shape-rendering="crispEdges" preserveAspectRatio="xMidYMid meet"><rect x="-2" y="-2" width="${n+4}" height="${n+4}" fill="#fff"/><path d="${p}" fill="#000"/></svg>`; }
 
 /* ====== Yuk stikerlari ====== */
-const LBL_DEF = {w:70,h:100,paper:"a4",gap:2,qrn:4,qr:16,font:100,copies:1,showType:1,type:"AVTO",showPunkt:1,punktText:"",showTrack:1,showCode:1,showName:0,showWeight:0,showOrigin:1,origin:"CHINA",stripes:1,border:1};
+const LBL_DEF = {tpl:9,brand:"TezPost",w:70,h:100,paper:"a4",gap:2,qrn:4,qr:16,font:100,copies:1,showType:1,type:"AVTO",showPunkt:1,punktText:"",showTrack:1,showCode:1,showName:0,showWeight:0,showOrigin:1,origin:"CHINA",stripes:1,border:1};
 let lblCfg = Object.assign({}, LBL_DEF), lblItems = [], lblSel = new Set(), lblT = null;
-try{ Object.assign(lblCfg, JSON.parse(localStorage.getItem("tp_lbl_cfg")||"{}")); }catch(e){}
+try{ const sv = JSON.parse(localStorage.getItem("tp_lbl_cfg")||"{}"); if(!sv.ver) delete sv.tpl; Object.assign(lblCfg, sv); }catch(e){}
+const LBL_TPLS = [[0,"Klassik (chiziqli)"],[1,"1 · Qora sarlavha"],[2,"2 · Ramkali"],[3,"3 · Yon panel"],[4,"4 · Premium minimal"],[5,"5 · Chipta"],[6,"6 · Katta kod"],[7,"7 · Qora premium"],[8,"8 · Diagonal"],[9,"9 · Medalyon"],[10,"10 · Ikki yarim"],[11,"11 · Kartochka"],[12,"12 · Lenta"]];
 const LBL_FIELDS = [
+  ["sel","tpl","Stiker dizayni",LBL_TPLS],["txt","brand","Brend nomi (logo yonida)"],
   ["num","w","Eni (mm)",20,200],["num","h","Bo'yi (mm)",20,300],
   ["sel","qrn","QR-kodlar soni",[[1,"1 ta (burchakda)"],[2,"2 ta (tepada)"],[4,"4 ta (burchaklarda)"]]],["num","qr","QR o'lchami (mm)",8,60],
   ["num","font","Matn o'lchami (%)",50,250],["num","copies","Har yukka nusxa",1,20],
@@ -2271,7 +2364,86 @@ const LBL_FIELDS = [
   ["chk","showOrigin","Pastki yozuv + sana"],["chk","showName","Mijoz ismi"],["chk","showWeight","Og'irligi"],
   ["chk","stripes","Tepa/past chiziqlar"],["chk","border","Tashqi ramka"]
 ];
-function lblSave(){ try{ localStorage.setItem("tp_lbl_cfg", JSON.stringify(lblCfg)); }catch(e){} }
+/* ====== stiker dizaynlari ====== */
+function lblP(it){
+  const c = lblCfg, qs = c.qr + "mm", qr = qrSvg(it.track);
+  return {c, qs, n:c.qrn, Q:(on=1)=>`<div class="lq" style="width:${qs};height:${qs}">${on ? qr : ""}</div>`,
+    punkt:(c.punktText || it.punkt || "").trim(), date:lblFmtD(it.created_at || Date.now()), type:c.type || "",
+    logo:`<img class="lg" src="icon-192.png" alt="">`, brand:esc(c.brand || "TezPost"),
+    pad:Math.max(1.5, c.w * 0.035).toFixed(1) + "mm", fs:(c.w * 0.0457 * c.font / 100).toFixed(2) + "mm",
+    extra:(()=>{ const a = []; if(c.showName && it.name) a.push(esc(it.name)); if(c.showWeight && it.weight_kg != null) a.push(Number(it.weight_kg) + " kg"); return a.length ? `<div class="lc lsm">${a.join(" · ")}</div>` : ""; })(),
+    trk:c.showTrack ? `<div class="ltrk">TREK KOD: ${esc(it.track)}</div>` : "", code:(c.showCode && it.code) ? esc(it.code) : "",
+    org:c.showOrigin ? `${esc(c.origin)}${c.origin ? "<br>" : ""}${esc(lblFmtD(it.created_at || Date.now()))}` : ""};
+}
+function lblFrame(p, cls, inner, noPad){
+  const c = p.c;
+  return `<div class="lb ${cls}" style="width:${c.w}mm;height:${c.h}mm;font-size:${p.fs};--p:${p.pad};--qs:${p.qs};${noPad ? "" : "padding:" + p.pad + ";"}${c.border ? "border:.2mm solid #000;" : ""}">${inner}</div>`;
+}
+function lblRow(p, left, mid, right, on){
+  const n = p.n, cols = n === 1 ? `${p.qs} 1fr` : `${p.qs} 1fr ${p.qs}`;
+  return `<div class="lrow" style="grid-template-columns:${cols}">${left}<div class="lc">${mid}</div>${n >= 2 ? right : ""}</div>`;
+}
+function lblRow2(p, mid){
+  const n = p.n; if(n < 4) return mid ? `<div class="lrow" style="grid-template-columns:1fr"><div class="lc lsm">${mid}</div></div>` : "";
+  return `<div class="lrow" style="grid-template-columns:${p.qs} 1fr ${p.qs}">${p.Q()}<div class="lc lsm">${mid}</div>${p.Q()}</div>`;
+}
+const LBL_T = {
+ 1: it=>{ const p = lblP(it);
+  return lblFrame(p, "t1", `<div class="h1">${p.logo}<div><b>${p.brand}</b><i>CARGO</i></div>${p.type ? `<span>${esc(p.type)}</span>` : ""}</div>`
+   + lblRow(p, p.Q(), p.c.showPunkt && p.punkt ? `<div class="pt">${esc(p.punkt)}</div>` : "", p.Q())
+   + (p.code ? `<div class="cd">${p.code}</div>` : "") + p.trk + p.extra + lblRow2(p, p.org)); },
+ 2: it=>{ const p = lblP(it);
+  return lblFrame(p, "t2", `<div class="h2">${p.logo}<b>${p.brand}</b>${p.c.showPunkt && p.punkt ? `<span class="pill">${esc(p.punkt)}</span>` : ""}</div><div class="dash"></div>`
+   + lblRow(p, p.Q(), p.code ? `<div class="cd">${p.code}</div>` : "", p.Q()) + `<div class="dash"></div>` + p.trk + p.extra
+   + lblRow2(p, (p.type ? `<b>${esc(p.type)}</b><br>` : "") + p.org)); },
+ 3: it=>{ const p = lblP(it);
+  const side = `<div class="side">${p.logo}<div class="vt">${p.brand} CARGO${p.type ? " · " + esc(p.type) : ""}</div></div>`;
+  return lblFrame(p, "t3", side + `<div class="mn" style="padding:${p.pad}">`
+   + (p.c.showPunkt && p.punkt ? `<div class="lbx lp">${esc(p.punkt)}</div>` : "")
+   + lblRow(p, p.Q(), "", p.Q()) + (p.code ? `<div class="cd">${p.code}</div>` : "") + p.trk + p.extra + lblRow2(p, p.org) + `</div>`, true); },
+ 4: it=>{ const p = lblP(it);
+  return lblFrame(p, "t4", `<div class="in4"><div class="h4">${p.logo}<b>${p.brand}</b><i>CARGO</i></div><div class="hl"></div>`
+   + lblRow(p, p.Q(), (p.c.showPunkt && p.punkt ? `<div class="tg4">${esc(p.punkt)}</div>` : "") + (p.type ? `<div class="ty4">${esc(p.type)}</div>` : ""), p.Q())
+   + `<div class="hl"></div>` + (p.code ? `<div class="cd">${p.code}</div>` : "") + `<div class="hl"></div>` + p.trk + p.extra + lblRow2(p, p.org) + `</div>`); },
+ 5: it=>{ const p = lblP(it);
+  return lblFrame(p, "t5", `<div class="h5">${p.logo}<b>${p.brand}</b><i>CARGO</i>${p.c.showPunkt && p.punkt ? `<span class="tab">${esc(p.punkt)}</span>` : ""}</div>`
+   + lblRow(p, p.Q(), (p.type ? `<div class="ty4">${esc(p.type)}</div>` : "") + (p.code ? `<div class="cd">${p.code}</div>` : ""), p.Q()) + p.extra
+   + `<div class="perf"><span>✂</span></div>` + p.trk
+   + `<div class="lrow" style="grid-template-columns:${p.n >= 4 ? p.qs + " 1fr " + p.qs : "1fr"}">${p.n >= 4 ? p.Q() : ""}<div class="lc lsm">${p.org}</div>${p.n >= 4 ? p.Q() : ""}</div>`); },
+ 6: it=>{ const p = lblP(it);
+  return lblFrame(p, "t6", `<div class="h6">${p.c.showPunkt && p.punkt ? `<span class="tab">${esc(p.punkt)}</span>` : "<span></span>"}${p.logo}</div>`
+   + (p.type ? `<div class="ty4">${esc(p.type)}</div>` : "") + (p.code ? `<div class="cd">${p.code}</div>` : "") + p.extra + p.trk
+   + `<div class="qrow" style="grid-template-columns:repeat(${p.n},1fr)">${Array.from({length:p.n}, ()=>p.Q()).join("")}</div>` + (p.org ? `<div class="lc lsm">${p.org}</div>` : "")); }
+};
+LBL_T[7] = it=>{ const p = lblP(it);
+  return lblFrame(p, "t7", `<div class="h7">${p.logo}<div><b>${p.brand}</b><i>CARGO</i></div>${p.type ? `<span>${esc(p.type)}</span>` : ""}</div><div class="hl7"></div>`
+   + lblRow(p, p.Q(), (p.c.showPunkt && p.punkt ? `<div class="pl7">${esc(p.punkt)}</div>` : "") + (p.code ? `<div class="cd">${p.code}</div>` : ""), p.Q())
+   + `<div class="hl7"></div>` + p.trk + p.extra + lblRow2(p, p.org)); };
+LBL_T[8] = it=>{ const p = lblP(it);
+  const mid = p.trk ? `<div class="ltrk" style="border:0;font-size:.8em;padding:0">${esc(it.track)}</div>` : "";
+  return lblFrame(p, "t8", `<div class="dg"></div><div class="dgb"></div>`
+   + `<div class="h8">${p.logo}<b>${p.brand}</b>${p.c.showPunkt && p.punkt ? `<span class="pill8">${esc(p.punkt)}</span>` : ""}</div><div style="height:6.4em"></div>`
+   + lblRow(p, p.Q(), (p.type ? `<div class="ty4" style="margin:0 0 .2em">${esc(p.type)}</div>` : "") + (p.code ? `<div class="cd">${p.code}</div>` : ""), p.Q()) + p.extra
+   + (p.n >= 4 ? `<div class="lrow" style="grid-template-columns:${p.qs} 1fr ${p.qs}">${p.Q()}<div class="lc">${mid}</div>${p.Q()}</div>` : p.trk)
+   + `<div class="f8">${p.org.replace("<br>", " · ")}</div><div style="height:2.6em"></div>`); };
+LBL_T[9] = it=>{ const p = lblP(it);
+  return lblFrame(p, "t9", `<div class="h9">${p.logo}<b>${p.brand}</b><i>CARGO</i></div>`
+   + (p.c.showPunkt && p.punkt ? `<div class="bd9"><span>${esc(p.punkt)}</span></div>` : "")
+   + lblRow(p, p.Q(), (p.type ? `<div class="ty4" style="margin:0 0 .3em">${esc(p.type)}</div>` : "") + (p.code ? `<div class="cd bx9">${p.code}</div>` : ""), p.Q()) + p.trk + p.extra + lblRow2(p, p.org)); };
+LBL_T[10] = it=>{ const p = lblP(it), n = p.n;
+  return lblFrame(p, "t10", `<div class="top10"><div class="r10">${p.logo}<b>${p.brand}</b>${p.c.showPunkt && p.punkt ? `<span class="pill10">${esc(p.punkt)}</span>` : ""}</div>${p.type ? `<div class="ty10">${esc(p.type)}</div>` : ""}${p.code ? `<div class="cd">${p.code}</div>` : ""}</div>`
+   + p.extra + p.trk + `<div class="qrow" style="grid-template-columns:repeat(${n},1fr)">${Array.from({length:n}, ()=>p.Q()).join("")}</div>` + (p.org ? `<div class="lc lsm">${p.org.replace("<br>", " · ")}</div>` : "")); };
+LBL_T[11] = it=>{ const p = lblP(it);
+  const mid = p.trk ? `<div class="ltrk" style="border:0;font-size:.8em;padding:0">${esc(it.track)}</div>` : "";
+  return lblFrame(p, "t11", `<div class="cx h11">${p.logo}<b>${p.brand}</b><i>CARGO</i>${p.type ? `<span>${esc(p.type)}</span>` : ""}</div>`
+   + `<div class="cx mid11">${p.c.showPunkt && p.punkt ? `<span class="pl11">${esc(p.punkt)}</span>` : ""}${p.code ? `<div class="cd">${p.code}</div>` : ""}${p.extra}</div>`
+   + `<div class="cx">${lblRow(p, p.Q(), mid, p.Q())}</div>` + (p.org || p.n >= 4 ? `<div class="cx">${lblRow2(p, p.org)}</div>` : "")); };
+LBL_T[12] = it=>{ const p = lblP(it);
+  return lblFrame(p, "t12", (p.c.showPunkt && p.punkt ? `<div class="rb12">${esc(p.punkt)}</div>` : "")
+   + `<div class="h12">${p.logo}<div><b>${p.brand}</b><i>CARGO</i></div></div>`
+   + `<div class="cw12">${p.code ? `<div class="cd">${p.code}</div><div class="bar12"></div>` : ""}${p.type ? `<div class="ty4" style="margin-top:.3em">${esc(p.type)}</div>` : ""}</div>` + p.extra
+   + lblRow(p, p.Q(), p.trk ? `<div class="ltrk" style="border:0;font-size:.8em;padding:0">${esc(it.track)}</div>` : "", p.Q()) + lblRow2(p, p.org)); };
+function lblSave(){ try{ localStorage.setItem("tp_lbl_cfg", JSON.stringify(Object.assign({}, lblCfg, {ver:2}))); }catch(e){} }
 function lblDrawSet(){
   $("lblSet").innerHTML = LBL_FIELDS.map(f=>{
     const [t,k,l] = f, v = lblCfg[k];
@@ -2289,6 +2461,7 @@ function lblSet(k,v,t){
 function lblReset(){ lblCfg = Object.assign({}, LBL_DEF); lblSave(); lblDrawSet(); lblPrev(); }
 function lblFmtD(x){ const d = new Date(x); if(isNaN(d)) return ""; const p = n=>String(n).padStart(2,"0"); return p(d.getDate())+"."+p(d.getMonth()+1)+"."+String(d.getFullYear()).slice(2)+" "+p(d.getHours())+":"+p(d.getMinutes()); }
 function lblHtml(it){
+  if(lblCfg.tpl && LBL_T[lblCfg.tpl]) return LBL_T[lblCfg.tpl](it);
   const c = lblCfg, qs = c.qr + "mm", fs = (c.w * 0.0457 * c.font / 100).toFixed(2) + "mm";
   const qr = qrSvg(it.track), Q = on => `<div class="lq" style="width:${qs};height:${qs}">${on ? qr : ""}</div>`;
   const n = c.qrn, pad = Math.max(1.5, c.w * 0.035).toFixed(1) + "mm";
@@ -2417,8 +2590,8 @@ const NAV = [
 const NAV_SEP = {rep:1, set:1};
 function navBuild(){
   const el = $("snav"); if(!el) return;
-  el.innerHTML = `<div class="sh"><img alt="" src="icon-192.png"><b>TezPost Admin</b></div>` + NAV.map(n=>(NAV_SEP[n[0]] ? '<div class="sep"></div>' : "") + `<button class="ni" data-k="${n[0]}" onclick="${n[3]}"><span class="ic">${ico(n[1],20)}</span>${n[2]}<span class="nb" data-b="${n[4]||""}"></span></button>`).join("")
-    + '<div class="sep"></div>' + `<button class="ni" onclick="logout()"><span class="ic">${ico("out",20)}</span>Chiqish</button>`;
+  el.innerHTML = `<div class="sh"><img alt="" src="icon-192.png"><b>TezPost Admin</b><button id="snavX" onclick="navClose()" aria-label="Yopish"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:20px;height:20px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>` + NAV.map(n=>(NAV_SEP[n[0]] ? '<div class="sep"></div>' : "") + `<button class="ni" data-k="${n[0]}" onclick="navClose();${n[3]}"><span class="ic">${ico(n[1],20)}</span>${n[2]}<span class="nb" data-b="${n[4]||""}"></span></button>`).join("")
+    + '<div class="sep"></div>' + `<button class="ni" onclick="navClose();logout()"><span class="ic">${ico("out",20)}</span>Chiqish</button>`;
 }
 function navMark(){
   const el = $("snav"); if(!el) return;
@@ -2436,6 +2609,8 @@ function navBadges(){
     nb.textContent = t;
   });
 }
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") navClose(); });
+(function(){ let x0=null; document.addEventListener("touchstart", e=>{ x0 = e.touches[0].clientX; }, {passive:true}); document.addEventListener("touchend", e=>{ if(x0===null) return; const dx = e.changedTouches[0].clientX - x0; const o = $("snav"); if(o && o.classList.contains("open") && dx < -50) navClose(); else if(x0 < 24 && dx > 70 && window.innerWidth < 900) navOpen(); x0 = null; }, {passive:true}); })();
 function navOpen(){ $("snav").classList.add("open"); $("snavBk").classList.add("open"); }
 function navClose(){ const a = $("snav"), b = $("snavBk"); if(a) a.classList.remove("open"); if(b) b.classList.remove("open"); }
 function navMenuBtns(){
