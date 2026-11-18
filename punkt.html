@@ -71,6 +71,14 @@
   .st.sort{background:#D3F2E0;color:#127A45}.st.uz{background:#D0F0EE;color:#0A6A66}.st.pickup{background:#D3E8FB;color:#0B5C9E}.st.done{background:#0B4DB5;color:#fff}
   .tag{display:inline-block;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:800;background:#EEF3FD;color:var(--blue)}
   .tag.bad{background:#FDE8E8;color:var(--bad)}.tag.ok{background:#E3F6EC;color:var(--ok)}.tag.warn{background:#FFF1DF;color:#B24F00}
+  .fchips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .fch{border:1.5px solid var(--line);background:#fff;border-radius:99px;height:38px;padding:0 14px;font-weight:800;color:var(--navy);font-size:14px;cursor:pointer}
+  .fch b{margin-left:4px;color:var(--blue)}.fch.on{background:var(--blue);color:#fff;border-color:var(--blue)}.fch.on b{color:#fff}
+  .fch.r b{color:#C62828}.fch.r.on{background:#C62828;border-color:#C62828}.fch.r.on b{color:#fff}.fch.w b{color:#B24F00}.fch.w.on{background:#E08A00;border-color:#E08A00}.fch.w.on b{color:#fff}.fch.m.on{background:#555;border-color:#555}
+  .cfact{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#EEF3FD;border-radius:14px;padding:10px 14px;margin-bottom:10px}.cfact b{margin-right:auto}
+  tr.rowr td{background:#FDE8E8}tr.rowr td:not(:last-child){color:#9B1C1C}tr.roww td{background:#FFF6E5}tr.rowc td{background:#F0F0F3;color:#777}
+  .dy{display:inline-block;padding:3px 10px;border-radius:99px;font-weight:800;font-size:12.5px;background:#EEF3FD;color:var(--blue)}.dy.w{background:#FFE2A8;color:#8A5200}.dy.r{background:#C62828;color:#fff}
+  .cfck{width:18px;height:18px;accent-color:#2563EB}
   .pager{display:flex;align-items:center;gap:10px;justify-content:flex-end;margin-top:12px;color:var(--muted);font-weight:700}
   .pager button{height:38px;min-width:42px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-weight:800;color:var(--navy)}
   .pager button:disabled{opacity:.35}
@@ -470,25 +478,48 @@ async function vKassa(){
 }
 
 /* ===== Musodara ===== */
-async function vConf(){
-  $("view").innerHTML = `<div class="two"><div class="scanbox"><span class="lbl">Musodara qilingan yuk</span><div class="scanrow"><input class="in" id="cfT" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Trek-kod"></div><div class="scanrow" style="margin-top:8px"><input class="in" id="cfN" placeholder="Sabab (ixtiyoriy)"><button class="btn red" onclick="confAdd()">Qo'shish</button></div></div><div></div></div><div id="cfL"><div class="ldr">Yuklanmoqda…</div></div>`;
-  $("cfT").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); $("cfN").focus(); } });
-  $("cfN").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); confAdd(); } });
+let cfQ = "", cfF = "all", cfOff = 0, cfSel = new Set(), cfRows = [];
+const CF_LIM = 10;
+function vConf(){
+  cfSel = new Set(); cfOff = 0;
+  $("view").innerHTML = `<div class="bar"><input class="in grow" id="cq" placeholder="Trek-kod, mijoz kodi yoki ism" value="${esc(cfQ)}"><button class="btn" onclick="cfGo()">Qidirish</button></div>
+    <div class="fchips" id="cfChips"></div><div id="cfAct"></div><div id="cfL"><div class="ldr">Yuklanmoqda…</div></div>`;
+  $("cq").addEventListener("keydown", e=>{ if(e.key === "Enter") cfGo(); });
   confLoad();
 }
+function cfGo(){ cfQ = $("cq").value.trim(); cfOff = 0; cfSel = new Set(); confLoad(); }
+function cfSetF(f){ cfF = f; cfOff = 0; cfSel = new Set(); confLoad(); }
 async function confLoad(){
   try{
-    const r = await rpc("punkt_conf_list", {p_token:token});
-    $("cfL").innerHTML = tbl(["№","Trackcode","Mijoz","Sabab","Punkt","Vaqt",""], r.map((d,i)=>`<tr><td>${i+1}</td><td class="mono">${esc(d.track)}</td><td><span class="tag">${esc(d.customer_code)}</span> ${esc(d.customer_name)}</td><td>${esc(d.conf_note||"—")}</td><td>${esc(d.punkt||"—")}</td><td>${dt(d.conf_at)}</td><td><button class="btn sec" style="height:34px" onclick="confRemove(${d.id})">Qaytarish</button></td></tr>`), "Musodara qilingan yuk yo'q");
+    const r = await rpc("punkt_storage_list", {p_token:token, p_q:cfQ, p_filter:cfF, p_limit:CF_LIM, p_offset:cfOff});
+    if(!r.items.length && cfOff > 0){ cfOff = Math.max(0, Math.ceil(r.total / CF_LIM) - 1) * CF_LIM; return confLoad(); }
+    cfRows = r.items; const c = r.counts;
+    $("cfChips").innerHTML = [["all","Hammasi",c.all,""],["warn","7 kundan ko'p",c.warn + c.over,"w"],["over","10 kundan ko'p",c.over,"r"],["conf","Musodara",c.conf,"m"]]
+      .map(x=>`<button class="fch ${x[3]} ${cfF===x[0]?"on":""}" onclick="cfSetF('${x[0]}')">${x[1]} <b>${x[2]}</b></button>`).join("");
+    const pages = Math.max(1, Math.ceil(r.total / CF_LIM)), cur = Math.floor(cfOff / CF_LIM) + 1;
+    const rowH = (d,i)=>{ const over = !d.confiscated && d.days >= 10, warn = !d.confiscated && d.days >= 7 && d.days < 10;
+      const st = d.confiscated ? `<span class="tag bad">Musodara</span>` : `<span class="st pickup">Stellajda</span>`;
+      return `<tr class="${d.confiscated ? "rowc" : over ? "rowr" : warn ? "roww" : ""}"><td><input type="checkbox" class="cfck" ${cfSel.has(d.id)?"checked":""} onchange="cfPick(${d.id},this.checked)"></td><td>${cfOff+i+1}</td>
+        <td class="mono">${esc(d.track)}</td><td><span class="tag">${esc(d.code)}</span> ${esc(d.name||"")}</td><td class="r">${d.weight_kg!=null?kgf(d.weight_kg):"—"}</td><td class="r">${d.uzs!=null?fmt(d.uzs):"—"}</td>
+        <td>${st}</td><td>${dt(d.received_at)}</td><td><span class="dy ${over?"r":warn?"w":""}">${d.days} kun</span></td></tr>`; };
+    $("cfL").innerHTML = r.items.length ? `<div class="tw"><table><thead><tr><th><input type="checkbox" id="cfAll" onchange="cfAllPick(this.checked)"></th><th>№</th><th>Trackcode</th><th>Mijoz</th><th class="r">Og'irlik (Kg)</th><th class="r">Umumiy UZS</th><th>Status</th><th>Qabul vaqti</th><th>Turgan</th></tr></thead><tbody>${r.items.map(rowH).join("")}</tbody></table></div>`
+        + `<div class="pager"><span>Jami: ${fmt(r.total)}</span><button ${cfOff?"":"disabled"} onclick="cfOff=Math.max(0,cfOff-CF_LIM);confLoad()">‹</button><span>Sahifa ${cur} / ${pages}</span><button ${cur<pages?"":"disabled"} onclick="cfOff+=CF_LIM;confLoad()">›</button></div>`
+      : `<div class="panel" style="text-align:center;padding:30px;color:var(--muted);font-weight:700">Yuk yo'q</div>`;
+    cfAct();
   }catch(e){ err(e); }
 }
-async function confAdd(){
-  const t = $("cfT").value.trim(), n = $("cfN").value.trim(); if(!t){ toast("Trek-kodni kiriting", true); return; }
-  try{ await rpc("punkt_conf_add", {p_token:token, p_track:t, p_note:n}); beep("done"); toast("Musodaraga qo'shildi"); $("cfT").value = ""; $("cfN").value = ""; $("cfT").focus(); confLoad(); }catch(e){ err(e); }
+function cfPick(id,on){ on ? cfSel.add(id) : cfSel.delete(id); cfAct(); }
+function cfAllPick(on){ cfRows.forEach(d=>on ? cfSel.add(d.id) : cfSel.delete(d.id)); document.querySelectorAll(".cfck").forEach(x=>x.checked = on); cfAct(); }
+function cfAct(){
+  const n = cfSel.size; if(!$("cfAct")) return;
+  const hasC = cfRows.some(d=>cfSel.has(d.id) && d.confiscated), hasN = cfRows.some(d=>cfSel.has(d.id) && !d.confiscated);
+  $("cfAct").innerHTML = n ? `<div class="cfact"><b>${n} ta tanlandi</b>${hasN ? `<button class="btn red" onclick="cfConf(true)">Musodaraga o'tkazish</button>` : ""}${hasC ? `<button class="btn sec" onclick="cfConf(false)">Musodaradan qaytarish</button>` : ""}</div>` : "";
 }
-async function confRemove(id){
-  if(!confirm("Yuk musodaradan qaytarilsinmi?")) return;
-  try{ await rpc("punkt_conf_remove", {p_token:token, p_id:id}); confLoad(); }catch(e){ err(e); }
+async function cfConf(on){
+  const ids = cfRows.filter(d=>cfSel.has(d.id) && d.confiscated === !on).map(d=>d.id);
+  if(!ids.length) return;
+  if(!confirm(ids.length + " ta yuk " + (on ? "musodaraga o'tkazilsinmi?" : "musodaradan qaytarilsinmi?"))) return;
+  try{ await rpc("punkt_storage_conf", {p_token:token, p_ids:ids, p_on:on}); toast(on ? "Musodaraga o'tkazildi" : "Qaytarildi"); cfSel = new Set(); confLoad(); }catch(e){ err(e); }
 }
 
 if("serviceWorker" in navigator){ window.addEventListener("load", ()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
