@@ -41,6 +41,7 @@
   nav#nav button{display:flex;align-items:center;gap:12px;width:100%;height:46px;border:0;background:none;border-radius:12px;padding:0 14px;font-weight:700;font-size:15px;color:var(--navy);text-align:left;text-transform:uppercase;letter-spacing:.2px}
   nav#nav button .ic{width:34px;height:34px;border-radius:10px;background:#F1F5FD;color:#4F6FB0;display:grid;place-items:center;flex:none}
   nav#nav button.on .ic{background:linear-gradient(180deg,#3B7BF0,#1F55D6);color:#fff;box-shadow:0 4px 10px rgba(37,99,235,.35)}
+  .camb{flex:none;width:46px;height:46px;border:0;border-radius:12px;background:#EEF3FD;color:#0B4DB5;display:grid;place-items:center;cursor:pointer}
   svg.ico{display:inline-block;vertical-align:-3px;flex:none}
   .hobtn svg.ico{vertical-align:-4px}
   nav#nav button.on{background:#EEF3FD;color:var(--blue)}
@@ -165,9 +166,37 @@ const ICONS = {
   ban:'<circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/>',
   key:'<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L21 2M16 7l3 3M18 5l2 2"/>',
   scale:'<path d="M12 3v18M5 7h14M5 7l-3 8a3 3 0 0 0 6 0L5 7zM19 7l-3 8a3 3 0 0 0 6 0l-3-8z"/>',
+  cam:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
   filter:'<path d="M22 3H2l8 9.5V19l4 2v-8.5L22 3z"/>'
 };
 function ico(n, s){ return `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:${s||18}px;height:${s||18}px">${ICONS[n]||""}</svg>`; }
+/* ===== kamera bilan skaner (QR / shtrix-kod) ===== */
+let camStream = null, camTimer = null, camLast = {v:"", t:0};
+function camClose(){ clearInterval(camTimer); camTimer = null; if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream = null; } const o = document.getElementById("camOv"); if(o) o.remove(); }
+async function camScan(onCode){
+  if(!("BarcodeDetector" in window) || !navigator.mediaDevices){ alert("Bu brauzer kamera skanerini qo'llamaydi. Telefondagi Chrome'dan foydalaning yoki skaner qurilmasini ishlating."); return; }
+  camClose();
+  if(!document.getElementById("camCss")){ const st = document.createElement("style"); st.id = "camCss"; st.textContent = "#camOv{position:fixed;inset:0;z-index:99999;background:#000;display:flex;flex-direction:column}#camOv video{flex:1;width:100%;object-fit:cover;min-height:0}#camOv .cb{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;color:#fff;font-weight:800;background:linear-gradient(#000a,#0000)}#camOv .cb button{border:0;border-radius:12px;height:42px;padding:0 18px;font-weight:800;background:#fff;color:#0B2A66;font-size:15px}#camOv .fr{position:absolute;left:50%;top:50%;width:min(70vw,320px);aspect-ratio:1;transform:translate(-50%,-50%);border:3px solid #fff;border-radius:22px;box-shadow:0 0 0 100vmax #0006}#camOv .hint{position:absolute;left:0;right:0;bottom:6vh;text-align:center;color:#fff;font-weight:700;padding:0 20px}"; document.head.appendChild(st); }
+  const o = document.createElement("div"); o.id = "camOv";
+  o.innerHTML = '<video playsinline muted autoplay></video><div class="fr"></div><div class="cb"><span>Kamera skaner</span><button onclick="camClose()">Yopish</button></div><div class="hint" id="camHint">QR yoki shtrix-kodni ramka ichiga tuting</div>';
+  document.body.appendChild(o);
+  try{
+    camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}, audio:false});
+    const v = o.querySelector("video"); v.srcObject = camStream; await v.play();
+    const det = new BarcodeDetector({formats:["qr_code","code_128","code_39","ean_13","ean_8","upc_a","itf","codabar"]});
+    let busy = false;
+    camTimer = setInterval(async ()=>{
+      if(busy || v.readyState < 2) return; busy = true;
+      try{
+        const r = await det.detect(v);
+        if(r && r.length){
+          const val = String(r[0].rawValue || "").trim(), now = Date.now();
+          if(val && (val !== camLast.v || now - camLast.t > 2500)){ camLast = {v:val, t:now}; try{ navigator.vibrate && navigator.vibrate(60); }catch(e){} onCode(val); }
+        }
+      }catch(e){} busy = false;
+    }, 250);
+  }catch(e){ camClose(); alert("Kameraga ruxsat berilmadi yoki kamera topilmadi."); }
+}
 const $ = id => document.getElementById(id);
 const CONFIG = { url: (window.TP_CONFIG||{}).url || "", key: (window.TP_CONFIG||{}).key || "" };
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -305,7 +334,7 @@ async function errClose(id){ try{ await rpc("punkt_err_close", {p_token:token, p
 let rcv = [], rcvUnk = [], rcvBusy = new Set();
 function vRcv(){
   $("view").innerHTML = `<div class="two"><div class="scanbox"><span class="lbl">Trek-kodni skaner qiling yoki kiriting</span>
-      <div class="scanrow"><input class="in" id="rsIn" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Trek-kod" enterkeyhint="done"><button class="btn" onclick="rcvScan()">Qo'shish</button></div>
+      <div class="scanrow"><input class="in" id="rsIn" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Trek-kod" enterkeyhint="done"><button class="camb" onclick="camScan(v=>{$('rsIn').value=v;rcvScan()})" aria-label="Kamera">${ico("cam",22)}</button><button class="btn" onclick="rcvScan()">Qo'shish</button></div>
       <div class="sum" id="rcvSum" style="margin-top:8px"></div>
       <div class="hobtns"><button class="hobtn done" id="rcvGo" onclick="rcvApply()">Qabul qilish</button><button class="hobtn cancel" onclick="rcvClear()">Tozalash</button></div></div><div></div></div><div id="rcvList"></div>`;
   $("rsIn").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); rcvScan(); } });
@@ -352,7 +381,7 @@ async function rcvApply(){
 let hoCash = false, hoCust = null, hoItems = [], hoOther = 0;
 function vHo(){
   $("view").innerHTML = `<div class="two"><div class="scanbox"><span class="lbl">Mijoz kodi</span><div class="scanrow"><input class="in" id="hoIn" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="TP1001" enterkeyhint="search"><button class="btn org" onclick="hoFind()">Qidirish</button></div></div>
-    <div class="scanbox" id="hoAct" hidden><span class="lbl">Yuk IDsi (shtrix-kodni skaner qiling)</span><div class="scanrow"><input class="in" id="hoScan" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Shtrix-kod yoki trek-kod" enterkeyhint="done"></div>
+    <div class="scanbox" id="hoAct" hidden><span class="lbl">Yuk IDsi (shtrix-kodni skaner qiling)</span><div class="scanrow"><input class="in" id="hoScan" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Shtrix-kod yoki trek-kod" enterkeyhint="done"><button class="camb" onclick="camScan(v=>{$('hoScan').value=v;hoScan()})" aria-label="Kamera">${ico("cam",22)}</button></div>
       <div class="sum" id="hoSum" style="margin:8px 2px 0"></div>
       <div class="hobtns"><button class="hobtn cash" id="hoCashBtn" onclick="hoCashOn()"><span id="hoCashT"></span></button><button class="hobtn cancel" id="hoCancelBtn" onclick="hoCancel()">Bekor qilish</button><button class="hobtn done" id="hoDoneBtn" onclick="hoApply()">Topshirildi</button></div></div></div><div id="hoBody"></div>`;
   $("hoIn").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoFind(); } });
