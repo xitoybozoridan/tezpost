@@ -316,6 +316,34 @@
     body.lblp #lblPrint .lb{break-inside:avoid;page-break-inside:avoid}
   }
   .camb{flex:none;width:48px;height:48px;border:0;border-radius:14px;background:#EEF3FD;color:#0B4DB5;display:grid;place-items:center;cursor:pointer}
+  /* musodara */
+  html[data-view=pc] #mus.screen{max-width:1280px}
+  html[data-view=pc] #mus .wrap{max-width:1280px;margin:0 auto;padding:16px 24px 40px}
+  .musbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .musbar select{height:48px;border:1.5px solid var(--line,#DCE4F3);border-radius:14px;padding:0 12px;font:inherit;font-weight:700;background:var(--card);color:inherit;min-width:180px}
+  .mchips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+  .mch{border:0;background:var(--card);box-shadow:var(--shadow);border-radius:99px;height:38px;padding:0 14px;font-weight:800;font-size:14px;color:#0B2B6B;cursor:pointer}
+  .mch b{margin-left:4px;color:#2563EB}.mch.on{background:#2563EB;color:#fff}.mch.on b{color:#fff}
+  .mch.r b{color:#C62828}.mch.r.on{background:#C62828}.mch.r.on b{color:#fff}.mch.w b{color:#B24F00}.mch.w.on{background:#E08A00}.mch.w.on b{color:#fff}.mch.m.on{background:#555}
+  .musact{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#EEF3FD;border-radius:14px;padding:10px 14px;margin-bottom:10px}.musact b{margin-right:auto}
+  .musact button{border:0;border-radius:10px;height:38px;padding:0 14px;font-weight:800;cursor:pointer;background:#DDE8FB;color:#0B4DB5}.musact button.red{background:#D93025;color:#fff}
+  .mrow{display:grid;grid-template-columns:34px 1.5fr 1.3fr 1.1fr .7fr .9fr 1fr 1.1fr .7fr;gap:8px 12px;align-items:center;padding:11px 14px;background:var(--card);border-bottom:1px solid #EEF2FA;font-size:14px}
+  .mrow.mh{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;border-radius:16px 16px 0 0;position:sticky;top:0;z-index:2}
+  #musList{border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}.mrow:last-child{border-bottom:0}
+  .mrow .mt{font-family:"Courier New",monospace;font-weight:800;word-break:break-all}.mrow .mr{text-align:right}
+  .mrow input[type=checkbox]{width:18px;height:18px;accent-color:#2563EB}
+  .mrow.rr{background:#FDE8E8;color:#8E1B1B}.mrow.rw{background:#FFF6E5}.mrow.rc{background:#EFEFF2;color:#777}
+  .mdy{display:inline-block;padding:3px 10px;border-radius:99px;font-weight:800;font-size:12.5px;background:#EEF3FD;color:#2563EB}.mdy.w{background:#FFE2A8;color:#8A5200}.mdy.r{background:#C62828;color:#fff}
+  .mst{display:inline-block;padding:3px 10px;border-radius:99px;font-weight:800;font-size:12.5px;background:#D3E8FB;color:#0B5C9E}.mst.c{background:#FDE8E8;color:#C62828}
+  .mpk{display:inline-block;padding:3px 10px;border-radius:8px;font-weight:800;font-size:12.5px;background:#EEF3FD;color:#0B4DB5}
+  @media (max-width:760px){
+    .mrow.mh{display:none}
+    .mrow{grid-template-columns:30px 1fr 1fr auto;gap:5px 10px}
+    .mrow .c0{grid-column:1;grid-row:1 / span 4}.mrow .c1{grid-column:2 / 4;grid-row:1}.mrow .c8{grid-column:4;grid-row:1;justify-self:end}
+    .mrow .c2{grid-column:2 / 5;grid-row:2}.mrow .c3{grid-column:2;grid-row:3}.mrow .c6{grid-column:3;grid-row:3}
+    .mrow .c4{grid-column:2;grid-row:4}.mrow .c5{grid-column:3;grid-row:4}.mrow .c7{grid-column:4;grid-row:3 / span 2;font-size:12px;align-self:center;text-align:right}
+    .mrow .c3,.mrow .c4,.mrow .c5,.mrow .c6{font-size:13px}.mrow .mr{text-align:left}
+  }
   .toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:14px 22px;border-radius:22px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:40;width:max-content;max-width:90vw;text-align:center;box-shadow:0 10px 24px rgba(5,20,60,.35)}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .toast.bad{background:var(--danger)}
@@ -736,6 +764,24 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
         <button class="btn" id="lblPrintBtn" onclick="lblPrint()" style="margin:0"></button>
       </div>
     </div>
+  </div>
+</main>
+
+<!-- ===== MUSODARA ===== -->
+<main id="mus" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('main')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Musodara</b>
+  </div>
+  <div class="wrap" style="padding-bottom:40px">
+    <div class="musbar">
+      <div class="scanrow" style="flex:1;min-width:220px"><input id="musQ" placeholder="Trek-kod, mijoz kodi yoki ism" autocomplete="off" oninput="musSearch()"></div>
+      <select id="musP" onchange="musPunkt()"><option value="">Barcha punktlar</option></select>
+    </div>
+    <div class="mchips" id="musChips"></div>
+    <div id="musAct"></div>
+    <div id="musList"></div>
+    <div class="pager" id="musPager"></div>
   </div>
 </main>
 
@@ -2583,6 +2629,57 @@ async function camScan(onCode){
   }catch(e){ camClose(); alert("Kameraga ruxsat berilmadi yoki kamera topilmadi."); }
 }
 async function camZ(d){ try{ const tr = camStream && camStream.getVideoTracks()[0]; const cp = tr.getCapabilities(); if(!cp.zoom){ camSay("Bu telefonda zoom yo'q, stikerga yaqinlashtiring."); return; } camZoom = Math.min(cp.zoom.max, Math.max(cp.zoom.min, camZoom + d)); await tr.applyConstraints({advanced:[{zoom:camZoom}]}); }catch(e){} }
+
+/* ====== Musodara (saqlash muddati) ====== */
+let musQ = "", musF = "all", musPk = null, musPg = 0, musSel = new Set(), musRows = [], musT = null;
+const MUS_LIM = 10;
+async function openMus(){
+  show("mus"); musSel = new Set(); musPg = 0;
+  try{ const pk = await rpc("admin_punkts", {p_token:token}); $("musP").innerHTML = '<option value="">Barcha punktlar</option>' + pk.map(p=>`<option value="${p.id}" ${musPk===p.id?"selected":""}>${esc(p.name)}</option>`).join(""); }catch(e){ handleErr(e); }
+  musLoad();
+}
+function musSearch(){ clearTimeout(musT); musT = setTimeout(()=>{ musQ = $("musQ").value.trim(); musPg = 0; musSel = new Set(); musLoad(); }, 300); }
+function musPunkt(){ musPk = $("musP").value ? Number($("musP").value) : null; musPg = 0; musSel = new Set(); musLoad(); }
+function musSetF(f){ musF = f; musPg = 0; musSel = new Set(); musLoad(); }
+async function musLoad(){
+  try{
+    const r = await rpc("admin_storage_list", {p_token:token, p_q:musQ, p_punkt:musPk, p_filter:musF, p_limit:MUS_LIM, p_offset:musPg * MUS_LIM});
+    if(!r.items.length && musPg > 0){ musPg = Math.max(0, Math.ceil(r.total / MUS_LIM) - 1); return musLoad(); }
+    musRows = r.items; const c = r.counts;
+    $("musChips").innerHTML = [["all","Hammasi",c.all,""],["warn","7 kundan ko'p",c.warn + c.over,"w"],["over","10 kundan ko'p",c.over,"r"],["conf","Musodara",c.conf,"m"]]
+      .map(x=>`<button class="mch ${x[3]} ${musF===x[0]?"on":""}" onclick="musSetF('${x[0]}')">${x[1]} <b>${x[2]}</b></button>`).join("");
+    const head = `<div class="mrow mh"><span><input type="checkbox" onchange="musAll(this.checked)"></span><span>Trackcode</span><span>Mijoz</span><span>Punkt</span><span class="mr">Og'irlik</span><span class="mr">Umumiy UZS</span><span>Status</span><span>Qabul vaqti</span><span>Turgan</span></div>`;
+    $("musList").innerHTML = r.items.length ? head + r.items.map(d=>{
+      const over = !d.confiscated && d.days >= 10, warn = !d.confiscated && d.days >= 7 && d.days < 10;
+      return `<div class="mrow ${d.confiscated ? "rc" : over ? "rr" : warn ? "rw" : ""}"><span class="c0"><input type="checkbox" class="mck" ${musSel.has(d.id)?"checked":""} onchange="musPick(${d.id},this.checked)"></span>
+        <span class="mt c1">${esc(d.track)}</span><span class="c2"><span class="mpk" style="background:#E8F0FD">${esc(d.code)}</span> ${esc(d.name||"")}</span>
+        <span class="c3"><span class="mpk">${esc(d.punkt||"—")}</span></span><span class="mr c4">${d.weight_kg!=null?Number(d.weight_kg)+" kg":"—"}</span><span class="mr c5">${d.uzs!=null?fmtN(d.uzs)+" so'm":"—"}</span>
+        <span class="c6">${d.confiscated ? '<span class="mst c">Musodara</span>' : '<span class="mst">Stellajda</span>'}</span><span class="c7">${lblFmtD(d.received_at)}</span>
+        <span class="c8"><span class="mdy ${over?"r":warn?"w":""}">${d.days} kun</span></span></div>`; }).join("")
+      : `<div class="empty" style="padding:26px;background:var(--card)"><b>Yuk yo'q</b></div>`;
+    musPager(r.total); musAct();
+  }catch(e){ handleErr(e); }
+}
+function fmtN(n){ return Math.round(Number(n||0)).toLocaleString("en-US").replace(/,/g," "); }
+function musPager(total){
+  const n = Math.ceil(total / MUS_LIM), el = $("musPager"); if(n <= 1){ el.innerHTML = ""; return; }
+  let h = `<button ${musPg===0?"disabled":""} onclick="musGo(${musPg-1})">‹</button>`, last = -1;
+  for(let i=0;i<n;i++) if(i===0||i===n-1||Math.abs(i-musPg)<=1){ if(i-last>1) h += `<span style="color:var(--muted)">…</span>`; h += `<button class="${i===musPg?"on":""}" onclick="musGo(${i})">${i+1}</button>`; last = i; }
+  el.innerHTML = h + `<button ${musPg>=n-1?"disabled":""} onclick="musGo(${musPg+1})">›</button>`;
+}
+function musGo(i){ musPg = i; musLoad(); window.scrollTo(0,0); }
+function musPick(id,on){ on ? musSel.add(id) : musSel.delete(id); musAct(); }
+function musAll(on){ musRows.forEach(d=>on ? musSel.add(d.id) : musSel.delete(d.id)); document.querySelectorAll(".mck").forEach(x=>x.checked = on); musAct(); }
+function musAct(){
+  const n = musSel.size, el = $("musAct"); if(!n){ el.innerHTML = ""; return; }
+  const hasC = musRows.some(d=>musSel.has(d.id) && d.confiscated), hasN = musRows.some(d=>musSel.has(d.id) && !d.confiscated);
+  el.innerHTML = `<div class="musact"><b>${n} ta tanlandi</b>${hasN ? `<button class="red" onclick="musConf(true)">Musodaraga o'tkazish</button>` : ""}${hasC ? `<button onclick="musConf(false)">Musodaradan qaytarish</button>` : ""}</div>`;
+}
+async function musConf(on){
+  const ids = musRows.filter(d=>musSel.has(d.id) && d.confiscated === !on).map(d=>d.id); if(!ids.length) return;
+  if(!confirm(ids.length + " ta yuk " + (on ? "musodaraga o'tkazilsinmi?" : "musodaradan qaytarilsinmi?"))) return;
+  try{ await rpc("admin_storage_conf", {p_token:token, p_ids:ids, p_on:on}); musSel = new Set(); musLoad(); }catch(e){ handleErr(e); }
+}
 const NAV = [
   ["cargo","box","Yuklar","show('main');setTab('cargo')"],
   ["cust","users","Mijozlar","show('main');setTab('cust')"],
@@ -2590,6 +2687,7 @@ const NAV = [
   ["rcv","down","Qabul qilish","openReceive()"],
   ["ho","up","Topshirish","openHandover()"],
   ["lbl","qr","Yuk stikerlari","openLbl()"],
+  ["mus","ban","Musodara","openMus()"],
   ["pay","card","Mijoz to'lovlari","openPayments()","payDot"],
   ["orph","help","Egasi topilmagan yuklar","openOrphans()","orCnt"],
   ["tx","car","Taksi: uyga yetkazish","openTx()","txCnt"],
@@ -2609,7 +2707,7 @@ function navBuild(){
 function navMark(){
   const el = $("snav"); if(!el) return;
   const act = document.querySelector(".screen.active"); const id = act ? act.id : "";
-  const map = {receive:"rcv", handover:"ho", payments:"pay", orphans:"orph", lbl:"lbl", tx:"tx", pk:"pk", pkw:"pk", report:"rep", bulkup:"bulk", xl:"xl", addrEdit:"addr", settings:"set", thread:"chat"};
+  const map = {receive:"rcv", handover:"ho", payments:"pay", orphans:"orph", lbl:"lbl", mus:"mus", tx:"tx", pk:"pk", pkw:"pk", report:"rep", bulkup:"bulk", xl:"xl", addrEdit:"addr", settings:"set", thread:"chat"};
   let tb = "cargo"; try{ tb = tab; }catch(e){}
   const key = id === "main" ? tb : (map[id] || "");
   el.querySelectorAll("button.ni[data-k]").forEach(b=>b.classList.toggle("on", b.dataset.k === key));
