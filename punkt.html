@@ -171,32 +171,42 @@ const ICONS = {
 };
 function ico(n, s){ return `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:${s||18}px;height:${s||18}px">${ICONS[n]||""}</svg>`; }
 /* ===== kamera bilan skaner (QR / shtrix-kod) ===== */
-let camStream = null, camTimer = null, camLast = {v:"", t:0};
+let camStream = null, camTimer = null, camLast = {v:"", t:0}, camZoom = 1;
 function camClose(){ clearInterval(camTimer); camTimer = null; if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream = null; } const o = document.getElementById("camOv"); if(o) o.remove(); }
+function camSay(t, ok){ const h = document.getElementById("camMsg"); if(h){ h.textContent = t; h.style.background = ok ? "#12803D" : "rgba(0,0,0,.6)"; } }
 async function camScan(onCode){
   if(!("BarcodeDetector" in window) || !navigator.mediaDevices){ alert("Bu brauzer kamera skanerini qo'llamaydi. Telefondagi Chrome'dan foydalaning yoki skaner qurilmasini ishlating."); return; }
   camClose();
-  if(!document.getElementById("camCss")){ const st = document.createElement("style"); st.id = "camCss"; st.textContent = "#camOv{position:fixed;inset:0;z-index:99999;background:#000;display:flex;flex-direction:column}#camOv video{flex:1;width:100%;object-fit:cover;min-height:0}#camOv .cb{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;color:#fff;font-weight:800;background:linear-gradient(#000a,#0000)}#camOv .cb button{border:0;border-radius:12px;height:42px;padding:0 18px;font-weight:800;background:#fff;color:#0B2A66;font-size:15px}#camOv .fr{position:absolute;left:50%;top:50%;width:min(70vw,320px);aspect-ratio:1;transform:translate(-50%,-50%);border:3px solid #fff;border-radius:22px;box-shadow:0 0 0 100vmax #0006}#camOv .hint{position:absolute;left:0;right:0;bottom:6vh;text-align:center;color:#fff;font-weight:700;padding:0 20px}"; document.head.appendChild(st); }
+  if(!document.getElementById("camCss")){ const st = document.createElement("style"); st.id = "camCss"; st.textContent = "#camOv{position:fixed;inset:0;z-index:99990;background:#000;display:flex;flex-direction:column}#camOv video{flex:1;width:100%;object-fit:cover;min-height:0}#camBar{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;color:#fff;font-weight:800;background:linear-gradient(#000a,#0000)}#camBar button,#camZm button{border:0;border-radius:12px;height:42px;min-width:42px;padding:0 16px;font-weight:800;background:#fff;color:#0B2A66;font-size:16px}#camFr{position:absolute;left:50%;top:50%;width:min(86vw,420px);aspect-ratio:1;transform:translate(-50%,-50%);border:3px solid #fff;border-radius:22px;box-shadow:0 0 0 100vmax #0005;pointer-events:none}#camMsg{position:absolute;left:16px;right:16px;bottom:15vh;text-align:center;color:#fff;font-weight:700;padding:10px 14px;border-radius:14px;background:rgba(0,0,0,.6);font-size:15px}#camZm{position:absolute;left:0;right:0;bottom:5vh;display:flex;justify-content:center;gap:12px}.toast,#toast{z-index:99999 !important}"; document.head.appendChild(st); }
   const o = document.createElement("div"); o.id = "camOv";
-  o.innerHTML = '<video playsinline muted autoplay></video><div class="fr"></div><div class="cb"><span>Kamera skaner</span><button onclick="camClose()">Yopish</button></div><div class="hint" id="camHint">QR yoki shtrix-kodni ramka ichiga tuting</div>';
+  o.innerHTML = '<video playsinline muted autoplay></video><div id="camFr"></div><div id="camBar"><span>Kamera skaner</span><button onclick="camClose()">Yopish</button></div><div id="camMsg">QR-kodni ramkaga to\'liq sig\'diring, telefonni 15–25 sm uzoqlikda ushlang</div><div id="camZm"><button onclick="camZ(-0.5)">−</button><button onclick="camZ(0.5)">+ Yaqinlashtirish</button></div>';
   document.body.appendChild(o);
   try{
-    camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}, audio:false});
+    camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}, width:{ideal:1920}, height:{ideal:1080}}, audio:false});
+    const tr = camStream.getVideoTracks()[0];
+    try{ const cp = tr.getCapabilities ? tr.getCapabilities() : {}; const adv = {}; if(cp.focusMode && cp.focusMode.includes("continuous")) adv.focusMode = "continuous"; if(cp.zoom){ camZoom = Math.min(cp.zoom.max, Math.max(cp.zoom.min, 1.5)); adv.zoom = camZoom; } if(Object.keys(adv).length) await tr.applyConstraints({advanced:[adv]}); }catch(e){}
     const v = o.querySelector("video"); v.srcObject = camStream; await v.play();
-    const det = new BarcodeDetector({formats:["qr_code","code_128","code_39","ean_13","ean_8","upc_a","itf","codabar"]});
-    let busy = false;
+    let fmts = ["qr_code","code_128","code_39","ean_13","ean_8","upc_a","itf","codabar"];
+    try{ const sup = await BarcodeDetector.getSupportedFormats(); fmts = fmts.filter(f=>sup.includes(f)); if(!fmts.length){ camClose(); alert("Bu telefon QR/shtrix-kodni kamera orqali o'qiy olmaydi."); return; } }catch(e){}
+    const det = new BarcodeDetector({formats:fmts});
+    const cv = document.createElement("canvas"), cx = cv.getContext("2d");
+    let busy = false, n = 0, errShown = false;
     camTimer = setInterval(async ()=>{
-      if(busy || v.readyState < 2) return; busy = true;
+      if(busy || v.readyState < 2 || !v.videoWidth) return; busy = true; n++;
       try{
-        const r = await det.detect(v);
+        let r = [];
+        try{ r = await det.detect(v); }catch(e1){ r = []; }
+        if(!r.length){ const w = Math.min(1280, v.videoWidth), h = Math.round(w * v.videoHeight / v.videoWidth); cv.width = w; cv.height = h; cx.drawImage(v, 0, 0, w, h); r = await det.detect(cv); }
         if(r && r.length){
           const val = String(r[0].rawValue || "").trim(), now = Date.now();
-          if(val && (val !== camLast.v || now - camLast.t > 2500)){ camLast = {v:val, t:now}; try{ navigator.vibrate && navigator.vibrate(60); }catch(e){} onCode(val); }
-        }
-      }catch(e){} busy = false;
-    }, 250);
+          if(val && (val !== camLast.v || now - camLast.t > 2500)){ camLast = {v:val, t:now}; try{ navigator.vibrate && navigator.vibrate(60); }catch(e){} camSay("O'qildi: " + val, true); onCode(val); }
+        } else if(n % 20 === 0){ camSay("Kod topilmadi. Yaqinroq keling yoki + tugmasini bosing; stiker yorug' va tekis bo'lsin."); }
+      }catch(e){ if(!errShown){ errShown = true; camSay("Skaner xatosi: " + (e && e.message || e)); } }
+      busy = false;
+    }, 220);
   }catch(e){ camClose(); alert("Kameraga ruxsat berilmadi yoki kamera topilmadi."); }
 }
+async function camZ(d){ try{ const tr = camStream && camStream.getVideoTracks()[0]; const cp = tr.getCapabilities(); if(!cp.zoom){ camSay("Bu telefonda zoom yo'q, stikerga yaqinlashtiring."); return; } camZoom = Math.min(cp.zoom.max, Math.max(cp.zoom.min, camZoom + d)); await tr.applyConstraints({advanced:[{zoom:camZoom}]}); }catch(e){} }
 const $ = id => document.getElementById(id);
 const CONFIG = { url: (window.TP_CONFIG||{}).url || "", key: (window.TP_CONFIG||{}).key || "" };
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
