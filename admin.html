@@ -591,6 +591,15 @@
   .kpi.big{grid-column:1 / -1;background:linear-gradient(180deg,#22A862,#127A45)}.kpi.big small,.kpi.big b{color:#fff}.kpi.big b{font-size:30px}
   .kpi.warn b{color:#C62828}
   .pchips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+  .rprange{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:4px 0 12px}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:170px;padding:12px 10px 30px;overflow-x:auto}
+  .bcol{flex:1 0 26px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative}
+  .bcol i{display:block;width:100%;max-width:40px;min-height:3px;background:linear-gradient(180deg,#3B7BD8,#0B4DB5);border-radius:8px 8px 3px 3px}
+  .bcol small{position:absolute;bottom:-24px;font-size:10px;color:var(--muted);white-space:nowrap}
+  .hbar{display:grid;grid-template-columns:minmax(130px,1.2fr) 2fr 40px;gap:10px;align-items:center;padding:7px 12px;font-size:13px}
+  .hbar div{height:10px;background:var(--blue-soft);border-radius:99px;overflow:hidden}
+  .hbar i{display:block;height:100%;background:linear-gradient(90deg,#FF9322,#F26A00);border-radius:99px}
+  .hbar b{text-align:right}
   .pchips button{border:1.5px solid var(--blue);background:#fff;color:var(--blue);border-radius:999px;padding:7px 14px;font-weight:800;font-size:13.5px}
   .pchips button.on{background:var(--blue);color:#fff}
   .rtable{width:100%;border-collapse:collapse;font-size:13.5px}.rtable th{text-align:left;color:var(--muted);font-size:12px;padding:6px 8px}.rtable td{padding:8px;border-top:1px solid var(--line)}.rtable td.r,.rtable th.r{text-align:right}
@@ -677,7 +686,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <button id="tChat" onclick="setTab('chat')">Chatlar<span class="tbdg" id="tBadge"></span></button>
     </div>
   </section>
-  <div class="wrap"><div id="out"></div></div>
+  <div class="wrap"><div class="pchips" id="cFilt" style="margin-top:12px"></div><div id="cargoExp"style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0"><button class="go" onclick="expCargo(false)" style="height:40px;padding:0 12px;border:0;border-radius:12px;color:#fff;font-weight:800;background:linear-gradient(180deg,#22A862,#127A45)">⬇ Excel (barcha yuklar)</button><button class="go" onclick="expCargo(true)" style="height:40px;padding:0 12px;border:0;border-radius:12px;color:#fff;font-weight:800;background:linear-gradient(180deg,#3B7BD8,#0B4DB5)">⎙ PDF</button></div><div id="out"></div></div>
 </main>
 
 <!-- ===== HISOBOT ===== -->
@@ -698,6 +707,8 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <div class="info" style="margin:8px 0 0">Yangi narx faqat keyin tortiladigan yuklarga ta'sir qiladi. Eski yuklar o'z narxida qoladi.</div>
     </div>
     <div class="pchips" id="rpChips"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px"><button class="go" onclick="expReport(false)" style="height:40px;padding:0 12px;border:0;border-radius:12px;color:#fff;font-weight:800;background:linear-gradient(180deg,#22A862,#127A45)">⬇ Excel (hisob-kitob)</button><button class="go" onclick="expReport(true)" style="height:40px;padding:0 12px;border:0;border-radius:12px;color:#fff;font-weight:800;background:linear-gradient(180deg,#3B7BD8,#0B4DB5)">⎙ PDF</button></div>
+    <div class="rprange"><label style="flex:1;min-width:140px"><span class="lbl" style="margin:0 0 4px">Boshlanish</span><input type="date" id="rpFrom" class="xsel" style="padding:0 10px"></label><label style="flex:1;min-width:140px"><span class="lbl" style="margin:0 0 4px">Tugash</span><input type="date" id="rpTo" class="xsel" style="padding:0 10px"></label><button class="go" onclick="rpCustom()" style="height:46px;padding:0 16px;border:0;border-radius:14px;background:linear-gradient(180deg,#3B7BD8,#0B4DB5);color:#fff;font-weight:800">Ko'rsatish</button></div>
     <div id="rpBody"></div>
   </div>
 </main>
@@ -779,6 +790,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <select id="musP" onchange="musPunkt()"><option value="">Barcha punktlar</option></select>
     </div>
     <div class="mchips" id="musChips"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px"><button class="go" onclick="expMus(false)" style="height:40px;padding:0 12px;border:0;border-radius:12px;color:#fff;font-weight:800;background:linear-gradient(180deg,#22A862,#127A45)">⬇ Excel (musodara)</button><button class="go" onclick="expMus(true)" style="height:40px;padding:0 12px;border:0;border-radius:12px;color:#fff;font-weight:800;background:linear-gradient(180deg,#3B7BD8,#0B4DB5)">⎙ PDF</button></div>
     <div id="musAct"></div>
     <div id="musList"></div>
     <div class="pager" id="musPager"></div>
@@ -1055,6 +1067,30 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
   <div class="composer">
     <textarea id="msgIn" rows="1" maxlength="1000" placeholder="Javob yozing..." oninput="autoGrow(this)"></textarea>
     <button class="sendbtn" onclick="sendMsg()" aria-label="Yuborish"><svg viewBox="0 0 24 24"><path d="M3.4 20.4l17.4-7.6a.9.9 0 0 0 0-1.6L3.4 3.6a.9.9 0 0 0-1.3 1l1.9 6.2 9 1.2-9 1.2-1.9 6.2a.9.9 0 0 0 1.3 1z"/></svg></button>
+  </div>
+</main>
+
+<!-- ===== PUNKT XABARLARI (ichki, mijozlarga ko'rinmaydi) ===== -->
+<main id="pm" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('main')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Punkt xabarlari</b>
+  </div>
+  <div class="wrap" style="padding-bottom:30px">
+    <div class="info" style="margin-bottom:12px">Punktlarga ichki xabar yozing. Bu xabarlar mijozlarga ko'rinmaydi.</div>
+    <div id="pmList"></div>
+  </div>
+  <span id="pmCnt" hidden></span>
+</main>
+<main id="pmThread" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="closePm()" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div style="min-width:0"><b id="pmName"></b><small id="pmSub" style="display:block;color:var(--muted)">Ichki xabar</small></div>
+  </div>
+  <div class="msgs" id="pmMsgs"></div>
+  <div class="composer">
+    <textarea id="pmIn" rows="1" maxlength="1000" placeholder="Punktga xabar yozing..." oninput="autoGrow(this)"></textarea>
+    <button class="sendbtn" onclick="sendPm()" aria-label="Yuborish"><svg viewBox="0 0 24 24"><path d="M3.4 20.4l17.4-7.6a.9.9 0 0 0 0-1.6L3.4 3.6a.9.9 0 0 0-1.3 1l1.9 6.2 9 1.2-9 1.2-1.9 6.2a.9.9 0 0 0 1.3 1z"/></svg></button>
   </div>
 </main>
 
@@ -2692,6 +2728,7 @@ const NAV = [
   ["orph","help","Egasi topilmagan yuklar","openOrphans()","orCnt"],
   ["tx","car","Taksi: uyga yetkazish","openTx()","txCnt"],
   ["pk","pin","Punktlar","openPk()","pkCnt"],
+  ["pm","chat","Punkt xabarlari","openPm()","pmCnt"],
   ["rep","chart","Hisobot va foyda","openReport()"],
   ["bulk","layers","Ommaviy yuklash","openBulk()"],
   ["xl","sheet","Excel'dan mijozni ajratish","openXl()"],
@@ -2707,7 +2744,7 @@ function navBuild(){
 function navMark(){
   const el = $("snav"); if(!el) return;
   const act = document.querySelector(".screen.active"); const id = act ? act.id : "";
-  const map = {receive:"rcv", handover:"ho", payments:"pay", orphans:"orph", lbl:"lbl", mus:"mus", tx:"tx", pk:"pk", pkw:"pk", report:"rep", bulkup:"bulk", xl:"xl", addrEdit:"addr", settings:"set", thread:"chat"};
+  const map = {receive:"rcv", handover:"ho", payments:"pay", orphans:"orph", lbl:"lbl", mus:"mus", tx:"tx", pk:"pk", pkw:"pk", report:"rep", bulkup:"bulk", xl:"xl", addrEdit:"addr", settings:"set", thread:"chat", pm:"pm", pmThread:"pm"};
   let tb = "cargo"; try{ tb = tab; }catch(e){}
   const key = id === "main" ? tb : (map[id] || "");
   el.querySelectorAll("button.ni[data-k]").forEach(b=>b.classList.toggle("on", b.dataset.k === key));
@@ -2779,8 +2816,17 @@ function setTab(t){
   $("tCargo").classList.toggle("on", t==="cargo");
   $("tCust").classList.toggle("on", t==="cust");
   $("tChat").classList.toggle("on", t==="chat");
+  $("cargoExp").style.display = t==="cargo" ? "" : "none";
+  $("cFilt").style.display = t==="cargo" ? "" : "none";
   navMark(); search();
 }
+/* Yuklar bo'limlari: Hammasi / Tasdiqlangan / Qabul qilish kerak / To'lanmaganlar */
+let cFilter = "all";
+const C_FILT = [["all","Hammasi"],["done","Tasdiqlangan"],["need","Qabul qilish kerak"],["unpaid","To'lanmaganlar"]];
+function drawCFilt(counts){
+  $("cFilt").innerHTML = C_FILT.map(([k,t])=>{ const n = counts ? (counts[k] ?? 0) : ""; return `<button class="${cFilter===k?"on":""}" onclick="cSetFilter('${k}')">${t}${n!==""?` <b>${n}</b>`:""}</button>`; }).join("");
+}
+function cSetFilter(k){ cFilter = k; showCargo = false; search(); }
 function openCustomer(code){
   $("q").value = code; $("qx").classList.add("show");
   setTab("cargo"); window.scrollTo({top:0,behavior:"smooth"});
@@ -3136,7 +3182,7 @@ async function savePayInfo(){
 }
 
 /* ====== Hisobot ====== */
-let rpPeriod = "month";
+let rpPeriod = "month", rpFrom = "", rpTo = "";
 function ymd(d){ return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
 async function openReport(){
   show("report");
@@ -3153,14 +3199,45 @@ async function saveRates(){
   if(!isFinite(usd) || usd < 1){ toast("Dollar kursini kiriting (masalan 12000)", true); return; }
   try{ await rpc("admin_set_rates", {p_token:token, p_sell:sell, p_cost:cost, p_usd:usd}); toast("Saqlandi: " + money(sell) + " / " + money(cost) + " · 1$ = " + somN(usd)); }catch(e){ handleErr(e); }
 }
+/* erkin davr: ikki sana */
+function rpCustom(){
+  const a = $("rpFrom").value, b = $("rpTo").value;
+  if(!a || !b){ toast("Ikkala sanani ham tanlang", true); return; }
+  if(a > b){ toast("Boshlanish sanasi oxiridan oldin bo'lsin", true); return; }
+  rpFrom = a; rpTo = b; rpPeriod = "custom"; drawPeriods(); loadReport();
+}
+/* statistika bo'limlari (admin_stats javobi) */
+const ST_LBL = {new:"Jo'natma kutilmoqda", china:"Xitoy omborida", transit:"Jo'natildi", sort:"Saralanmoqda", uz:"Punktga yetkazilmoqda", pickup:"Topshirish punktida", done:"Mijozga topshirildi"};
+function statsHtml(st){
+  const t = st.totals || {}, daily = st.daily || [], pk = st.punkts || [], cu = st.customers || [], sts = st.statuses || {};
+  const maxRev = Math.max(1, ...daily.map(x => Number(x.revenue_uzs) || 0));
+  const bars = daily.length ? `<div class="bars">${daily.map(x => { const h = Math.max(3, Math.round((Number(x.revenue_uzs) || 0) / maxRev * 100));
+      return `<div class="bcol" title="${esc(x.day)}: ${somN(x.revenue_uzs)} · ${x.cargos} ta yuk"><i style="height:${h}%"></i><small>${esc(String(x.day).slice(5))}</small></div>`; }).join("")}</div>`
+    : '<div class="empty" style="padding:18px">Bu davrda yuk yo\'q</div>';
+  const maxSt = Math.max(1, ...Object.values(sts).map(Number));
+  const stRows = Object.keys(ST_LBL).filter(k => sts[k]).map(k => `<div class="hbar"><span>${ST_LBL[k]}</span><div><i style="width:${Math.round(sts[k] / maxSt * 100)}%"></i></div><b>${sts[k]}</b></div>`).join("") || '<div class="empty" style="padding:14px">Ma\'lumot yo\'q</div>';
+  const pkRows = pk.map(p => `<tr><td>${esc(p.name)}</td><td class="r">${p.cargos}</td><td class="r">${kgf(p.kg)}</td><td class="r">${somN(p.revenue_uzs)}</td><td class="r">${p.done}</td></tr>`).join("");
+  const cuRows = cu.map((c, i) => `<tr style="cursor:pointer" onclick="openCustomer('${esc(c.code)}')"><td>${i+1}. <span class="tag">${esc(c.code)}</span> ${esc(c.name || "")}</td><td class="r">${c.cargos}</td><td class="r">${kgf(c.kg)}</td><td class="r">${somN(c.revenue_uzs)}</td></tr>`).join("");
+  const avgCheck = t.weighed ? Math.round(Number(t.revenue_uzs) / Number(t.weighed)) : 0;
+  return `<div class="kpis" style="margin-top:12px">
+      <div class="kpi"><small>Yuklar soni</small><b>${t.cargos ?? 0}</b></div>
+      <div class="kpi"><small>Mijozlar</small><b>${t.customers ?? 0}</b></div>
+      <div class="kpi"><small>Mijozga topshirilgan</small><b>${t.done ?? 0}</b></div>
+      <div class="kpi ${Number(t.musodara) ? "warn" : ""}"><small>Musodara</small><b>${t.musodara ?? 0}</b></div>
+      <div class="kpi"><small>O'rtacha yetkazish</small><b>${t.avg_days != null ? t.avg_days + " kun" : "—"}</b></div>
+      <div class="kpi"><small>O'rtacha chek (1 yuk)</small><b>${somN(avgCheck)}</b></div></div>
+    <div class="info">Kunlik dinamika (sotish summasi)</div><div class="scanbox">${bars}</div>
+    <div class="info">Punktlar</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Punkt</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Summa</th><th class="r">Topshirilgan</th></tr>${pkRows || '<tr><td colspan="5">Ma\'lumot yo\'q</td></tr>'}</table></div>
+    <div class="info">Holatlar</div><div class="scanbox">${stRows}</div>
+    <div class="info">Eng ko'p olib kelgan mijozlar (bosing: yuklari)</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Mijoz</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Summa</th></tr>${cuRows || '<tr><td colspan="4">Ma\'lumot yo\'q</td></tr>'}</table></div>`;
+}
 async function loadReport(){
-  const now = new Date(); let from = null, to = null;
-  if(rpPeriod === "today"){ from = to = ymd(now); }
-  else if(rpPeriod === "week"){ const d = new Date(now); d.setDate(d.getDate()-6); from = ymd(d); to = ymd(now); }
-  else if(rpPeriod === "month"){ from = ymd(new Date(now.getFullYear(), now.getMonth(), 1)); to = ymd(now); }
+  const [from, to] = rpRange();
   $("rpBody").innerHTML = '<div class="skel"></div><div class="skel"></div>';
   try{
-    const r = await rpc("admin_report", {p_token:token, p_date_from:from, p_date_to:to});
+    const [r, st] = await Promise.all([
+      rpc("admin_report", {p_token:token, p_date_from:from, p_date_to:to}),
+      rpc("admin_stats", {p_token:token, p_date_from:from, p_date_to:to})]);
     const profit = Number(r.revenue_uzs) - Number(r.cost_uzs);
     $("rpBody").innerHTML = `<div class="kpis">
       <div class="kpi big"><small>Sof foyda</small><b>${somN(profit)}</b></div>
@@ -3170,7 +3247,8 @@ async function loadReport(){
       <div class="kpi"><small>To'langan</small><b style="color:#127A45">${somN(r.paid_uzs)}</b></div>
       <div class="kpi ${Number(r.debt_uzs)?"warn":""}"><small>To'lanmagan (qarz)</small><b>${somN(r.debt_uzs)}</b></div>
       <div class="kpi"><small>Og'irligi kiritilgan</small><b>${r.weighed} / ${r.cargos}</b></div></div>
-      ${r.no_weight ? `<div class="info" style="margin-bottom:10px">Og'irligi kiritilmagan ${r.no_weight} ta yuk hisobga kirmagan. Og'irlikni yuk kartasidagi «» tugmasi yoki Sozlamalar → «Excel'dan ajratish» orqali kiriting.</div>` : ""}
+      ${statsHtml(st)}
+      ${r.no_weight ?`<div class="info" style="margin-bottom:10px">Og'irligi kiritilmagan ${r.no_weight} ta yuk hisobga kirmagan. Og'irlikni yuk kartasidagi «» tugmasi yoki Sozlamalar → «Excel'dan ajratish» orqali kiriting.</div>` : ""}
       ${r.months.length ? `<div class="info">Oylar bo'yicha</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Oy</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Summa</th><th class="r">Foyda</th></tr>${r.months.map(m=>`<tr><td>${esc(m.month)}</td><td class="r">${m.cargos}</td><td class="r">${kgf(m.kg)}</td><td class="r">${somN(m.revenue_uzs)}</td><td class="r"><b>${somN(m.profit_uzs)}</b></td></tr>`).join("")}</table></div>` : ""}
       ${r.debtors.length ? `<div class="info">Qarzdorlar (to'lanmagan yuklar)</div><div class="scanbox" style="padding:6px 10px"><table class="rtable"><tr><th>Mijoz</th><th class="r">Yuk</th><th class="r">Kg</th><th class="r">Qarz</th></tr>${r.debtors.map(c=>`<tr style="cursor:pointer" onclick="openCustomer('${esc(c.code)}')"><td><b>${esc(c.code)}</b> ${esc(c.name)}</td><td class="r">${c.cargos}</td><td class="r">${kgf(c.kg)}</td><td class="r"><b style="color:#C62828">${somN(c.debt_uzs)}</b></td></tr>`).join("")}</table></div>` : ""}`;
   }catch(e){ $("rpBody").innerHTML = ""; handleErr(e); }
@@ -3801,6 +3879,7 @@ function renderCargo(r){
   const q = $("q").value.trim(), out = $("out"); cState = r;
   const cs = r.customers || [], ds = r.declarations || [], total = r.total != null ? r.total : ds.length;
   $("subline").textContent = "Yuklar: " + total;
+  drawCFilt(r.counts);
   sel.clear(); canPick = q !== "";
   const pickCount = ds.filter(d=>d.status==="pickup").length;
   let html = "";
@@ -3855,14 +3934,224 @@ async function search(){
           : `<div class="empty"><b>Mijoz topilmadi</b><p>${q?"Boshqa so'z bilan qidirib ko'ring.":"Hali hech kim ro'yxatdan o'tmagan."}</p></div>`;
       }, q === "");
     } else {
-      await swr(my, "c|" + q + "|" + showCargo, ()=>rpc("admin_search", {p_token:token, p_q:q, p_limit: showCargo ? 300 : 15, p_offset:0}), renderCargo, q === "");
+      await swr(my, "c|" + q + "|" + showCargo + "|" + cFilter, ()=>rpc("admin_cargo_list", {p_token:token, p_q:q, p_filter:cFilter, p_limit: (showCargo || cFilter !== "all") ? 300 : 15, p_offset:0}), renderCargo, q === "");
     }
   }catch(e){ if(my === seq){ out.innerHTML = ""; handleErr(e); } }
 }
 
+/* ====== Punkt xabarlari (ichki) ====== */
+let pmId = null, pmMsgs = [], pmLast = 0, pmTimer = null, pmThreads = [];
+async function openPm(){ show("pm"); await loadPm(); }
+async function loadPm(){
+  $("pmList").innerHTML = '<div class="skel"></div><div class="skel"></div>';
+  try{
+    pmThreads = await rpc("admin_pm_threads", {p_token:token});
+    pmBadgeSet();
+    $("pmList").innerHTML = pmThreads.length ? pmThreads.map(t => {
+      const last = t.last_body ? (t.last_from_admin ? "Siz: " : "") + t.last_body : "Hali xabar yo'q";
+      return `<button onclick="openPmThread(${t.id})" style="width:100%;text-align:left;display:flex;gap:12px;align-items:center;background:var(--card);border:0;border-radius:16px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px;font:inherit;color:inherit;cursor:pointer">
+        <span style="flex:1;min-width:0"><b style="display:block;font-size:15px">${esc(t.name)}${t.active ? "" : " <small style='color:var(--muted)'>(o'chirilgan)</small>"}</b>
+        <small style="display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(last)}</small></span>
+        ${Number(t.unread) ? `<span style="background:#E53935;color:#fff;border-radius:999px;min-width:24px;height:24px;padding:0 7px;display:grid;place-items:center;font-weight:800;font-size:12px">${t.unread}</span>` : ""}
+      </button>`; }).join("")
+      : '<div class="empty"><b>Punktlar yo\'q</b><p>Avval «Punktlar» bo\'limida punkt qo\'shing.</p></div>';
+  }catch(e){ handleErr(e); }
+}
+function pmBadgeSet(){
+  const n = pmThreads.reduce((a,t)=>a + Number(t.unread||0), 0);
+  const el = $("pmCnt"); if(el) el.textContent = n ? String(n) : ""; navBadges();
+}
+async function pmBadge(){
+  if(!token || !CONFIGURED) return;
+  try{ pmThreads = await rpc("admin_pm_threads", {p_token:token}); pmBadgeSet(); }catch(e){}
+}
+function openPmThread(id){
+  pmId = id; pmMsgs = []; pmLast = 0; $("pmMsgs").innerHTML = "";
+  const t = pmThreads.find(x => x.id === id); $("pmName").textContent = t ? t.name : "Punkt";
+  show("pmThread"); pollPm(true);
+  clearInterval(pmTimer);
+  pmTimer = setInterval(()=>{ if(!document.hidden && $("pmThread").classList.contains("active")) pollPm(); }, 4000);
+}
+function closePm(){ clearInterval(pmTimer); pmId = null; show("pm"); loadPm(); }
+async function pollPm(first){
+  if(!pmId || !token) return;
+  try{
+    const r = await rpc("admin_pm_open", {p_token:token, p_punkt:pmId, p_after:pmLast});
+    const m = (r.messages || []).filter(x => x.id > pmLast);
+    if(m.length){ pmMsgs = pmMsgs.concat(m); pmLast = m[m.length-1].id; }
+    if(m.length || first) renderPm(first || m.some(x => !x.from_admin));
+  }catch(e){ handleErr(e); }
+}
+function renderPm(stick){
+  const box = $("pmMsgs"); if(!box) return;
+  const near = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
+  box.innerHTML = pmMsgs.length ? pmMsgs.map(m => `<div class="b ${m.from_admin ? "me" : "cu"}"><div class="tx">${esc(m.body)}</div><div class="tm">${hm(m.created_at)}</div></div>`).join("")
+    : '<div class="empty" style="margin:auto"><b>Hali xabar yo\'q</b><p>Birinchi xabarni yozing.</p></div>';
+  if(stick || near) box.scrollTop = box.scrollHeight;
+}
+async function sendPm(){
+  const ta = $("pmIn"), t = ta.value.trim();
+  if(!t || !pmId) return;
+  ta.value = ""; autoGrow(ta);
+  try{ await rpc("admin_pm_send", {p_token:token, p_punkt:pmId, p_body:t}); await pollPm(); $("pmMsgs").scrollTop = $("pmMsgs").scrollHeight; }
+  catch(e){ ta.value = t; autoGrow(ta); handleErr(e); }
+}
+$("pmIn").addEventListener("keydown", e=>{ if(e.key==="Enter" && !e.shiftKey && window.matchMedia("(hover:hover)").matches){ e.preventDefault(); sendPm(); } });
+
+/* ====== Eksport: Excel (.xlsx) va PDF ====== */
+function xlsxBuild(sheets){
+  const H = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', ns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+  const f = {};
+  f["[Content_Types].xml"] = H + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    + sheets.map((s,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("") + "</Types>";
+  f["_rels/.rels"] = H + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+  f["xl/workbook.xml"] = H + `<workbook xmlns="${ns}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>`
+    + sheets.map((s,i)=>`<sheet name="${xe(s.name).slice(0,31)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join("") + "</sheets></workbook>";
+  f["xl/_rels/workbook.xml.rels"] = H + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    + sheets.map((s,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join("") + "</Relationships>";
+  sheets.forEach((s,si)=>{
+    const rows = s.rows.map((r,ri)=>`<row r="${ri+1}">` + r.map((v,i)=>{
+      if(v == null || v === "") return "";
+      const ref = colName(i) + (ri+1);
+      return typeof v === "number" && isFinite(v) ? `<c r="${ref}"><v>${v}</v></c>` : `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${xe(v)}</t></is></c>`;
+    }).join("") + "</row>").join("");
+    f[`xl/worksheets/sheet${si+1}.xml`] = H + `<worksheet xmlns="${ns}"><sheetData>${rows}</sheetData></worksheet>`;
+  });
+  return zipWrite(f);
+}
+function expSave(blob, name){
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+/* sahifalab barcha yuklarni olish (admin_search 300 tadan) */
+async function expAllDecl(){
+  let off = 0, total = Infinity, out = [];
+  while(out.length < total){
+    const r = await rpc("admin_search", {p_token:token, p_q:"", p_limit:300, p_offset:off});
+    const got = r.declarations || []; total = Number(r.total) || 0; out = out.concat(got); off += 300;
+    if(!got.length) break;
+  }
+  return out;
+}
+/* musodara ro'yxati: joriy filtr/qidiruv bo'yicha, sahifalab */
+async function expAllMus(){
+  let off = 0, total = Infinity, out = [];
+  while(out.length < total){
+    const r = await rpc("admin_storage_list", {p_token:token, p_q:musQ, p_punkt:musPk, p_filter:musF, p_limit:200, p_offset:off});
+    const got = r.items || []; total = Number(r.total) || 0; out = out.concat(got); off += 200;
+    if(!got.length) break;
+  }
+  return out;
+}
+/* davr: rpPeriod bo'yicha [from, to] (ymd) */
+/* davr: today / week / month / all / custom (rpFrom..rpTo) */
+function rpRange(){
+  if(rpPeriod === "custom") return [rpFrom || null, rpTo || rpFrom || null];
+  const now = new Date(); let from = null, to = null;
+  if(rpPeriod === "today"){ from = to = ymd(now); }
+  else if(rpPeriod === "week"){ const d = new Date(now); d.setDate(d.getDate()-6); from = ymd(d); to = ymd(now); }
+  else if(rpPeriod === "month"){ from = ymd(new Date(now.getFullYear(), now.getMonth(), 1)); to = ymd(now); }
+  return [from, to];
+}
+function expRange(){ return rpRange(); }
+const expPeriodName = () => rpPeriod === "custom" ? (rpFrom + " — " + (rpTo || rpFrom)) : (({today:"Bugun", week:"So'nggi 7 kun", month:"Bu oy", all:"Hammasi"})[rpPeriod] || "Hammasi");
+const expUzs = d => d.amount == null ? 0 : Math.round(Number(d.amount) * Number(d.rate || 0));
+/* PDF: chop etish oynasi (brauzer "PDF sifatida saqlash" imkonini beradi) */
+function expWin(){ const w = window.open("", "_blank"); if(!w) toast("Brauzerda ochiladigan oynaga ruxsat bering", true); else w.document.write("<p style='font-family:Arial;padding:20px'>Tayyorlanmoqda…</p>"); return w; }
+function expPdf(w, title, sub, head, rows, summary){
+  if(!w) return;
+  const e = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+  w.document.open();
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(title)}</title><style>
+  body{font-family:Arial,sans-serif;color:#0B2B6B;margin:20px;font-size:12px}
+  h1{font-size:18px;margin:0 0 4px} .sub{color:#6B7A99;margin-bottom:12px}
+  .k{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px} .k div{border:1px solid #D9E2F2;border-radius:8px;padding:7px 11px;min-width:130px} .k small{display:block;color:#6B7A99} .k b{font-size:14px}
+  table{border-collapse:collapse;width:100%} th,td{border:1px solid #D9E2F2;padding:5px 7px;text-align:left;vertical-align:top} th{background:#EAF1FB}
+  @media print{ @page{size:A4 landscape;margin:10mm} body{margin:0} }</style></head><body>
+  <h1>${e(title)}</h1><div class="sub">${e(sub)}</div>
+  ${summary ? `<div class="k">${summary.map(([a,b])=>`<div><small>${e(a)}</small><b>${e(b)}</b></div>`).join("")}</div>` : ""}
+  <table><thead><tr>${head.map(h=>`<th>${e(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${e(v)}</td>`).join("")}</tr>`).join("")}</tbody></table>
+  <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>`);
+  w.document.close();
+}
+/* 1) barcha yuklar: Excel + PDF */
+async function expCargo(pdf){
+  const w = pdf ? expWin() : null;
+  try{
+    toast("Tayyorlanmoqda…");
+    const list = await expAllDecl();
+    const head = ["Trek-kod","Mijoz kodi","Mijoz ismi","Telefon","Punkt","Holat","Og'irlik (kg)","Summa ($)","Summa (so'm)","To'langan","Musodara","Yaratilgan"];
+    const rows = list.map(d => [d.track, d.customer_code, d.customer_name, d.customer_phone, d.punkt || "", STATUS[d.status] || d.status,
+      d.weight_kg != null ? Number(d.weight_kg) : "", d.amount != null ? Number(d.amount) : "", expUzs(d), d.paid ? "Ha" : "Yo'q", d.confiscated ? "Ha" : "Yo'q", lblFmtD(d.created_at)]);
+    const d = new Date(), stamp = ymd(d);
+    if(pdf){
+      const tot = list.reduce((a,x)=>a + expUzs(x), 0), kg = list.reduce((a,x)=>a + Number(x.weight_kg||0), 0);
+      expPdf(w, "Barcha yuklar", "Sana: " + stamp + " · Yuklar: " + list.length, head, rows.map(r=>r.map(v=>v === "" ? "—" : v)),
+        [["Yuklar soni", String(list.length)], ["Jami og'irlik", kg.toFixed(1) + " kg"], ["Jami summa", somN(tot)]]);
+    } else {
+      expSave(xlsxBuild([{name:"Yuklar", rows:[head, ...rows]}]), "tezpost-yuklar-" + stamp + ".xlsx");
+      toast("Excel tayyor: " + list.length + " ta yuk");
+    }
+  }catch(e){ if(w) w.close(); handleErr(e); }
+}
+/* 2) hisob-kitob: davr bo'yicha umumiy + mijozlar kesimi */
+async function expReport(pdf){
+  const w = pdf ? expWin() : null;
+  try{
+    toast("Tayyorlanmoqda…");
+    const [from, to] = expRange();
+    const rep = await rpc("admin_report", {p_token:token, p_date_from:from, p_date_to:to});
+    const all = await expAllDecl();
+    const inRange = x => { if(!from) return true; const k = ymd(new Date(x.created_at)); return k >= from && k <= to; };
+    const map = new Map();
+    all.filter(inRange).forEach(d => {
+      const k = d.customer_code || "—", m = map.get(k) || {code:k, name:d.customer_name || "", phone:d.customer_phone || "", n:0, kg:0, usd:0, uzs:0, paid:0, debt:0};
+      m.n++; m.kg += Number(d.weight_kg||0); m.usd += Number(d.amount||0); const u = expUzs(d); m.uzs += u;
+      if(d.paid) m.paid += u; else m.debt += u; map.set(k, m);
+    });
+    const cust = [...map.values()].sort((a,b)=>b.uzs-a.uzs);
+    const profit = Number(rep.revenue_uzs) - Number(rep.cost_uzs);
+    const sumHead = ["Ko'rsatkich","Qiymat"];
+    const sumRows = [["Davr", expPeriodName()], ["Sof foyda (so'm)", profit], ["Jami og'irlik (kg)", Number(rep.kg||0)], ["Mijozlardan (so'm)", Number(rep.revenue_uzs||0)], ["iPost'ga to'lov (so'm)", Number(rep.cost_uzs||0)], ["To'langan (so'm)", Number(rep.paid_uzs||0)], ["Qarz (so'm)", Number(rep.debt_uzs||0)]];
+    const custHead = ["Mijoz kodi","Ismi","Telefon","Yuklar soni","Og'irlik (kg)","Summa ($)","Summa (so'm)","To'langan (so'm)","Qarz (so'm)"];
+    const custRows = cust.map(m => [m.code, m.name, m.phone, m.n, +m.kg.toFixed(2), +m.usd.toFixed(2), m.uzs, m.paid, m.debt]);
+    const stamp = ymd(new Date());
+    if(pdf){
+      expPdf(w, "Hisob-kitob · " + expPeriodName(), "Sana: " + stamp + " · Mijozlar: " + cust.length, ["Mijoz kodi","Ismi","Yuklar","Og'irlik (kg)","Summa (so'm)","To'langan","Qarz"],
+        cust.map(m => [m.code, m.name, m.n, m.kg.toFixed(1), somN(m.uzs), somN(m.paid), somN(m.debt)]),
+        [["Sof foyda", somN(profit)], ["Jami og'irlik", kgf(rep.kg) + " kg"], ["Mijozlardan", somN(rep.revenue_uzs)], ["To'langan", somN(rep.paid_uzs)], ["Qarz", somN(rep.debt_uzs)]]);
+    } else {
+      expSave(xlsxBuild([{name:"Umumiy", rows:[sumHead, ...sumRows]}, {name:"Mijozlar", rows:[custHead, ...custRows]}]), "tezpost-hisob-" + stamp + ".xlsx");
+      toast("Excel tayyor");
+    }
+  }catch(e){ if(w) w.close(); handleErr(e); }
+}
+/* 3) musodara ro'yxati: joriy filtr bo'yicha */
+async function expMus(pdf){
+  const w = pdf ? expWin() : null;
+  try{
+    toast("Tayyorlanmoqda…");
+    const list = await expAllMus();
+    const head = ["Trek-kod","Mijoz kodi","Mijoz ismi","Punkt","Og'irlik (kg)","Summa (so'm)","Qabul qilingan","Necha kun","Holat"];
+    const rows = list.map(d => [d.track, d.code, d.name || "", d.punkt || "", d.weight_kg != null ? Number(d.weight_kg) : "", d.uzs != null ? Number(d.uzs) : "",
+      lblFmtD(d.received_at), Number(d.days || 0), d.confiscated ? "Musodara" : (d.days >= 10 ? "10 kundan oshgan" : d.days >= 7 ? "7 kundan oshgan" : "Stellajda")]);
+    const stamp = ymd(new Date());
+    if(pdf){
+      expPdf(w, "Musodara ro'yxati", "Sana: " + stamp + " · Yuklar: " + list.length, head, rows.map(r=>r.map(v=>v === "" ? "—" : v)),
+        [["Yuklar soni", String(list.length)], ["10 kundan oshgan", String(list.filter(x=>!x.confiscated && x.days>=10).length)], ["Musodara", String(list.filter(x=>x.confiscated).length)]]);
+    } else {
+      expSave(xlsxBuild([{name:"Musodara", rows:[head, ...rows]}]), "tezpost-musodara-" + stamp + ".xlsx");
+      toast("Excel tayyor: " + list.length + " ta yuk");
+    }
+  }catch(e){ if(w) w.close(); handleErr(e); }
+}
+const expBtn = (cls, label, fn) => `<button class="go" onclick="${fn}" style="height:40px;padding:0 12px;border:0;border-radius:12px;color:#fff;font-weight:800;background:${cls==="x"?"linear-gradient(180deg,#22A862,#127A45)":"linear-gradient(180deg,#3B7BD8,#0B4DB5)"}">${label}</button>`;
+function expBar(xlFn, pdfFn){ return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">${expBtn("x","⬇ Excel",xlFn)}${expBtn("p","⎙ PDF",pdfFn)}</div>`; }
+
 /* ====== Boshlash ====== */
 if(!CONFIGURED) $("setupWarn").style.display = "block";
 if(token) enter(); else show("login");
+setInterval(pmBadge, 20000);
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
