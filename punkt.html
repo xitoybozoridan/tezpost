@@ -279,7 +279,7 @@ async function start(){
   $("login").hidden = true; $("app").hidden = false; $("pName").textContent = me.name;
   drawNav(); go(page);
 }
-const PAGES = [["cust","users","Mijozlar"],["cargo","box","Yuklar"],["err","warn","Xato punkt"],["rcv","down","Qabul qilish"],["ho","up","Topshirish"],["conf","ban","Musodara"],["msg","chat","Xabarlar"]];
+const PAGES = [["cust","users","Mijozlar"],["cargo","box","Yuklar"],["err","warn","Xato punkt"],["rcv","down","Qabul qilish"],["ho","up","Topshirish"],["kassa","cash","Kassa"],["conf","ban","Musodara"],["msg","chat","Xabarlar"]];
 function drawNav(){
   $("nav").innerHTML = PAGES.map(([k,ic,t])=>`<button class="${k===page?"on":""}" onclick="go('${k}')"><span class="ic">${ico(ic,20)}</span>${t}${k==="err" && me && me.errors ? `<span class="bd">${me.errors}</span>` : ""}${k==="msg" && msgUnread ? `<span class="bd">${msgUnread}</span>` : ""}</button>`).join("");
 }
@@ -516,8 +516,8 @@ async function vKassa(){
   $("kd").addEventListener("change", e=>{ if(e.target.value){ kDate = e.target.value; vKassa(); } });
   try{
     const r = await rpc("punkt_kassa", {p_token:token, p_date:kDate});
-    $("kb").innerHTML = `<div class="cards"><div class="c"><span>Topshirilgan yuk</span><b>${r.count} ta</b></div><div class="c"><span>Og'irlik</span><b>${kgf(r.kg)} kg</b></div><div class="c"><span>Jami (UZS)</span><b>${fmt(r.total_uzs)}</b></div><div class="c"><span>Naqd olindi (UZS)</span><b style="color:var(--ok)">${fmt(r.cash_uzs)}</b></div><div class="c"><span>Oldindan to'langan</span><b>${fmt(r.prepaid_uzs)}</b></div><div class="c"><span>To'lanmagan</span><b style="color:var(--bad)">${fmt(r.debt_uzs)}</b></div></div>`
-      + tbl(["№","Trackcode","Mijoz","~Og'irlik (Kg)","~USD","~UZS","To'lov","Vaqt"], r.items.map((d,i)=>`<tr><td>${i+1}</td><td class="mono">${esc(d.track)}</td><td><span class="tag">${esc(d.customer_code)}</span> ${esc(d.customer_name)}</td><td class="r">${d.weight_kg!=null?kgf(d.weight_kg):"—"}</td><td class="r">${Number(d.usd).toFixed(2)}</td><td class="r">${fmt(d.uzs)}</td><td>${d.paid?(d.cash?`<span class="tag ok">Naqd</span>`:`<span class="tag">Oldindan</span>`):`<span class="tag bad">To'lanmagan</span>`}</td><td>${dt(d.done_at)}</td></tr>`), "Bu kunda topshirilgan yuk yo'q");
+    $("kb").innerHTML = `<div class="cards"><div class="c"><span>Topshirilgan yuk</span><b>${r.count} ta</b></div><div class="c"><span>Og'irlik</span><b>${kgf(r.kg)} kg</b></div><div class="c"><span>Jami (so'm)</span><b>${fmt(r.total_uzs)}</b></div><div class="c"><span>Naqd olindi</span><b style="color:var(--ok)">${fmt(r.cash_uzs)}</b></div></div>`
+      + tbl(["№","Trackcode","Mijoz","~Og'irlik (Kg)","Summa (so'm)","To'lov","Vaqt"], r.items.map((d,i)=>`<tr><td>${i+1}</td><td class="mono">${esc(d.track)}</td><td><span class="tag">${esc(d.customer_code)}</span> ${esc(d.customer_name)}</td><td class="r">${d.weight_kg!=null?kgf(d.weight_kg):"—"}</td><td class="r">${d.weight_kg!=null?fmt(d.uzs):"—"}</td><td>${d.cash?"Naqd pul":(d.paid?"Oldindan":"—")}</td><td>${dt(d.done_at)}</td></tr>`));
   }catch(e){ err(e); }
 }
 
