@@ -446,6 +446,7 @@ function vHo(){
   $("view").innerHTML = `<div class="two"><div class="scanbox"><span class="lbl">Mijoz kodi</span><div class="scanrow"><input class="in" id="hoIn" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="TP1001" enterkeyhint="search"><button class="btn org" onclick="hoFind()">Qidirish</button></div></div>
     <div class="scanbox" id="hoAct" hidden><span class="lbl">Yuk IDsi (shtrix-kodni skaner qiling)</span><div class="scanrow"><input class="in" id="hoScan" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Shtrix-kod yoki trek-kod" enterkeyhint="done"><button class="camb" onclick="camScan(v=>{$('hoScan').value=v;hoScan()})" aria-label="Kamera">${ico("cam",22)}</button></div>
       <div class="sum" id="hoSum" style="margin:8px 2px 0"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin:6px 0 10px"><b style="font-size:13px">Mijozning olish kodi:</b><input id="hoCode" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off" style="width:110px;height:44px;border:1.5px solid #CFD8E8;border-radius:12px;padding:0 12px;font:inherit;font-size:18px;font-weight:800;letter-spacing:4px;text-align:center"></div>
       <div class="hobtns"><button class="hobtn cash" id="hoCashBtn" onclick="hoCashOn()"><span id="hoCashT"></span></button><button class="hobtn cancel" id="hoCancelBtn" onclick="hoCancel()">Bekor qilish</button><button class="hobtn done" id="hoDoneBtn" onclick="hoApply()">Topshirildi</button></div></div></div><div id="hoBody"></div>`;
   $("hoIn").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoFind(); } });
   $("hoScan").addEventListener("keydown", e=>{ if(e.key === "Enter"){ e.preventDefault(); hoScan(); } });
@@ -495,11 +496,13 @@ function hoCashOn(){ if(!hoItems.some(x=>x.checked)) return; hoCash = true; hoPa
 function hoCancel(){ hoItems.forEach(x=>x.checked = false); hoCash = false; hoDraw(); $("hoScan").focus(); }
 async function hoApply(){
   const ids = hoItems.filter(x=>x.checked).map(x=>x.id); if(!ids.length) return;
+  const code = ($("hoCode").value || "").trim();
+  if(!/^\d{4}$/.test(code)){ toast("Mijozning 4 xonali olish kodini kiriting", true); $("hoCode").focus(); return; }
   $("hoDoneBtn").disabled = true;
   try{
-    const r = await rpc("punkt_handover_done", {p_token:token, p_ids:ids, p_cash:hoCash});
+    const r = await rpc("punkt_handover_done", {p_token:token, p_ids:ids, p_cash:hoCash, p_code:code});
     beep("done"); toast(r.count + " ta yuk mijozga topshirildi");
-    hoCash = false; $("hoIn").value = hoCust.code; await hoFind();
+    hoCash = false; $("hoCode").value = ""; $("hoIn").value = hoCust.code; await hoFind();
   }catch(e){ err(e); hoPaint(); }
 }
 

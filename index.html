@@ -676,6 +676,7 @@ async function rpc(name, args){
 let token = store.get("tp_token", null);
 let me = store.get("tp_me", null);
 let declarations = store.get("tp_decl", []);
+let pickupCode = "";
 let products = [{type:"", qty:1}];
 let mode = "login";
 let busy = false;
@@ -1264,7 +1265,11 @@ function renderList(loading){
         <b>Hozircha deklaratsiya yo'q</b>
         <p>Yuk yuborishdan oldin "Deklaratsiya yaratish" tugmasi orqali trek-kodni qo'shing.</p></div>`;
   renderPayBanner();
-  $("declList").innerHTML = all.length ? itemHtml(all[0]) : empty;
+  const hasPick = all.some(d => d.status === "pickup");
+  const codeCard = pickupCode && hasPick ? `<div style="background:linear-gradient(135deg,#0B4DB5,#1E6FE0);color:#fff;border-radius:18px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div><small style="opacity:.85;font-weight:700">Yuk olish kodi</small><div style="font-size:12px;opacity:.85;margin-top:2px">Punktda shu kodni ayting</div></div>
+      <b style="font-size:28px;letter-spacing:6px">${pickupCode}</b></div>` : "";
+  $("declList").innerHTML = all.length ? codeCard + itemHtml(all[0]) : empty;
   $("allList").innerHTML = all.length ? all.slice(0, allShown).map(itemHtml).join("") + (all.length > allShown ? `<button class="morebtn" onclick="allShown+=15;renderList()">Yana ko'rsatish (${all.length - allShown})</button>` : "") : empty;
 }
 async function loadList(){
@@ -1274,6 +1279,7 @@ async function loadList(){
     declarations = await rpc("my_declarations", {p_token:token}) || [];
     store.set("tp_decl", declarations);
   }catch(e){ handleErr(e, e.offline); }
+  try{ const oc = await rpc("my_pickup_code", {p_token:token}); pickupCode = oc && oc.code || ""; }catch(e){}
   renderList();
   if($("profile").classList.contains("active")) renderProfile();
 }
