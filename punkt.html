@@ -554,7 +554,7 @@ function cfAllPick(on){ cfRows.forEach(d=>on ? cfSel.add(d.id) : cfSel.delete(d.
 function cfAct(){
   const n = cfSel.size; if(!$("cfAct")) return;
   const hasC = cfRows.some(d=>cfSel.has(d.id) && d.confiscated), hasN = cfRows.some(d=>cfSel.has(d.id) && !d.confiscated);
-  $("cfAct").innerHTML = n ? `<div class="cfact"><b>${n} ta tanlandi</b>${hasN ? `<button class="btn red" onclick="cfConf(true)">Musodaraga o'tkazish</button>` : ""}${hasC ? `<button class="btn sec" onclick="cfConf(false)">Musodaradan qaytarish</button>` : ""}</div>` : "";
+  $("cfAct").innerHTML = n ? `<div class="cfact"><b>${n} ta tanlandi</b>${hasN ? `<button class="btn red" onclick="cfConf(true)">Musodaraga o'tkazish</button>` : ""}</div>` : "";
 }
 async function cfConf(on){
   const ids = cfRows.filter(d=>cfSel.has(d.id) && d.confiscated === !on).map(d=>d.id);
