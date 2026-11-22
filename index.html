@@ -433,12 +433,12 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
     </label>
     <label class="field has-eye" id="passField"><span>Parol</span>
       <input id="aPass" type="password" placeholder="Kamida 6 ta belgi" autocomplete="current-password">
-      <div id="tgRow" style="display:none;margin-top:10px"><a id="tgOpen" href="#" target="_blank" rel="noopener" style="display:block;text-align:center;padding:12px;border-radius:12px;background:#229ED9;color:#fff;font-weight:700;text-decoration:none">Telegram botni ochish</a></div>
-      <div id="aCodeRow" style="display:none;margin-top:10px"><input id="aCode" inputmode="numeric" maxlength="4" placeholder="Telegram kod (4 raqam)" autocomplete="one-time-code" style="letter-spacing:6px;font-weight:800;text-align:center"></div>
       <button type="button" class="eye" aria-label="Parolni ko'rsatish" onclick="toggleEye(this)">
         <svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
     </label>
+    <div id="tgRow" style="display:none;margin-top:10px"><a id="tgOpen" href="#" target="_blank" rel="noopener" style="display:block;text-align:center;padding:12px;border-radius:12px;background:#229ED9;color:#fff;font-weight:700;text-decoration:none">Telegram botni ochish</a></div>
+    <div id="aCodeRow" style="display:none;margin-top:10px"><input id="aCode" inputmode="numeric" maxlength="4" placeholder="Telegram kod (4 raqam)" autocomplete="one-time-code" style="letter-spacing:6px;font-weight:800;text-align:center"></div>
     <div class="msg" id="authMsg"></div>
     <button class="btn-save btn-orange" id="authBtn" onclick="submitAuth()">Kirish</button>
   </div>
