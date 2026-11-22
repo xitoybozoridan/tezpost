@@ -433,6 +433,7 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
     </label>
     <label class="field has-eye" id="passField"><span>Parol</span>
       <input id="aPass" type="password" placeholder="Kamida 6 ta belgi" autocomplete="current-password">
+      <div id="aCodeRow" style="display:none;margin-top:10px"><input id="aCode" inputmode="numeric" maxlength="4" placeholder="SMS kod (4 raqam)" autocomplete="one-time-code" style="letter-spacing:6px;font-weight:800;text-align:center"></div>
       <button type="button" class="eye" aria-label="Parolni ko'rsatish" onclick="toggleEye(this)">
         <svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
@@ -740,10 +741,31 @@ async function submitAuth(){
   if(mode==="reg" && name.length < 2){ msg.textContent = "Ismingizni kiriting"; return; }
   if(digits.length !== 9){ msg.textContent = "Telefon raqamni to'liq kiriting (9 ta raqam)"; return; }
   if(pass.length < 6){ msg.textContent = "Parol kamida 6 ta belgidan iborat bo'lsin"; return; }
+  // 1-bosqich (ro'yxatdan o'tish): telefonga SMS kod yuboriladi
+  if(mode==="reg" && $("aCodeRow").style.display !== "block"){
+    setBusy($("authBtn"), true, "Ro'yxatdan o'tish");
+    try{
+      const sr = await fetch(CONFIG.url + "/functions/v1/sms-start", { method:"POST",
+        headers:{ "apikey": CONFIG.key, "Authorization": "Bearer " + CONFIG.key, "Content-Type":"application/json" },
+        body: JSON.stringify({phone:"998"+digits}) });
+      const sj = await sr.json().catch(()=>({}));
+      if(!sr.ok) throw new Error(sj.error || "SMS yuborilmadi");
+      $("aCodeRow").style.display = "block"; $("aCode").focus();
+      msg.textContent = "Telefoningizga 4 xonali kod yuborildi. Kodni kiriting va yana bosing";
+    }catch(e){ msg.textContent = e.message || "SMS yuborilmadi"; }
+    finally{ setBusy($("authBtn"), false, "Ro'yxatdan o'tish"); }
+    return;
+  }
   const label = mode==="reg" ? "Ro'yxatdan o'tish" : "Kirish";
   setBusy($("authBtn"), true, label);
   try{
     const phone = "998" + digits;
+    if(mode==="reg"){
+      const smsCode = $("aCode").value.trim();
+      if(!/^\d{4}$/.test(smsCode)) throw new Error("SMS kodni kiriting");
+      const v = await rpc("sms_verify", {p_phone:phone, p_code:smsCode});
+      if(v && v.error) throw new Error(v.error);
+    }
     const r = mode==="reg"
       ? await rpc("register_customer", {p_phone:phone, p_password:pass, p_name:name})
       : await rpc("login_customer", {p_phone:phone, p_password:pass});
