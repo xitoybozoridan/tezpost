@@ -776,7 +776,7 @@ async function submitAuth(){
       if(!sr.ok) throw new Error(sj.error || "Telegram so'rovi yaratilmadi");
       tgToken = sj.token;
       const TG_BOT = "TezPostVerify_bot";
-      $("tgOpen").href = `intent://resolve?domain=${TG_BOT}&start=${sj.token}#Intent;scheme=tg;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end`;
+      $("tgOpen").href = `tg://resolve?domain=${TG_BOT}&start=${sj.token}`;
       // brauzer havolasi olib tashlandi
       $("tgRow").style.display = "block";
       msg.textContent = "Telegram botni oching va «Raqamni yuborish» ni bosing. Kod shu yerda chiqadi";
