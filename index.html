@@ -416,6 +416,7 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
     <div class="brand"><img alt="TezPost Cargo" src="logo.jpg"></div>
   </section>
   <div id="setupWarn" class="setup" style="display:none;margin-top:18px">Server hali ulanmagan. Ilova sozlamalarini tekshiring.</div>
+  <div id="regBanner" style="display:none;margin:0 16px 14px"></div>
   <div class="auth-card">
     <div class="tabs">
       <button id="tabLogin" class="on" onclick="setMode('login')">Kirish</button>
@@ -444,6 +445,7 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
       <input id="aCode" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="one-time-code"></label>
     <div class="msg" id="authMsg"></div>
     <button class="btn-save btn-orange" id="authBtn" onclick="submitAuth()">Kirish</button>
+    <button id="noTgBtn" onclick="submitNoTg()" style="display:none;margin-top:10px;width:100%;background:transparent;border:1.5px solid #E67E22;color:#E67E22;border-radius:12px;padding:12px;font-weight:700;font-size:15px">Telegram'siz so'rov yuborish</button>
   </div>
 </main>
 
@@ -715,6 +717,7 @@ function setMode(m){
   $("authTitle").textContent = m==="reg" ? "Yangi hisob yaratish" : "Xush kelibsiz";
   $("authSub").textContent = m==="reg" ? "Ism, telefon raqam va parol kiriting" : "Telefon raqam va parol bilan kiring";
   $("authBtn").textContent = m==="reg" ? "Ro'yxatdan o'tish" : "Kirish";
+  $("noTgBtn").style.display = m==="reg" ? "block" : "none";
   $("aPass").autocomplete = m==="reg" ? "new-password" : "current-password";
   $("authMsg").textContent = "";
 }
@@ -752,6 +755,81 @@ async function tgCheck(){
       $("authMsg").textContent = "So'rov muddati tugadi. Qaytadan bosing";
     }
   }catch(e){}
+}
+
+/* ---- Telegram'siz so'rov: admin tasdig'i ---- */
+const REG_KEY = "tp_reg_token";
+let regPhone = null;
+function escH(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function regGet(){ try{ return localStorage.getItem(REG_KEY); }catch(e){ return null; } }
+function regStore(v){ try{ v ? localStorage.setItem(REG_KEY, v) : localStorage.removeItem(REG_KEY); }catch(e){} }
+function drawRegBanner(html){
+  const b = $("regBanner");
+  if(!html){ b.style.display = "none"; b.innerHTML = ""; return; }
+  b.innerHTML = html; b.style.display = "block";
+}
+function regCopy(id){
+  const v = $(id).textContent;
+  try{ navigator.clipboard.writeText(v); toast("Nusxa olindi"); }catch(e){ toast("Nusxa olib bo'lmadi", true); }
+}
+function regFill(){
+  $("aPhone").value = fmtPhoneInput(regPhone ? regPhone.slice(3) : "");
+  setMode("login");
+  $("aPass").value = $("regPassVal") ? $("regPassVal").textContent : "";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+async function checkRegReq(){
+  const t = regGet();
+  if(!t || !CONFIGURED) return;
+  try{
+    const s = await rpc("reg_request_status", {p_token:t});
+    if(s && s.status === "pending"){
+      drawRegBanner(`<div style="background:#E8F3EE;color:#127A45;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.5">So'rovingiz admin tasdig'ini kutmoqda. Tasdiqlangach shu yerda telefon raqam va parol chiqadi.</div>`);
+    } else if(s && s.status === "approved" && s.password){
+      regPhone = s.phone;
+      drawRegBanner(`<div style="background:#FFF4E5;border:1.5px solid #E67E22;color:#5a3b00;border-radius:16px;padding:14px">
+        <b style="font-size:15px">Hisobingiz tasdiqlandi</b>
+        <p style="margin:6px 0 10px;font-size:13px;line-height:1.5">Quyidagi telefon va parolni nusxa olib, kirish formasiga qo'ying va «Kirish» ni bosing.</p>
+        <div style="font-size:14px;margin-bottom:6px">Telefon: <b id="regPhoneVal">+${escH(s.phone)}</b>
+          <button onclick="regCopy('regPhoneVal')" style="margin-left:6px;border:0;background:#E67E22;color:#fff;border-radius:8px;padding:4px 8px;font-size:12px">Nusxa</button></div>
+        <div style="font-size:14px;margin-bottom:10px">Parol: <b id="regPassVal">${escH(s.password)}</b>
+          <button onclick="regCopy('regPassVal')" style="margin-left:6px;border:0;background:#E67E22;color:#fff;border-radius:8px;padding:4px 8px;font-size:12px">Nusxa</button></div>
+        <button onclick="regFill()" style="width:100%;border:0;background:#E67E22;color:#fff;border-radius:12px;padding:11px;font-weight:700">Kirish formasiga o'tish</button>
+      </div>`);
+    } else if(s && s.status === "rejected"){
+      drawRegBanner(`<div style="background:#FDE8E8;color:#C62828;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.5">So'rovingiz rad etildi. Batafsil ma'lumot uchun punktga murojaat qiling.
+        <button onclick="regDone()" style="display:block;margin-top:8px;border:0;background:#C62828;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px">Yopish</button></div>`);
+    } else {
+      regStore(null); regPhone = null; drawRegBanner("");
+    }
+  }catch(e){}
+}
+// birinchi muvaffaqiyatli kirishdan keyin (yoki yopilganda) ma'lumot o'chadi
+function regDone(){
+  const t = regGet();
+  if(t){ try{ rpc("reg_request_clear", {p_token:t}).catch(()=>{}); }catch(e){} }
+  regStore(null); regPhone = null; drawRegBanner("");
+}
+async function submitNoTg(){
+  if(busy) return;
+  if(!CONFIGURED){ $("authMsg").textContent = "Server hali ulanmagan"; return; }
+  const digits = $("aPhone").value.replace(/\D/g,"");
+  const pass = $("aPass").value;
+  const name = $("aName").value.trim();
+  const msg = $("authMsg"); msg.textContent = "";
+  if(name.length < 2){ msg.textContent = "Ismingizni kiriting"; return; }
+  if(digits.length !== 9){ msg.textContent = "Telefon raqamni to'liq kiriting (9 ta raqam)"; return; }
+  if(pass.length < 6){ msg.textContent = "Parol kamida 6 ta belgidan iborat bo'lsin"; return; }
+  setBusy($("noTgBtn"), true, "Telegram'siz so'rov yuborish");
+  try{
+    const r = await rpc("reg_request_submit", {p_phone:"998"+digits, p_password:pass, p_name:name});
+    if(r && r.error) throw new Error(r.error);
+    regStore(r.token); regPhone = "998"+digits;
+    $("aPass").value = "";
+    msg.textContent = "So'rov yuborildi. Admin tasdiqlagach shu yerda ma'lumot chiqadi";
+    checkRegReq();
+  }catch(e){ msg.textContent = e.message; }
+  finally{ setBusy($("noTgBtn"), false, "Telegram'siz so'rov yuborish"); }
 }
 
 async function submitAuth(){
@@ -801,6 +879,7 @@ async function submitAuth(){
       : await rpc("login_customer", {p_phone:phone, p_password:pass});
     if(r && r.error){ msg.textContent = r.error; return; }
     token = r.token; me = {name:r.name, phone:r.phone};
+    if(mode !== "reg") regDone();
     store.set("tp_token", token); store.set("tp_me", me);
     declarations = []; store.set("tp_decl", []);
     $("aPass").value = "";
@@ -1340,7 +1419,8 @@ document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token
 
 /* ====== Boshlash ====== */
 if(!CONFIGURED) $("setupWarn").style.display = "block";
-if(token && me){ enterApp(); } else { setMode("login"); show("auth"); }
+if(token && me){ enterApp(); } else { setMode("login"); show("auth"); checkRegReq(); }
+setInterval(() => { if(!token) checkRegReq(); }, 30000);
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));

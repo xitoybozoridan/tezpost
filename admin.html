@@ -929,6 +929,11 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <span class="st"><b>Punktlar <span id="pkCnt" style="color:var(--muted);font-weight:700"></span></b><small>Punkt ilovasi uchun login/parol va xato punktlar</small></span>
       <span class="ch">›</span>
     </button>
+    <button class="setrow" onclick="openRegs()">
+      <span class="si" style="background:#E67E22"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>
+      <span class="st"><b>Ro'yxat so'rovlari <span id="regCnt" style="color:var(--muted);font-weight:700"></span></b><small>Telegram'siz so'rovlarni tasdiqlash</small></span>
+      <span class="ch">›</span>
+    </button>
     <button class="setrow" onclick="openTx()">
       <span class="si" style="background:#F26A00"><svg viewBox="0 0 24 24"><path d="M5 16l1.5-5.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 16M4 16h16v3h-2v-1.5H6V19H4zM9 6h6l1 3H8z"/></svg></span>
       <span class="st"><b>Taksi: uyga yetkazish <span id="txCnt" style="color:var(--muted);font-weight:700"></span></b><small>Taksichilar, narx, ulushingiz va buyurtmalar</small></span>
@@ -976,6 +981,18 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
     <div id="pkList"></div>
     <div class="info" style="margin:14px 4px 8px">Xato punkt (boshqa punktga tegishli skaner qilingan yuklar)</div>
     <div id="pkErr"></div>
+  </div>
+</main>
+
+<main id="regs" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Ro'yxat so'rovlari</b>
+    <button class="chip" style="border:0;cursor:pointer" onclick="loadRegs()">⟳</button>
+  </div>
+  <div class="wrap" style="padding-bottom:40px">
+    <div class="info" style="margin-bottom:10px">Telegram'siz ro'yxatdan o'tgan mijozlar. Tasdiqlangach mijoz ilovada telefon va parolni ko'radi.</div>
+    <div id="regList"></div>
   </div>
 </main>
 
@@ -3701,6 +3718,27 @@ async function pkwLoad(quiet){
 let pkData = [], pkEdit = null;
 async function checkPk(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_punkts", {p_token:token}); const n = r.reduce((a,x)=>a + Number(x.errors||0), 0); const e = $("pkCnt"); if(e) e.textContent = n > 0 ? "· " + n + " ta xato" : (r.length ? "· " + r.length + " ta" : ""); }catch(e){} }
 async function openPk(){ show("pk"); $("pkwBtnT").innerHTML = ico("eye",20) + " Punkt kuzatuvi"; $("pkLink").textContent = location.origin + location.pathname.replace(/[^/]*$/, "") + "punkt.html"; pkEdit = null; await loadPk(); }
+async function openRegs(){ show("regs"); await loadRegs(); }
+async function loadRegs(){
+  try{
+    const r = await rpc("admin_reg_list", {p_token:token});
+    const c = $("regCnt"); if(c) c.textContent = r.length ? "· " + r.length + " ta" : "";
+    $("regList").innerHTML = r.length ? r.map(x => `<div class="scanbox" style="margin-bottom:8px">
+        <b style="font-size:16px">${esc(x.name)}</b>
+        <div class="info" style="margin:4px 0 10px">+${esc(x.phone)} · ${new Date(x.created_at).toLocaleString("uz-UZ")}</div>
+        <div class="scanrow">
+          <button onclick="regAct('approve','${esc(x.phone)}')" style="flex:1;height:44px;border:0;border-radius:12px;background:#127A45;color:#fff;font-weight:800">Tasdiqlash</button>
+          <button onclick="regAct('reject','${esc(x.phone)}')" style="flex:1;height:44px;border:0;border-radius:12px;background:#C62828;color:#fff;font-weight:800">Rad etish</button>
+        </div></div>`).join("") : `<div class="info">Kutilayotgan so'rov yo'q</div>`;
+  }catch(e){ handleErr(e); }
+}
+async function regAct(kind, phone){
+  try{
+    await rpc(kind === "approve" ? "admin_reg_approve" : "admin_reg_reject", {p_token:token, p_phone:phone});
+    toast(kind === "approve" ? "Tasdiqlandi" : "Rad etildi");
+    await loadRegs();
+  }catch(e){ handleErr(e); }
+}
 async function loadPk(){
   try{
     pkData = await rpc("admin_punkts", {p_token:token});
