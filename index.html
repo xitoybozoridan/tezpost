@@ -535,6 +535,27 @@
   @keyframes qroad{to{stroke-dashoffset:-10}}
   @keyframes qtri{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
   @media (prefers-reduced-motion:reduce){.qi *,.qi::after{animation:none !important}}
+  /* ---------- Pastki menyu: sirpanuvchi tanlov + markaziy tugma ---------- */
+  .nav .in{grid-template-columns:repeat(5,1fr);position:relative}
+  .nav .in>button{position:relative;z-index:1;transition:color .25s ease,transform .12s ease}
+  .nav .npill{position:absolute;z-index:0;top:5px;bottom:5px;left:0;width:0;border-radius:16px;background:var(--blue-soft);transition:transform .42s cubic-bezier(.3,1.2,.4,1),width .3s ease,opacity .2s;opacity:0;pointer-events:none}
+  .nav .npill.on{opacity:1}
+  .nav button.on::after{display:none !important}
+  .nav button.on svg{animation:ntab .4s cubic-bezier(.3,1.5,.5,1)}
+  @keyframes ntab{0%{transform:translateY(3px) scale(.85)}100%{transform:none}}
+  .navadd{display:block !important;padding:0 !important}
+  .navadd .fab{position:absolute;left:50%;top:-30px;width:62px;height:62px;margin-left:-31px;border-radius:50%;background:linear-gradient(145deg,#2F7BEA,#0B4DB5);display:grid;place-items:center;border:5px solid var(--navbg,#fff);box-shadow:0 8px 20px rgba(11,77,181,.45);transition:transform .15s ease}
+  .navadd:active .fab{transform:scale(.92)}
+  .navadd .fab svg{width:27px;height:27px;stroke:#fff;fill:none;position:relative;z-index:1}
+  .navadd .fring{position:absolute;inset:-5px;border-radius:50%;border:2px solid rgba(47,123,234,.55);animation:qring 2.6s ease-out infinite}
+  [data-theme=dark] .navadd .fab{border-color:var(--card)}
+  html,body{overflow-x:hidden}
+  .screen.active.sl-r{animation:slr .34s cubic-bezier(.2,.8,.2,1) both}
+  .screen.active.sl-l{animation:sll .34s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes slr{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
+  @keyframes sll{from{opacity:0;transform:translateX(-34px)}to{opacity:1;transform:none}}
+  #chat.active{bottom:calc(var(--navh,84px) + 24px)}
+  body.kb #chat.active{bottom:0}
 </style>
 <script>
 try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
@@ -739,9 +760,10 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
 </main>
 
 <!-- ===== Pastki menyu ===== -->
-<nav class="nav" id="nav"><div class="in">
+<nav class="nav" id="nav"><div class="in"><span class="npill" id="npill"></span>
   <button id="navHome" class="on" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19z"/></svg>Asosiy</button>
   <button id="navLoads" onclick="go('loads')"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>Yuklarim</button>
+  <button id="navAdd" class="navadd" onclick="openDecl()" aria-label="Deklaratsiya yaratish"><span class="fab"><span class="fring"></span><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/><path d="M17.5 2.5v5M15 5h5" stroke-width="2.2"/></svg></span></button>
   <button id="navChat" onclick="openChat()"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 8.5h7M8.5 11.5h4.5"/></svg>Yordam<span class="bdg" id="chatBadge"></span></button>
   <button id="navProfile" onclick="go('profile')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>Profil</button>
 </div></nav>
@@ -848,13 +870,30 @@ function toast(msg, bad){
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active", s.id===id));
   $("nav").classList.toggle("show", id==="home" || id==="profile" || id==="loads" || id==="chat");
-  setTimeout(()=>{ const n=$("nav"); if(n.offsetHeight) document.documentElement.style.setProperty("--navh", n.offsetHeight+"px"); }, 30);
+  setTimeout(()=>{ movePill(); const n=$("nav"); if(n.offsetHeight) document.documentElement.style.setProperty("--navh", n.offsetHeight+"px"); }, 30);
   $("navHome").classList.toggle("on", id==="home");
   $("navLoads").classList.toggle("on", id==="loads");
   $("navChat").classList.toggle("on", id==="chat");
   $("navProfile").classList.toggle("on", id==="profile");
+  const ORDER = ["home","loads","chat","profile"], ni = ORDER.indexOf(id), pi = ORDER.indexOf(show._cur);
+  const el = $(id);
+  el.classList.remove("sl-r","sl-l");
+  if(ni >= 0 && pi >= 0 && ni !== pi) el.classList.add(ni > pi ? "sl-r" : "sl-l");
+  if(ni >= 0) show._tab = id; show._cur = id;
+  movePill(); clearTimeout(show._pt); show._pt = setTimeout(movePill, 420);
   window.scrollTo({top:0,left:0,behavior:"instant"});
 }
+function movePill(){
+  const pill = $("npill"), map = {home:"navHome", loads:"navLoads", chat:"navChat", profile:"navProfile"}, id = show._tab && document.querySelector(".screen.active") && map[document.querySelector(".screen.active").id];
+  const b = id && $(id);
+  if(!b || !b.offsetWidth){ pill.classList.remove("on"); return; }
+  const w = Math.min(b.offsetWidth - 6, 74);
+  if(!pill.dataset.init){ pill.dataset.init = 1; pill.style.transition = "none"; requestAnimationFrame(()=>requestAnimationFrame(()=>{ pill.style.transition = ""; })); }
+  pill.style.width = w + "px";
+  pill.style.transform = `translateX(${b.offsetLeft + (b.offsetWidth - w)/2}px)`;
+  pill.classList.add("on");
+}
+window.addEventListener("resize", movePill);
 function go(id){ if(addrOpen) setAddrOpen(false, false); if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); if(id==="home"){ refreshAddr(); loadTxCard(); } }
 function openDecl(){ resetForm(); show("decl"); }
 function closeDecl(){ show("home"); }
