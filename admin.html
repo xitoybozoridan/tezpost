@@ -3829,11 +3829,19 @@ function chatRow(c){
     <div class="mid"><b>${esc(c.name)}</b><span class="pv">${c.last_from_admin?"Siz: ":""}${esc(c.last_body||"")}</span></div>
     <div class="rt">${esc(hm(c.last_at))}${un?`<br><span class="dot">${un}</span>`:""}</div></button>`;
 }
-let thId = null, thLast = 0, thMsgs = [], thTimer = null;
+let thId = null, thLast = 0, thMsgs = [], thTimer = null; const thImg = {};
+async function loadThImgs(){
+  for(const e of [...$("msgs").querySelectorAll("img.cimg[data-mid]")].filter(x=>!x.getAttribute("src"))){
+    const id = e.dataset.mid;
+    if(!thImg[id]){ try{ thImg[id] = await rpc("admin_chat_img", {p_token:token, p_id:Number(id)}); }catch(x){ continue; } }
+    if(thImg[id]) e.src = thImg[id];
+  }
+}
 function renderThread(stick){
   const box = $("msgs"), near = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
-  box.innerHTML = thMsgs.map(m=>`<div class="b ${m.from_admin?"me":"cu"}"><div class="tx">${esc(m.body)}</div><div class="tm">${hm(m.created_at)}</div></div>`).join("");
+  box.innerHTML = thMsgs.map(m=>`<div class="b ${m.from_admin?"me":"cu"}">${m.has_img ? `<img class="cimg" data-mid="${m.id}" ${thImg[m.id] ? `src="${thImg[m.id]}"` : ""} onclick="if(this.src){const w=window.open();w.document.write('<body style=margin:0;background:#000><img style=max-width:100%;display:block;margin:auto src='+this.src+'>')}" style="display:block;width:200px;max-width:100%;border-radius:10px;margin-bottom:4px;cursor:zoom-in;min-height:80px;background:rgba(0,0,0,.08)" alt="">` : ""}<div class="tx">${m.has_img && m.body==="Rasm" ? "" : esc(m.body)}</div><div class="tm">${hm(m.created_at)}</div></div>`).join("");
   if(stick || near) box.scrollTop = box.scrollHeight;
+  loadThImgs();
 }
 async function pollThread(first){
   if(!thId || !token) return;

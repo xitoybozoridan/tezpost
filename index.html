@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#0B4DB5">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -404,11 +404,109 @@
 .txd{margin-top:8px;font-size:14px;font-weight:600}.txd a{margin-left:8px;color:#127A45;text-decoration:none}
 .txwait{margin-top:8px;border-radius:12px;padding:9px 12px;background:#E8F3EE;color:#127A45;font-size:14px}.txwait.pay{background:#FFF4E5;color:#8A5A00}
 .txcan{margin-top:8px;border:1.5px solid var(--danger);color:var(--danger);background:transparent;border-radius:12px;padding:7px 14px;font-weight:600}
+
+  /* ---------- Splash ---------- */
+  #splash{position:fixed;inset:0;z-index:100;background:radial-gradient(120% 90% at 50% 38%,#1560D8 0%,#0B4DB5 45%,#052F7A 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .55s ease,transform .55s ease,visibility .55s}
+  #splash.out{opacity:0;transform:scale(1.08);visibility:hidden}
+  #splash .sp-card{position:relative;width:min(78vw,340px);background:#fff;border-radius:34px;padding:22px 20px;box-shadow:0 30px 70px rgba(0,0,0,.35);animation:spIn .9s cubic-bezier(.2,.9,.25,1.15) both}
+  #splash .sp-card img{width:100%;display:block}
+  #splash .sp-card::after{content:"";position:absolute;inset:0;border-radius:34px;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.85) 50%,transparent 65%);transform:translateX(-120%);animation:spShine 1.1s .8s ease both}
+  #splash .sp-ring{position:absolute;width:min(78vw,340px);aspect-ratio:1.2;border-radius:40px;border:2px solid rgba(255,255,255,.5);animation:spRing 1.6s .35s ease-out infinite;pointer-events:none}
+  #splash .sp-wrap{position:relative;display:grid;place-items:center}
+  #splash .sp-tag{color:#fff;font-weight:700;font-size:15px;letter-spacing:.4px;opacity:0;animation:spTag .7s 1s ease both}
+  #splash .sp-dots{display:flex;gap:8px;opacity:0;animation:spTag .5s 1.2s ease both}
+  #splash .sp-dots i{width:8px;height:8px;border-radius:50%;background:#FF9322;animation:spDot 1s infinite ease-in-out}
+  #splash .sp-dots i:nth-child(2){animation-delay:.15s}#splash .sp-dots i:nth-child(3){animation-delay:.3s}
+  @keyframes spIn{0%{opacity:0;transform:scale(.4) rotate(-6deg)}60%{opacity:1}100%{opacity:1;transform:none}}
+  @keyframes spShine{to{transform:translateX(120%)}}
+  @keyframes spRing{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(1.45)}}
+  @keyframes spTag{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes spDot{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1.2);opacity:1}}
+
+  /* ---------- Xitoy manzili (yig'iladigan) ---------- */
+  .ahead{width:100%;display:flex;align-items:center;gap:12px;border:0;background:none;padding:2px 2px;text-align:left;color:var(--text)}
+  .ahead .aic{width:38px;height:38px;border-radius:12px;background:var(--blue-soft);display:grid;place-items:center;flex:none}
+  .ahead .aic svg{width:22px;height:22px;stroke:var(--blue);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .ahead b{font-size:17px;flex:1}
+  .ahead .chev{width:22px;height:22px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s}
+  .acard.open .ahead .chev{transform:rotate(180deg)}
+  .abody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s ease}
+  .acard.open .abody{grid-template-rows:1fr}
+  .abi{overflow:hidden;min-height:0}
+  .abi>:first-child{margin-top:12px}
+
+  /* ---------- Video qo'llanmalar ---------- */
+  .vhead{padding:calc(env(safe-area-inset-top) + 10px) 14px 4px}
+  .vbanner{margin:10px 14px 14px;border-radius:22px;padding:16px;background:linear-gradient(135deg,#0B4DB5,#2F7BEA);color:#fff;display:flex;gap:14px;align-items:center}
+  .vbanner .vp{width:58px;height:58px;border-radius:18px;background:#fff;display:grid;place-items:center;flex:none}
+  .vbanner .vp svg{width:26px;height:26px;fill:#E11D2E}
+  .vbanner b{font-size:17px;display:block}.vbanner small{opacity:.85;font-size:13px}
+  .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 14px 20px}
+  .vcard{border:0;background:var(--card);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);text-align:left;color:var(--text);padding:0}
+  .vcard:active{transform:scale(.98)}
+  .vth{position:relative;aspect-ratio:16/10;background:linear-gradient(135deg,#0A2E75,#1560D8);display:grid;place-items:center;overflow:hidden}
+  .vth img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .vth .pl{position:relative;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.95);display:grid;place-items:center}
+  .vth .pl svg{width:18px;height:18px;fill:var(--blue);margin-left:2px}
+  .vth .no{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:8px}
+  .vth .num{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.92);color:var(--text);font-size:12px;font-weight:800;padding:3px 9px;border-radius:9px}
+  .vcard .vt{padding:10px 12px 12px}
+  .vcard .vt b{display:block;font-size:14px;line-height:1.25}
+  .vcard .vt small{display:block;color:var(--muted);font-size:12px;margin-top:4px;line-height:1.3}
+  .vbig{position:relative;margin:0 14px;border-radius:22px;overflow:hidden;aspect-ratio:16/10;background:linear-gradient(135deg,#0A2E75,#1560D8);display:grid;place-items:center}
+  .vbig img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .vbig .pl{position:relative;width:68px;height:68px;border-radius:50%;background:#FF0000;display:grid;place-items:center;box-shadow:0 0 0 10px rgba(255,255,255,.25)}
+  .vbig .pl svg{width:28px;height:28px;fill:#fff;margin-left:3px}
+  .vyt{display:flex;align-items:center;justify-content:center;gap:10px;width:calc(100% - 28px);margin:18px 14px 0;height:56px;border:0;border-radius:28px;background:#FF0000;color:#fff;font-size:17px;font-weight:700}
+  .vyt svg{width:20px;height:20px;fill:#fff}
+  .vyt.dis{background:#9AA7BC}
+
+  /* ---------- Chiqish oynasi ---------- */
+  .dlg{position:fixed;inset:0;z-index:60;background:rgba(5,20,60,.5);display:none;align-items:center;justify-content:center;padding:24px}
+  .dlg.show{display:flex;animation:fade .2s ease both}
+  .dlg .box{width:100%;max-width:340px;background:var(--card);border-radius:26px;padding:22px 22px 16px;box-shadow:0 30px 70px rgba(0,0,0,.35);animation:spIn .35s ease both}
+  .dlg h3{margin:0 0 8px;font-size:20px}.dlg p{margin:0 0 18px;color:var(--muted);font-size:15px}
+  .dlg .btns{display:flex;gap:10px;justify-content:flex-end}
+  .dlg button{border:0;border-radius:14px;height:46px;padding:0 20px;font-size:16px;font-weight:700;background:none;color:var(--text)}
+  .dlg button.red{background:#C0222E;color:#fff}
+
+  /* ---------- Yordam chati (tab) ---------- */
+  #chat.active{display:flex;flex-direction:column;position:fixed;top:0;bottom:var(--navh,84px);left:0;right:0;width:100%;max-width:520px;height:auto;min-height:0;margin:0 auto;z-index:5;background:var(--bg)}
+  body.kb #chat.active{bottom:0}
+  body.kb #nav{display:none !important}
+  .chat-top{padding-bottom:10px}
+  .chat-top .av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#0B4DB5,#2F7BEA);display:grid;place-items:center;flex:none}
+  .chat-top .av svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .chat-top{gap:11px}
+  .dsep{align-self:center;margin:8px 0 4px;background:rgba(11,77,181,.12);color:var(--blue);font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px}
+  .b{position:relative;animation:none}
+  .b.new{animation:bpop .28s cubic-bezier(.2,.9,.3,1.2) both}
+  .b.me.new{transform-origin:100% 100%}.b.adm.new{transform-origin:0 100%}
+  @keyframes bpop{from{opacity:0;transform:scale(.7) translateY(10px)}to{opacity:1;transform:none}}
+  .b .tm{display:flex;justify-content:flex-end;align-items:center;gap:3px}
+  .b.me .tm{opacity:.85}
+  .tk{width:16px;height:11px;flex:none}
+  .tk path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .tk.rd{color:#7FE3FF}.tk.sn{color:rgba(255,255,255,.75)}
+  .b.pend .tm{opacity:.6}
+  .cimg{display:block;max-width:100%;width:210px;max-height:260px;object-fit:cover;border-radius:12px;margin:-2px -4px 4px;background:rgba(0,0,0,.08);min-height:90px}
+  .b .tx:empty{display:none}
+  .attach{width:42px;height:42px;border-radius:50%;border:0;background:var(--blue-soft);display:grid;place-items:center;flex:none}
+  .attach svg{width:21px;height:21px;stroke:var(--blue);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .composer{padding-bottom:8px;align-items:flex-end}
+  .sendbtn:active{transform:scale(.9)}
+  #lightbox{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center}
+  #lightbox.show{display:flex;animation:fade .2s ease both}
+  #lightbox img{max-width:100%;max-height:100%;object-fit:contain}
+  #lightbox button{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:14px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:22px}
 </style>
 <script>
 try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
 </head>
 <body>
+<div id="splash"><div class="sp-wrap"><div class="sp-ring"></div><div class="sp-card"><img alt="TezPost Cargo" src="logo.jpg"></div></div>
+  <div class="sp-tag">Xitoydan O'zbekistonga — tez va ishonchli</div>
+  <div class="sp-dots"><i></i><i></i><i></i></div></div>
 
 <!-- ===== KIRISH / RO'YXATDAN O'TISH ===== -->
 <main id="auth" class="screen">
@@ -474,18 +572,17 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
     <div class="qrow">
       <button class="qcard" onclick="openTariffs()"><span class="qi"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span><b>Tariflar</b></button>
       <span id="txCard" style="display:contents"></span>
+      <button class="qcard" onclick="openVideos()"><span class="qi" style="background:#E11D2E"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span><b>Video qo'llanma</b></button>
     </div>
   </section>
 
+  <section class="section" style="padding-bottom:0;padding-top:0"><div class="acard" id="addrCard"></div></section>
   <section class="section" style="padding-bottom:0"><div id="payBanH"></div></section>
   <section class="section">
     <div class="section-head"><h2>So'nggi deklaratsiya</h2><button class="all" id="allBtn" onclick="openLoads()" style="display:none">Barchasi ›</button></div>
     <div id="declList"></div>
   </section>
 
-  <section class="section" style="padding-top:2px">
-    <div class="acard" id="addrCard"></div>
-  </section>
 </main>
 
 <!-- ===== YUKLARIM ===== -->
@@ -500,14 +597,27 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
 <!-- ===== YORDAM CHATI ===== -->
 <main id="chat" class="screen">
   <div class="chat-top">
-    <button class="link back" onclick="closeChat()" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="av"><svg viewBox="0 0 24 24"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/><path d="M19 19c0 1.5-2 2.5-5 2.5"/></svg></div>
     <div><h2>Yordam</h2><small>TezPost qo'llab-quvvatlash</small></div>
   </div>
   <div class="msgs" id="msgs"></div>
   <div class="composer">
+    <button class="attach" onclick="$('chatFile').click()" aria-label="Rasm"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5"/></svg></button>
+    <input type="file" id="chatFile" accept="image/*" hidden onchange="chatPickImg(this)">
     <textarea id="msgIn" rows="1" maxlength="1000" placeholder="Xabar yozing..." oninput="autoGrow(this)"></textarea>
-    <button class="sendbtn" onclick="sendChat()" aria-label="Yuborish"><svg viewBox="0 0 24 24"><path d="M3.4 20.4l17.4-7.6a.9.9 0 0 0 0-1.6L3.4 3.6a.9.9 0 0 0-1.3 1l1.9 6.2 9 1.2-9 1.2-1.9 6.2a.9.9 0 0 0 1.3 1z"/></svg></button>
+    <button class="sendbtn" onmousedown="event.preventDefault()" onclick="sendChat()" aria-label="Yuborish"><svg viewBox="0 0 24 24"><path d="M3.4 20.4l17.4-7.6a.9.9 0 0 0 0-1.6L3.4 3.6a.9.9 0 0 0-1.3 1l1.9 6.2 9 1.2-9 1.2-1.9 6.2a.9.9 0 0 0 1.3 1z"/></svg></button>
   </div>
+</main>
+
+<!-- ===== VIDEO QO'LLANMALAR ===== -->
+<main id="videos" class="screen">
+  <div class="vhead"><button class="link back" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Orqaga</button><h2 style="margin:6px 4px 0;font-size:22px">Video qo'llanmalar</h2></div>
+  <div class="vbanner"><div class="vp"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></div><div><b>TezPost video darsliklari</b><small>Videolar YouTube orqali ochiladi</small></div></div>
+  <div class="vgrid" id="vgrid"></div>
+</main>
+<main id="video" class="screen">
+  <div class="vhead"><button class="link back" onclick="show('videos')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Orqaga</button></div>
+  <div id="vdet" style="padding-top:10px"></div>
 </main>
 
 <!-- ===== PROFIL ===== -->
@@ -634,6 +744,11 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
   </div>
 </div>
 
+<div class="dlg" id="exitBack" onclick="cancelExit()">
+  <div class="box" onclick="event.stopPropagation()"><h3>Ilovadan chiqasizmi?</h3><p>Ilovani yopmoqchisiz.</p>
+    <div class="btns"><button onclick="cancelExit()">Bekor qilish</button><button class="red" onclick="doExit()">Chiqish</button></div></div>
+</div>
+<div id="lightbox" onclick="closeLightbox()"><button aria-label="Yopish">✕</button><img id="lbImg" alt=""></div>
 <div class="toast" id="toast"></div>
 
 <script src="config.js"></script>
@@ -696,14 +811,15 @@ function toast(msg, bad){
 /* ====== Ekranlar ====== */
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active", s.id===id));
-  $("nav").classList.toggle("show", id==="home" || id==="profile" || id==="loads");
+  $("nav").classList.toggle("show", id==="home" || id==="profile" || id==="loads" || id==="chat");
+  setTimeout(()=>{ const n=$("nav"); if(n.offsetHeight) document.documentElement.style.setProperty("--navh", n.offsetHeight+"px"); }, 30);
   $("navHome").classList.toggle("on", id==="home");
   $("navLoads").classList.toggle("on", id==="loads");
   $("navChat").classList.toggle("on", id==="chat");
   $("navProfile").classList.toggle("on", id==="profile");
   window.scrollTo({top:0,left:0,behavior:"instant"});
 }
-function go(id){ if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); if(id==="home"){ refreshAddr(); loadTxCard(); } }
+function go(id){ addrOpen = false; if(id==="home") drawAddr(); if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); if(id==="home"){ refreshAddr(); loadTxCard(); } }
 function openDecl(){ resetForm(); show("decl"); }
 function closeDecl(){ show("home"); }
 function openLoads(){ go("loads"); }
@@ -933,39 +1049,135 @@ function toggleTheme(){
 applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light");
 
 /* ====== Yordam chati ====== */
-let chatLast = 0, chatMsgs = [], chatTimer = null;
+let chatLast = 0, chatMsgs = [], chatTimer = null, readUpto = 0, chatSig = "", chatSeen = new Set(), chatFirst = true;
+const imgCache = {};
+const MONTHS = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentabr","oktabr","noyabr","dekabr"];
 function hm(iso){ const d = new Date(iso); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
-function autoGrow(t){ t.style.height = "42px"; const h = Math.min(t.scrollHeight, 110); t.style.height = h + "px"; t.style.overflowY = t.scrollHeight > 110 ? "auto" : "hidden"; }
-function renderChat(stick){
-  const box = $("msgs"), near = box.scrollHeight - box.scrollTop - box.clientHeight < 90;
-  box.innerHTML = '<div class="b adm"><div class="tx">Assalomu alaykum! TezPost yordam xizmati. Savolingizni yozing, imkon qadar tez javob beramiz.</div></div>'
-    + chatMsgs.map(m=>`<div class="b ${m.from_admin?"adm":"me"}"><div class="tx">${esc(m.body)}</div><div class="tm">${hm(m.created_at)}</div></div>`).join("");
-  if(stick || near) box.scrollTop = box.scrollHeight;
+function dayKey(d){ return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate(); }
+function dayLabel(iso){
+  const d = new Date(iso), n = new Date(), a = new Date(d.getFullYear(), d.getMonth(), d.getDate()), b = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  const diff = Math.round((b - a) / 864e5);
+  if(diff === 0) return "Bugun"; if(diff === 1) return "Kecha";
+  return d.getDate() + " " + MONTHS[d.getMonth()] + (d.getFullYear() !== n.getFullYear() ? " " + d.getFullYear() : "");
 }
+function autoGrow(t){ t.style.height = "42px"; const h = Math.min(t.scrollHeight, 110); t.style.height = h + "px"; t.style.overflowY = t.scrollHeight > 110 ? "auto" : "hidden"; }
+const TK1 = '<svg class="tk sn" viewBox="0 0 16 11"><path d="M1.5 6l3.2 3.2L11 1.5"/></svg>';
+const TK2 = '<svg class="tk rd" viewBox="0 0 20 11"><path d="M1.5 6l3.2 3.2L11 1.5M8 8.6l.6.6L15 1.5"/></svg>';
+const TKP = '<svg class="tk sn" viewBox="0 0 16 11"><circle cx="8" cy="5.5" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 3.5v2.2l1.4.9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+function tickOf(m){ return m.from_admin ? "" : m.pending ? TKP : (m.id <= readUpto ? TK2 : TK1); }
+function msgHtml(m, isNew){
+  const img = m.has_img || m.local ? `<img class="cimg" data-mid="${m.id||""}" ${m.local ? `src="${m.local}"` : (imgCache[m.id] ? `src="${imgCache[m.id]}"` : "")} onclick="openLightbox(this)" alt="">` : "";
+  const txt = (m.has_img || m.local) && (m.body === "Rasm") ? "" : esc(m.body);
+  return `<div class="b ${m.from_admin?"adm":"me"}${m.pending?" pend":""}${isNew?" new":""}" data-k="${m.id || m.tmp}">${img}<div class="tx">${txt}</div><div class="tm">${hm(m.created_at)}${tickOf(m)}</div></div>`;
+}
+function renderChat(stick){
+  const box = $("msgs");
+  const sig = chatMsgs.map(m=>(m.id||m.tmp)+(m.pending?"p":"")).join(",") + "|" + readUpto;
+  if(sig === chatSig && !stick) return;
+  chatSig = sig;
+  const near = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+  let html = '<div class="b adm"><div class="tx">Assalomu alaykum! TezPost yordam xizmati. Savolingizni yozing, imkon qadar tez javob beramiz.</div></div>', lastDay = "";
+  chatMsgs.forEach(m=>{
+    const d = new Date(m.created_at), k = dayKey(d);
+    if(k !== lastDay){ html += `<div class="dsep">${dayLabel(m.created_at)}</div>`; lastDay = k; }
+    const key = m.id || m.tmp, isNew = !chatFirst && !chatSeen.has(key);
+    chatSeen.add(key);
+    html += msgHtml(m, isNew);
+  });
+  box.innerHTML = html;
+  chatFirst = false;
+  if(stick || near) box.scrollTop = box.scrollHeight;
+  loadChatImgs();
+}
+async function loadChatImgs(){
+  const els = [...$("msgs").querySelectorAll("img.cimg[data-mid]")].filter(e=>e.dataset.mid && !e.getAttribute("src"));
+  for(const e of els){
+    const id = e.dataset.mid;
+    if(!imgCache[id]){ try{ imgCache[id] = await rpc("chat_img", {p_token:token, p_id:Number(id)}); }catch(x){ continue; } }
+    if(imgCache[id]) e.src = imgCache[id];
+  }
+}
+function openLightbox(el){ if(!el.src) return; $("lbImg").src = el.src; $("lightbox").classList.add("show"); }
+function closeLightbox(){ $("lightbox").classList.remove("show"); }
+/* tovushlar */
+let _ac = null;
+function tone(seq){
+  try{
+    _ac = _ac || new (window.AudioContext || window.webkitAudioContext)();
+    if(_ac.state === "suspended") _ac.resume();
+    const t0 = _ac.currentTime;
+    seq.forEach(([f, d, at, v])=>{
+      const o = _ac.createOscillator(), g = _ac.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(f, t0 + at);
+      g.gain.setValueAtTime(0.0001, t0 + at); g.gain.exponentialRampToValueAtTime(v, t0 + at + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t0 + at + d);
+      o.connect(g); g.connect(_ac.destination); o.start(t0 + at); o.stop(t0 + at + d + 0.02);
+    });
+  }catch(e){}
+}
+const sndSend = () => tone([[660, .14, 0, .16], [990, .2, .07, .14]]);
+const sndRecv = () => tone([[880, .18, 0, .12], [1175, .26, .1, .1]]);
 async function pollChat(first){
   if(!token || !CONFIGURED) return;
   try{
     let r = await rpc("chat_list", {p_token:token, p_after:chatLast}) || [];
     r = r.filter(m=>m.id > chatLast);
-    if(r.length){ chatMsgs = chatMsgs.concat(r); chatLast = r[r.length-1].id; }
-    if(r.length || first) renderChat(first || r.some(m=>!m.from_admin));
+    let gotAdm = false;
+    if(r.length){ chatMsgs = chatMsgs.filter(m=>!m.pending || !r.some(x=>!x.from_admin && x.body === m.body)); chatMsgs = chatMsgs.concat(r); chatLast = r[r.length-1].id; gotAdm = r.some(m=>m.from_admin); }
+    try{ const ru = await rpc("chat_read_upto", {p_token:token}); if(typeof ru === "number") readUpto = ru; }catch(e){}
+    if(gotAdm && !first) sndRecv();
+    renderChat(first || r.some(m=>!m.from_admin) || gotAdm);
   }catch(e){ if(e.session) handleErr(e); }
 }
 function openChat(){
-  chatMsgs = []; chatLast = 0; $("chatBadge").classList.remove("show");
+  chatMsgs = []; chatLast = 0; readUpto = 0; chatSig = ""; chatSeen = new Set(); chatFirst = true; $("chatBadge").classList.remove("show");
   show("chat"); renderChat(true); pollChat(true);
   clearInterval(chatTimer);
-  chatTimer = setInterval(()=>{ if(!document.hidden && $("chat").classList.contains("active")) pollChat(); }, 4000);
+  chatTimer = setInterval(()=>{ if(!document.hidden && $("chat").classList.contains("active")) pollChat(); }, 3000);
 }
-function closeChat(){ clearInterval(chatTimer); show("home"); checkUnread(); }
-async function sendChat(){
+let tmpSeq = 0;
+async function sendChat(imgData){
   const ta = $("msgIn"), t = ta.value.trim();
-  if(!t) return;
+  const isImg = typeof imgData === "string";
+  if(!t && !isImg) return;
   ta.value = ""; autoGrow(ta);
-  try{ await rpc("chat_send", {p_token:token, p_body:t}); await pollChat(); $("msgs").scrollTop = $("msgs").scrollHeight; }
-  catch(e){ ta.value = t; autoGrow(ta); handleErr(e); }
+  const tmp = "t" + (++tmpSeq), body = t || (isImg ? "Rasm" : "");
+  chatMsgs.push({tmp, from_admin:false, body, created_at:new Date().toISOString(), pending:true, local:isImg ? imgData : null});
+  renderChat(true); sndSend();
+  try{
+    const r = isImg ? await rpc("chat_send_img", {p_token:token, p_body:body, p_img:imgData}) : await rpc("chat_send", {p_token:token, p_body:body});
+    chatMsgs = chatMsgs.filter(m=>m.tmp !== tmp);
+    if(r && r.id > chatLast){ if(isImg) imgCache[r.id] = imgData; chatMsgs.push({id:r.id, from_admin:false, body:r.body, has_img:isImg, created_at:r.created_at}); chatLast = r.id; }
+    renderChat(true);
+  }catch(e){
+    chatMsgs = chatMsgs.filter(m=>m.tmp !== tmp); renderChat(true);
+    if(!isImg){ ta.value = t; autoGrow(ta); }
+    handleErr(e);
+  }
+}
+function compressImg(file){
+  return new Promise((res, rej)=>{
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = ()=>{
+      let w = im.naturalWidth, h = im.naturalHeight; const M = 1600;
+      if(Math.max(w, h) > M){ const k = M / Math.max(w, h); w = Math.round(w*k); h = Math.round(h*k); }
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
+      let q = 0.86, d = c.toDataURL("image/jpeg", q);
+      while(d.length > 1300000 && q > 0.45){ q -= 0.08; d = c.toDataURL("image/jpeg", q); }
+      URL.revokeObjectURL(url); res(d);
+    };
+    im.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error("Rasmni o'qib bo'lmadi")); };
+    im.src = url;
+  });
+}
+async function chatPickImg(inp){
+  const f = inp.files && inp.files[0]; inp.value = "";
+  if(!f) return;
+  try{ const d = await compressImg(f); sendChat(d); }catch(e){ toast(e.message, true); }
 }
 $("msgIn").addEventListener("keydown", e=>{ if(e.key==="Enter" && !e.shiftKey && window.matchMedia("(hover:hover)").matches){ e.preventDefault(); sendChat(); } });
+$("msgIn").addEventListener("focus", ()=>document.body.classList.add("kb"));
+$("msgIn").addEventListener("blur", ()=>setTimeout(()=>{ if(document.activeElement !== $("msgIn")) document.body.classList.remove("kb"); }, 120));
 async function checkUnread(){
   if(!token || !CONFIGURED) return;
   try{
@@ -1012,16 +1224,25 @@ async function copyText(t){
   try{ await navigator.clipboard.writeText(t); return true; }catch(e){}
   try{ const ta = document.createElement("textarea"); ta.value = t; ta.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(ta); ta.select(); const ok = document.execCommand("copy"); ta.remove(); return ok; }catch(e){ return false; }
 }
+let addrOpen = false;
+const CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+const PIN_IC = '<svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>';
+function toggleAddr(){ addrOpen = !addrOpen; $("addrCard").classList.toggle("open", addrOpen); }
 function drawAddr(){
-  const list = addrs || [], t = list[addrSel], box = $("addrCard"), H = "<h2>Xitoy manzilingiz</h2>";
-  if(!t){ box.innerHTML = H + '<div class="aempty">Manzil hali kiritilmagan. Tez orada qo\'shiladi.</div>'; return; }
-  const rows = ADDR_ROWS.filter(r=>t[r[0]]);
-  box.innerHTML = H +
-    `<div class="apills">${list.map((x,i)=>`<button class="apill ${i===addrSel?"on":""}" onclick="addrSel=${i};drawAddr()">${esc(x.name)}</button>`).join("")}</div>`
-    + (rows.length
-      ? `<div class="arows">${rows.map(r=>`<div class="arow"><div class="al"><b>${r[1]}</b><small>${r[2]}</small></div><div class="av">${esc(t[r[0]])}</div><button class="acp" aria-label="Nusxa olish" onclick="copyRow(this,'${r[0]}')">${COPY_SVG}</button></div>`).join("")}</div>
-         <button class="btn-save btn-orange" onclick="copyAll(this)">Barchasini nusxa olish</button>`
-      : '<div class="aempty">Bu tarif uchun manzil hali kiritilmagan.</div>');
+  const list = addrs || [], t = list[addrSel], box = $("addrCard");
+  const H = `<button class="ahead" onclick="toggleAddr()"><span class="aic">${PIN_IC}</span><b>Xitoy manzilingiz</b>${CHEV}</button>`;
+  let inner;
+  if(!t) inner = '<div class="aempty">Manzil hali kiritilmagan. Tez orada qo\'shiladi.</div>';
+  else{
+    const rows = ADDR_ROWS.filter(r=>t[r[0]]);
+    inner = `<div class="apills">${list.map((x,i)=>`<button class="apill ${i===addrSel?"on":""}" onclick="addrSel=${i};drawAddr()">${esc(x.name)}</button>`).join("")}</div>`
+      + (rows.length
+        ? `<div class="arows">${rows.map(r=>`<div class="arow"><div class="al"><b>${r[1]}</b><small>${r[2]}</small></div><div class="av">${esc(t[r[0]])}</div><button class="acp" aria-label="Nusxa olish" onclick="copyRow(this,'${r[0]}')">${COPY_SVG}</button></div>`).join("")}</div>
+           <button class="btn-save btn-orange" onclick="copyAll(this)">Barchasini nusxa olish</button>`
+        : '<div class="aempty">Bu tarif uchun manzil hali kiritilmagan.</div>');
+  }
+  box.classList.toggle("open", addrOpen);
+  box.innerHTML = H + `<div class="abody"><div class="abi">${inner}</div></div>`;
 }
 async function copyRow(btn, key){
   const t = (addrs||[])[addrSel]; if(!t) return;
@@ -1034,7 +1255,7 @@ async function copyAll(btn){
   if(await copyText(txt)) toast("Hammasi nusxa olindi"); else toast("Nusxa olib bo'lmadi", true);
 }
 function refreshAddr(){
-  if(addrs) drawAddr(); else $("addrCard").innerHTML = '<h2>Xitoy manzilingiz</h2><div class="skel"></div>';
+  if(addrs) drawAddr(); else $("addrCard").innerHTML = `<button class="ahead" onclick="toggleAddr()"><span class="aic">${PIN_IC}</span><b>Xitoy manzilingiz</b>${CHEV}</button><div class="abody"><div class="abi"><div class="skel"></div></div></div>`;
   loadAddrs().then(()=>{ if(addrSel >= (addrs||[]).length) addrSel = 0; drawAddr(); });
 }
 function closeTariffs(){ $("tariffBack").classList.remove("show"); }
@@ -1416,6 +1637,56 @@ async function loadList(){
 }
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token && ($("home").classList.contains("active") || $("loads").classList.contains("active"))) loadList();
   if(!document.hidden && token && $("home").classList.contains("active")){ refreshAddr(); checkUnread(); } });
+
+/* ====== Video qo'llanmalar ====== */
+/* Videolarni YouTube'ga yuklagach, "yt" ga video ID sini yozing (masalan youtu.be/ABC123 -> "ABC123"). Shorts bo'lsa short:true */
+const YT_CHANNEL = "";
+const VIDEOS = [
+  {yt:"", t:"Ro'yxatdan o'tish", d:"TezPost ilovasida ro'yxatdan o'tish", dur:"0:52"},
+  {yt:"", t:"Pinduoduo'ga Xitoy manzilini kiritish", d:"Ombor manzilini Pinduoduo'ga qo'shish", dur:"0:45"},
+  {yt:"", t:"Deklaratsiya yaratish", d:"Pinduoduo'dan trek-kod olish va TezPost'da deklaratsiya qo'shish", dur:"0:52"}
+];
+const PLAY_SVG = '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>';
+function ytUrl(v){ return v.short ? "https://www.youtube.com/shorts/" + v.yt : "https://www.youtube.com/watch?v=" + v.yt; }
+function openVideos(){
+  $("vgrid").innerHTML = VIDEOS.map((v,i)=>`<button class="vcard" onclick="openVideo(${i})"><div class="vth">${v.yt ? `<img loading="lazy" src="https://img.youtube.com/vi/${v.yt}/hqdefault.jpg" alt="">` : ""}<span class="num">#${i+1}</span><span class="pl">${PLAY_SVG}</span><span class="no">${v.yt ? esc(v.dur||"") : "Tez orada"}</span></div><div class="vt"><b>${esc(v.t)}</b><small>${esc(v.d)}</small></div></button>`).join("");
+  show("videos");
+}
+function openVideo(i){
+  const v = VIDEOS[i];
+  $("vdet").innerHTML = `<div class="vbig">${v.yt ? `<img src="https://img.youtube.com/vi/${v.yt}/hqdefault.jpg" alt="">` : ""}<span class="pl">${PLAY_SVG}</span></div>
+    <div style="padding:16px 14px 0"><h2 style="margin:0 0 6px;font-size:22px">${esc(v.t)}</h2><p style="margin:0;color:var(--muted);font-size:15px">${esc(v.d)}</p></div>
+    ${v.yt ? `<button class="vyt" onclick="window.open(ytUrl(VIDEOS[${i}]),'_blank')">${PLAY_SVG}YouTube'da ochish</button>` : `<button class="vyt dis" disabled>Video tez orada qo'shiladi</button>`}`;
+  show("video");
+}
+
+/* ====== Orqaga tugmasi (telefon) ====== */
+let exiting = false;
+try{ history.replaceState({tp:"base"}, ""); history.pushState({tp:"app"}, ""); }catch(e){}
+window.addEventListener("popstate", ()=>{
+  if(exiting) return;
+  if(handleBack()) { try{ history.pushState({tp:"app"}, ""); }catch(e){} }
+});
+function handleBack(){            // true = ilova ichida ishlandi (history'ni qayta to'ldiramiz)
+  if($("exitBack").classList.contains("show")){ $("exitBack").classList.remove("show"); return true; }
+  if($("lightbox").classList.contains("show")){ closeLightbox(); return true; }
+  if($("notifBack").classList.contains("show")){ closeNotif(); return true; }
+  const sb = document.querySelector(".sheet-back.show"); if(sb){ sb.classList.remove("show"); return true; }
+  const cur = document.querySelector(".screen.active"), id = cur ? cur.id : "auth";
+  if(id === "video"){ show("videos"); return true; }
+  if(id !== "home" && id !== "auth" && token){ go("home"); return true; }
+  $("exitBack").classList.add("show");   // bosh sahifada: tasdiq so'raymiz (history asosiy holatda qoladi)
+  return false;
+}
+function cancelExit(){ $("exitBack").classList.remove("show"); try{ history.pushState({tp:"app"}, ""); }catch(e){} }
+function doExit(){
+  exiting = true; $("exitBack").classList.remove("show");
+  try{ window.close(); }catch(e){}
+  try{ history.back(); }catch(e){}
+  setTimeout(()=>{ exiting = false; toast("Yopish uchun yana bir marta «orqaga» bosing"); }, 500);
+}
+/* Splash */
+setTimeout(()=>{ const sp = $("splash"); if(sp){ sp.classList.add("out"); setTimeout(()=>sp.remove(), 700); } }, 2000);
 
 /* ====== Boshlash ====== */
 if(!CONFIGURED) $("setupWarn").style.display = "block";
