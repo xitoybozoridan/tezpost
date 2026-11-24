@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "uz.tezpostcargo.twa",
+    "sha256_cert_fingerprints": ["2B:35:E2:8B:99:CB:97:3C:12:35:0B:8B:27:93:80:53:0B:D7:60:57:B6:48:07:03:FE:64:6F:2C:5B:D8:FE:10"]
+  }
+}]
