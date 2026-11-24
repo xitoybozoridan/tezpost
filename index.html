@@ -538,7 +538,7 @@
   /* ---------- Pastki menyu: sirpanuvchi tanlov + markaziy tugma ---------- */
   .nav .in{grid-template-columns:repeat(5,1fr);position:relative}
   .nav .in>button{position:relative;z-index:1;transition:color .25s ease,transform .12s ease}
-  .nav .npill{position:absolute;z-index:0;top:5px;bottom:5px;left:0;width:0;border-radius:16px;background:var(--blue-soft);transition:transform .42s cubic-bezier(.3,1.2,.4,1),width .3s ease,opacity .2s;opacity:0;pointer-events:none}
+  .nav .npill{position:absolute;z-index:0;top:4px;bottom:4px;left:0;right:100%;border-radius:18px;background:linear-gradient(160deg,#E4EEFF,#C7DAFF);box-shadow:0 3px 10px rgba(47,123,234,.22),inset 0 1px 0 rgba(255,255,255,.8);opacity:0;transition:opacity .2s;pointer-events:none}
   .nav .npill.on{opacity:1}
   .nav button.on::after{display:none !important}
   .nav button.on svg{animation:ntab .4s cubic-bezier(.3,1.5,.5,1)}
@@ -549,6 +549,7 @@
   .navadd .fab svg{width:27px;height:27px;stroke:#fff;fill:none;position:relative;z-index:1}
   .navadd .fring{position:absolute;inset:-5px;border-radius:50%;border:2px solid rgba(47,123,234,.55);animation:qring 2.6s ease-out infinite}
   [data-theme=dark] .navadd .fab{border-color:var(--card)}
+  [data-theme=dark] .nav .npill{background:linear-gradient(160deg,#27407A,#1E3566);box-shadow:0 3px 10px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
   html,body{overflow-x:hidden}
   .screen.active.sl-r{animation:slr .34s cubic-bezier(.2,.8,.2,1) both}
   .screen.active.sl-l{animation:sll .34s cubic-bezier(.2,.8,.2,1) both}
@@ -883,15 +884,22 @@ function show(id){
   movePill(); clearTimeout(show._pt); show._pt = setTimeout(movePill, 420);
   window.scrollTo({top:0,left:0,behavior:"instant"});
 }
+let pillPos = null;
 function movePill(){
-  const pill = $("npill"), map = {home:"navHome", loads:"navLoads", chat:"navChat", profile:"navProfile"}, id = show._tab && document.querySelector(".screen.active") && map[document.querySelector(".screen.active").id];
-  const b = id && $(id);
-  if(!b || !b.offsetWidth){ pill.classList.remove("on"); return; }
-  const w = Math.min(b.offsetWidth - 6, 74);
-  if(!pill.dataset.init){ pill.dataset.init = 1; pill.style.transition = "none"; requestAnimationFrame(()=>requestAnimationFrame(()=>{ pill.style.transition = ""; })); }
-  pill.style.width = w + "px";
-  pill.style.transform = `translateX(${b.offsetLeft + (b.offsetWidth - w)/2}px)`;
-  pill.classList.add("on");
+  const pill = $("npill"), map = {home:"navHome", loads:"navLoads", chat:"navChat", profile:"navProfile"};
+  const act = document.querySelector(".screen.active"), id = show._tab && act && map[act.id], b = id && $(id), inW = pill.parentElement.offsetWidth;
+  if(!b || !b.offsetWidth || !inW){ pill.classList.remove("on"); return; }
+  const w = Math.min(b.offsetWidth - 4, 78), L = Math.round(b.offsetLeft + (b.offsetWidth - w)/2), R = Math.round(inW - (L + w));
+  const prev = pillPos; pillPos = {L, R, inW};
+  pill.style.left = L + "px"; pill.style.right = R + "px";
+  if(!prev || prev.inW !== inW || !pill.classList.contains("on")){ pill.classList.add("on"); return; }
+  if(Math.abs(prev.L - L) < 2) return;
+  const right = L > prev.L, lead = right ? "right" : "left", trail = right ? "left" : "right";
+  const from = {left:prev.L, right:prev.R}, to = {left:L, right:R};
+  if(!pill.animate) return;
+  pill.animate([{[lead]:from[lead]+"px"}, {[lead]:to[lead]+"px"}], {duration:360, easing:"cubic-bezier(.2,.9,.25,1)"});
+  pill.animate([{[trail]:from[trail]+"px"}, {[trail]:to[trail]+"px"}], {duration:560, easing:"cubic-bezier(.55,0,.2,1.18)"});
+  pill.animate([{transform:"scale(1,1)"},{transform:"scale(1.04,.8)",offset:.35},{transform:"scale(.98,1.08)",offset:.7},{transform:"scale(1,1)"}], {duration:580, easing:"ease-in-out"});
 }
 window.addEventListener("resize", movePill);
 function go(id){ if(addrOpen) setAddrOpen(false, false); if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); if(id==="home"){ refreshAddr(); loadTxCard(); } }
