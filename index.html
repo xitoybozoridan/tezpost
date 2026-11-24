@@ -430,10 +430,18 @@
   .ahead b{font-size:17px;flex:1}
   .ahead .chev{width:22px;height:22px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s}
   .acard.open .ahead .chev{transform:rotate(180deg)}
-  .abody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s ease}
-  .acard.open .abody{grid-template-rows:1fr}
-  .abi{overflow:hidden;min-height:0}
-  .abi>:first-child{margin-top:12px}
+  .abody{height:0;overflow:hidden;transition:height .42s cubic-bezier(.32,.72,0,1);will-change:height}
+  .abi{padding-top:10px;opacity:0;transform:translateY(-6px);transition:opacity .3s ease,transform .42s cubic-bezier(.32,.72,0,1)}
+  .acard.open .abi{opacity:1;transform:none}
+  .acard{padding:10px 12px !important}
+  .ahead{gap:10px;padding:0}
+  .ahead .aic{width:32px;height:32px;border-radius:10px}.ahead .aic svg{width:18px;height:18px}
+  .ahead b{font-size:15px}.ahead .chev{width:20px;height:20px}
+  .qrow{gap:8px}
+  .qrow .qcard{flex:1 1 0;width:auto;min-width:0;min-height:74px;padding:9px 10px;border-radius:16px;gap:6px}
+  .qrow .qcard .qi{width:26px;height:26px;border-radius:9px}.qrow .qcard .qi svg{width:15px;height:15px}
+  .qrow .qcard b{font-size:12px;line-height:1.2}
+  .qrow .qcard small{font-size:10px}
 
   /* ---------- Video qo'llanmalar ---------- */
   .vhead{padding:calc(env(safe-area-inset-top) + 10px) 14px 4px}
@@ -819,7 +827,7 @@ function show(id){
   $("navProfile").classList.toggle("on", id==="profile");
   window.scrollTo({top:0,left:0,behavior:"instant"});
 }
-function go(id){ addrOpen = false; if(id==="home") drawAddr(); if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); if(id==="home"){ refreshAddr(); loadTxCard(); } }
+function go(id){ if(addrOpen) setAddrOpen(false, false); if(id==="profile") renderProfile(); show(id); if(id==="home" || id==="loads") loadList(); if(id==="home"){ refreshAddr(); loadTxCard(); } }
 function openDecl(){ resetForm(); show("decl"); }
 function closeDecl(){ show("home"); }
 function openLoads(){ go("loads"); }
@@ -1227,7 +1235,20 @@ async function copyText(t){
 let addrOpen = false;
 const CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
 const PIN_IC = '<svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>';
-function toggleAddr(){ addrOpen = !addrOpen; $("addrCard").classList.toggle("open", addrOpen); }
+function setAddrOpen(v, animate){
+  addrOpen = v;
+  const box = $("addrCard"), bd = $("abody"); box.classList.toggle("open", v);
+  if(!bd) return;
+  if(!animate){ bd.style.transition = "none"; bd.style.height = v ? "auto" : "0px"; void bd.offsetHeight; bd.style.transition = ""; return; }
+  if(v){
+    bd.style.height = bd.scrollHeight + "px";
+    clearTimeout(setAddrOpen._t); setAddrOpen._t = setTimeout(()=>{ if(addrOpen) bd.style.height = "auto"; }, 460);
+  }else{
+    clearTimeout(setAddrOpen._t); bd.style.height = bd.getBoundingClientRect().height + "px"; void bd.offsetHeight;
+    requestAnimationFrame(()=>{ bd.style.height = "0px"; });
+  }
+}
+function toggleAddr(){ setAddrOpen(!addrOpen, true); }
 function drawAddr(){
   const list = addrs || [], t = list[addrSel], box = $("addrCard");
   const H = `<button class="ahead" onclick="toggleAddr()"><span class="aic">${PIN_IC}</span><b>Xitoy manzilingiz</b>${CHEV}</button>`;
@@ -1241,8 +1262,9 @@ function drawAddr(){
            <button class="btn-save btn-orange" onclick="copyAll(this)">Barchasini nusxa olish</button>`
         : '<div class="aempty">Bu tarif uchun manzil hali kiritilmagan.</div>');
   }
+  if(!$("abody")){ box.innerHTML = H + '<div class="abody" id="abody"><div class="abi" id="abi"></div></div>'; $("abody").style.height = addrOpen ? "auto" : "0px"; }
   box.classList.toggle("open", addrOpen);
-  box.innerHTML = H + `<div class="abody"><div class="abi">${inner}</div></div>`;
+  if($("abi").dataset.h !== inner){ $("abi").innerHTML = inner; $("abi").dataset.h = inner; }
 }
 async function copyRow(btn, key){
   const t = (addrs||[])[addrSel]; if(!t) return;
@@ -1255,7 +1277,7 @@ async function copyAll(btn){
   if(await copyText(txt)) toast("Hammasi nusxa olindi"); else toast("Nusxa olib bo'lmadi", true);
 }
 function refreshAddr(){
-  if(addrs) drawAddr(); else $("addrCard").innerHTML = `<button class="ahead" onclick="toggleAddr()"><span class="aic">${PIN_IC}</span><b>Xitoy manzilingiz</b>${CHEV}</button><div class="abody"><div class="abi"><div class="skel"></div></div></div>`;
+  if(addrs) drawAddr(); else if(!$("abody")){ $("addrCard").innerHTML = `<button class="ahead" onclick="toggleAddr()"><span class="aic">${PIN_IC}</span><b>Xitoy manzilingiz</b>${CHEV}</button><div class="abody" id="abody" style="height:0"><div class="abi" id="abi"><div class="skel"></div></div></div>`; }
   loadAddrs().then(()=>{ if(addrSel >= (addrs||[]).length) addrSel = 0; drawAddr(); });
 }
 function closeTariffs(){ $("tariffBack").classList.remove("show"); }
@@ -1640,31 +1662,34 @@ document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token
 
 /* ====== Video qo'llanmalar ====== */
 /* Videolarni YouTube'ga yuklagach, "yt" ga video ID sini yozing (masalan youtu.be/ABC123 -> "ABC123"). Shorts bo'lsa short:true */
-const YT_CHANNEL = "";
-const VIDEOS = [
-  {yt:"", t:"Ro'yxatdan o'tish", d:"TezPost ilovasida ro'yxatdan o'tish", dur:"0:52"},
-  {yt:"", t:"Pinduoduo'ga Xitoy manzilini kiritish", d:"Ombor manzilini Pinduoduo'ga qo'shish", dur:"0:45"},
-  {yt:"", t:"Deklaratsiya yaratish", d:"Pinduoduo'dan trek-kod olish va TezPost'da deklaratsiya qo'shish", dur:"0:52"}
-];
+let VIDEOS = store.get("tp_videos", []) || [];
 const PLAY_SVG = '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>';
 function ytUrl(v){ return v.short ? "https://www.youtube.com/shorts/" + v.yt : "https://www.youtube.com/watch?v=" + v.yt; }
-function openVideos(){
-  $("vgrid").innerHTML = VIDEOS.map((v,i)=>`<button class="vcard" onclick="openVideo(${i})"><div class="vth">${v.yt ? `<img loading="lazy" src="https://img.youtube.com/vi/${v.yt}/hqdefault.jpg" alt="">` : ""}<span class="num">#${i+1}</span><span class="pl">${PLAY_SVG}</span><span class="no">${v.yt ? esc(v.dur||"") : "Tez orada"}</span></div><div class="vt"><b>${esc(v.t)}</b><small>${esc(v.d)}</small></div></button>`).join("");
-  show("videos");
+function drawVideos(){
+  $("vgrid").innerHTML = VIDEOS.length ? VIDEOS.map((v,i)=>`<button class="vcard" onclick="openVideo(${i})"><div class="vth"><img loading="lazy" src="https://img.youtube.com/vi/${esc(v.yt)}/hqdefault.jpg" alt=""><span class="num">#${i+1}</span><span class="pl">${PLAY_SVG}</span>${v.dur ? `<span class="no">${esc(v.dur)}</span>` : ""}</div><div class="vt"><b>${esc(v.title)}</b><small>${esc(v.descr||"")}</small></div></button>`).join("")
+    : '<div class="empty" style="grid-column:1/-1"><b>Hozircha video yo\'q</b><p>Tez orada video qo\'llanmalar qo\'shiladi.</p></div>';
+}
+async function openVideos(){
+  drawVideos(); show("videos");
+  try{ const r = await rpc("videos_list", {}); if(Array.isArray(r)){ VIDEOS = r; store.set("tp_videos", r); drawVideos(); } }catch(e){}
 }
 function openVideo(i){
-  const v = VIDEOS[i];
-  $("vdet").innerHTML = `<div class="vbig">${v.yt ? `<img src="https://img.youtube.com/vi/${v.yt}/hqdefault.jpg" alt="">` : ""}<span class="pl">${PLAY_SVG}</span></div>
-    <div style="padding:16px 14px 0"><h2 style="margin:0 0 6px;font-size:22px">${esc(v.t)}</h2><p style="margin:0;color:var(--muted);font-size:15px">${esc(v.d)}</p></div>
-    ${v.yt ? `<button class="vyt" onclick="window.open(ytUrl(VIDEOS[${i}]),'_blank')">${PLAY_SVG}YouTube'da ochish</button>` : `<button class="vyt dis" disabled>Video tez orada qo'shiladi</button>`}`;
+  const v = VIDEOS[i]; if(!v) return;
+  $("vdet").innerHTML = `<div class="vbig"><img src="https://img.youtube.com/vi/${esc(v.yt)}/hqdefault.jpg" alt=""><span class="pl">${PLAY_SVG}</span></div>
+    <div style="padding:16px 14px 0"><h2 style="margin:0 0 6px;font-size:22px">${esc(v.title)}</h2><p style="margin:0;color:var(--muted);font-size:15px">${esc(v.descr||"")}</p></div>
+    <button class="vyt" onclick="window.open(ytUrl(VIDEOS[${i}]),'_blank')">${PLAY_SVG}YouTube'da ochish</button>`;
   show("video");
 }
 
 /* ====== Orqaga tugmasi (telefon) ====== */
 let exiting = false;
-try{ history.replaceState({tp:"base"}, ""); history.pushState({tp:"app"}, ""); }catch(e){}
+let armed = false;
+try{ history.replaceState({tp:"base"}, ""); }catch(e){}
+function armHistory(){ if(armed) return; armed = true; try{ history.pushState({tp:"app"}, ""); }catch(e){} }
+["pointerdown","touchstart","click","keydown"].forEach(ev=>document.addEventListener(ev, armHistory, {capture:true, passive:true}));
 window.addEventListener("popstate", ()=>{
   if(exiting) return;
+  if(!armed){ return; }
   if(handleBack()) { try{ history.pushState({tp:"app"}, ""); }catch(e){} }
 });
 function handleBack(){            // true = ilova ichida ishlandi (history'ni qayta to'ldiramiz)
