@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0B4DB5">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -574,6 +574,11 @@
   .vtab.on{background:var(--card);color:var(--blue);border-color:#9DBBF0;box-shadow:0 3px 10px rgba(47,123,234,.18)}
   .vgrid.swap{animation:vswap .3s ease both}
   @keyframes vswap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  /* ilova kabi: yaqinlashtirish va matn belgilash yo'q */
+  html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
+  img{-webkit-user-drag:none}
 </style>
 <script>
 try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
@@ -1800,6 +1805,11 @@ function openVideo(i){
     <button class="vyt" onclick="playVideo(${i})">${PLAY_SVG}YouTube'da ochish</button>`;
   show("video");
 }
+
+/* Uzoq bosganda "nusxa / Google qidiruv" menyusi chiqmasin */
+document.addEventListener("contextmenu", e=>{ if(!e.target.closest || !e.target.closest("input,textarea")) e.preventDefault(); });
+document.addEventListener("selectstart", e=>{ if(!e.target.closest || !e.target.closest("input,textarea")) e.preventDefault(); });
+["gesturestart","gesturechange","gestureend"].forEach(t=>document.addEventListener(t, e=>e.preventDefault()));
 
 /* ====== Bosganda yengil tebranish (haptic) ====== */
 let hapticOn = store.get("tp_haptic", true) !== false;
