@@ -557,6 +557,23 @@
   @keyframes sll{from{opacity:0;transform:translateX(-34px)}to{opacity:1;transform:none}}
   #chat.active{bottom:calc(var(--navh,84px) + 24px)}
   body.kb #chat.active{bottom:0}
+  .vbig{cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .vbig .pl{animation:vwob 2.4s ease-in-out infinite}
+  .vbig:active .pl{animation:none;transform:scale(.92)}
+  .vbig .pw{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(255,255,255,.75);animation:vpulse 2s ease-out infinite;pointer-events:none}
+  .vbig .pw.p2{animation-delay:1s}
+  .vbig .pl svg{position:relative;z-index:1}
+  @keyframes vpulse{0%{transform:scale(1);opacity:.85}100%{transform:scale(2.1);opacity:0}}
+  @keyframes vwob{0%,100%{transform:scale(1) rotate(0)}15%{transform:scale(1.1) rotate(-6deg)}30%{transform:scale(1.1) rotate(6deg)}45%{transform:scale(1.06) rotate(-3deg)}60%{transform:scale(1) rotate(0)}}
+  .vsearch{display:flex;align-items:center;gap:10px;margin:0 14px 10px;height:46px;padding:0 14px;border-radius:23px;background:var(--card);border:1.5px solid var(--line,#dbe4f3)}
+  .vsearch svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;flex:none}
+  .vsearch input{flex:1;border:0;background:none;outline:0;font-size:15px;color:var(--text);min-width:0}
+  .vtabs{display:flex;gap:6px;margin:0 14px 12px;padding:5px;border-radius:22px;background:var(--blue-soft);overflow-x:auto;scrollbar-width:none}
+  .vtabs::-webkit-scrollbar{display:none}
+  .vtab{flex:1 0 auto;min-width:0;height:38px;padding:0 10px;border:1.5px solid transparent;border-radius:18px;background:none;color:var(--muted);font-size:13px;font-weight:700;white-space:nowrap;transition:background .25s,color .25s,border-color .25s,box-shadow .25s}
+  .vtab.on{background:var(--card);color:var(--blue);border-color:#9DBBF0;box-shadow:0 3px 10px rgba(47,123,234,.18)}
+  .vgrid.swap{animation:vswap .3s ease both}
+  @keyframes vswap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 </style>
 <script>
 try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
@@ -671,6 +688,8 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
 <main id="videos" class="screen">
   <div class="vhead"><button class="link back" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Orqaga</button><h2 style="margin:6px 4px 0;font-size:22px">Video qo'llanmalar</h2></div>
   <div class="vbanner"><div class="vp"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></div><div><b>TezPost video darsliklari</b><small>Videolar YouTube orqali ochiladi</small></div></div>
+  <div class="vsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="vq" type="search" placeholder="Video qidirish..." oninput="drawVideos()" autocomplete="off"></div>
+  <div class="vtabs" id="vtabs"></div>
   <div class="vgrid" id="vgrid"></div>
 </main>
 <main id="video" class="screen">
@@ -1748,22 +1767,37 @@ document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && token
 
 /* ====== Video qo'llanmalar ====== */
 /* Videolarni YouTube'ga yuklagach, "yt" ga video ID sini yozing (masalan youtu.be/ABC123 -> "ABC123"). Shorts bo'lsa short:true */
-let VIDEOS = store.get("tp_videos", []) || [];
+let VIDEOS = [], VCATS = [], vCat = 0;
+try{ const c = store.get("tp_vdata", null); if(c){ VIDEOS = c.videos || []; VCATS = c.cats || []; } }catch(e){}
 const PLAY_SVG = '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>';
 function ytUrl(v){ return v.short ? "https://www.youtube.com/shorts/" + v.yt : "https://www.youtube.com/watch?v=" + v.yt; }
-function drawVideos(){
-  $("vgrid").innerHTML = VIDEOS.length ? VIDEOS.map((v,i)=>`<button class="vcard" onclick="openVideo(${i})"><div class="vth"><img loading="lazy" src="https://img.youtube.com/vi/${esc(v.yt)}/hqdefault.jpg" alt=""><span class="num">#${i+1}</span><span class="pl">${PLAY_SVG}</span>${v.dur ? `<span class="no">${esc(v.dur)}</span>` : ""}</div><div class="vt"><b>${esc(v.title)}</b><small>${esc(v.descr||"")}</small></div></button>`).join("")
-    : '<div class="empty" style="grid-column:1/-1"><b>Hozircha video yo\'q</b><p>Tez orada video qo\'llanmalar qo\'shiladi.</p></div>';
+function drawVideos(swap){
+  const q = ($("vq") ? $("vq").value : "").trim().toLowerCase();
+  const tabs = [{id:0, name:"Hammasi"}].concat(VCATS.filter(c=>VIDEOS.some(v=>v.cat_id === c.id)));
+  if(!tabs.some(t=>t.id === vCat)) vCat = 0;
+  $("vtabs").style.display = tabs.length > 2 ? "flex" : "none";
+  $("vtabs").innerHTML = tabs.map(t=>`<button class="vtab ${t.id === vCat ? "on" : ""}" onclick="vCat=${t.id};drawVideos(true)">${esc(t.name)}</button>`).join("");
+  const list = VIDEOS.map((v,i)=>({v,i})).filter(x=>(!vCat || x.v.cat_id === vCat) && (!q || (x.v.title + " " + (x.v.descr||"")).toLowerCase().includes(q)));
+  const g = $("vgrid");
+  g.innerHTML = list.length ? list.map((x,n)=>`<button class="vcard" onclick="openVideo(${x.i})"><div class="vth"><img loading="lazy" src="https://img.youtube.com/vi/${esc(x.v.yt)}/hqdefault.jpg" alt=""><span class="num">#${n+1}</span><span class="pl">${PLAY_SVG}</span>${x.v.dur ? `<span class="no">${esc(x.v.dur)}</span>` : ""}</div><div class="vt"><b>${esc(x.v.title)}</b><small>${esc(x.v.descr||"")}</small></div></button>`).join("")
+    : '<div class="empty" style="grid-column:1/-1"><b>Video topilmadi</b><p>Bu bo\'limda hozircha video yo\'q.</p></div>';
+  if(swap){ g.classList.remove("swap"); void g.offsetWidth; g.classList.add("swap"); }
 }
 async function openVideos(){
   drawVideos(); show("videos");
-  try{ const r = await rpc("videos_list", {}); if(Array.isArray(r)){ VIDEOS = r; store.set("tp_videos", r); drawVideos(); } }catch(e){}
+  try{
+    const r = await rpc("videos_data", {});
+    if(r && Array.isArray(r.videos)){ VIDEOS = r.videos; VCATS = r.cats || []; store.set("tp_vdata", r); drawVideos(); }
+  }catch(e){
+    try{ const r = await rpc("videos_list", {}); if(Array.isArray(r) && !VIDEOS.length){ VIDEOS = r; drawVideos(); } }catch(x){}
+  }
 }
+function playVideo(i){ const v = VIDEOS[i]; if(!v) return; if(navigator.vibrate) navigator.vibrate(15); const w = window.open(ytUrl(v), "_blank"); if(!w) location.href = ytUrl(v); }
 function openVideo(i){
   const v = VIDEOS[i]; if(!v) return;
-  $("vdet").innerHTML = `<div class="vbig"><img src="https://img.youtube.com/vi/${esc(v.yt)}/hqdefault.jpg" alt=""><span class="pl">${PLAY_SVG}</span></div>
+  $("vdet").innerHTML = `<button class="vbig" onclick="playVideo(${i})" aria-label="Videoni ochish" style="display:grid;border:0;padding:0;width:calc(100% - 28px)"><img src="https://img.youtube.com/vi/${esc(v.yt)}/hqdefault.jpg" alt=""><span class="pl"><i class="pw"></i><i class="pw p2"></i>${PLAY_SVG}</span></button>
     <div style="padding:16px 14px 0"><h2 style="margin:0 0 6px;font-size:22px">${esc(v.title)}</h2><p style="margin:0;color:var(--muted);font-size:15px">${esc(v.descr||"")}</p></div>
-    <button class="vyt" onclick="window.open(ytUrl(VIDEOS[${i}]),'_blank')">${PLAY_SVG}YouTube'da ochish</button>`;
+    <button class="vyt" onclick="playVideo(${i})">${PLAY_SVG}YouTube'da ochish</button>`;
   show("video");
 }
 

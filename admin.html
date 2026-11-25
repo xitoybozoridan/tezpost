@@ -1010,6 +1010,10 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
   <div class="wrap" style="padding-bottom:40px">
     <div class="info" style="margin-bottom:10px">Videoni YouTube'ga yuklang, havolasini shu yerga joylang. Mijoz ilovasida «Video qo'llanma» bo'limida ko'rinadi.</div>
     <div id="vidForm"></div>
+    <div class="scanbox" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:8px"><b style="font-size:16px;flex:1">Kategoriyalar</b><button class="chip" style="border:0;cursor:pointer" onclick="catEdit(null)">+ Qo'shish</button></div>
+      <div id="catList" style="margin-top:10px"></div>
+    </div>
     <div id="vidList"></div>
   </div>
 </main>
@@ -3738,7 +3742,30 @@ async function checkPk(){ if(!token || !CONFIGURED) return; try{ const r = await
 async function openPk(){ show("pk"); $("pkwBtnT").innerHTML = ico("eye",20) + " Punkt kuzatuvi"; $("pkLink").textContent = location.origin + location.pathname.replace(/[^/]*$/, "") + "punkt.html"; pkEdit = null; await loadPk(); }
 /* ====== Video qo'llanmalar ====== */
 let vidData = [];
-async function openVids(){ show("vids"); $("vidForm").innerHTML = ""; await loadVids(); }
+let catData = [];
+async function openVids(){ show("vids"); $("vidForm").innerHTML = ""; await loadCats(); await loadVids(); }
+async function loadCats(){
+  try{
+    catData = await rpc("admin_cat_list", {p_token:token}) || [];
+    $("catList").innerHTML = catData.length ? catData.map((c,i)=>`<div style="display:flex;align-items:center;gap:6px;padding:8px 0;${i ? "border-top:1px solid var(--line,#e3e9f4)" : ""}">
+      <b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.name)} <span style="color:var(--muted);font-weight:600">· ${c.n} ta</span></b>
+      <button onclick="catMove(${c.id},-1)" ${i === 0 ? "disabled" : ""} style="width:34px;height:34px;border:0;border-radius:9px;background:var(--blue-soft);color:var(--blue);font-weight:800">↑</button>
+      <button onclick="catMove(${c.id},1)" ${i === catData.length-1 ? "disabled" : ""} style="width:34px;height:34px;border:0;border-radius:9px;background:var(--blue-soft);color:var(--blue);font-weight:800">↓</button>
+      <button onclick="catEdit(${c.id})" style="width:34px;height:34px;border:0;border-radius:9px;background:var(--blue);color:#fff">✎</button>
+      <button onclick="catDel(${c.id})" style="width:34px;height:34px;border:0;border-radius:9px;background:#FDECEC;color:#C62828;font-weight:800">✕</button></div>`).join("") : `<div class="info">Kategoriya yo'q. «+ Qo'shish» ni bosing.</div>`;
+  }catch(e){ handleErr(e); }
+}
+async function catEdit(id){
+  const cur = id == null ? "" : (catData.find(c=>c.id === id) || {}).name || "";
+  const name = prompt(id == null ? "Yangi kategoriya nomi:" : "Kategoriya nomini o'zgartirish:", cur);
+  if(name === null) return;
+  try{ await rpc("admin_cat_save", {p_token:token, p_id:id, p_name:name}); toast("Saqlandi"); await loadCats(); await loadVids(); }catch(e){ handleErr(e); }
+}
+async function catDel(id){
+  if(!confirm("Kategoriyani o'chirasizmi? Videolar o'chmaydi, kategoriyasiz qoladi.")) return;
+  try{ await rpc("admin_cat_delete", {p_token:token, p_id:id}); toast("O'chirildi"); await loadCats(); await loadVids(); }catch(e){ handleErr(e); }
+}
+async function catMove(id, dir){ try{ await rpc("admin_cat_move", {p_token:token, p_id:id, p_dir:dir}); await loadCats(); }catch(e){ handleErr(e); } }
 async function loadVids(){
   try{
     vidData = await rpc("admin_video_list", {p_token:token}) || [];
@@ -3748,7 +3775,7 @@ async function loadVids(){
         <img src="https://img.youtube.com/vi/${esc(v.yt)}/default.jpg" style="width:84px;height:56px;border-radius:10px;object-fit:cover;flex:none;background:#0B4DB5" alt="">
         <div style="min-width:0;flex:1"><b style="font-size:15px;display:block">#${i+1} ${esc(v.title)}</b>
           <div class="info" style="margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(v.descr || v.url)}</div>
-          <div class="info" style="margin:2px 0 0">${v.short ? "Shorts" : "Video"}${v.dur ? " · " + esc(v.dur) : ""}${v.active ? "" : " · yashirin"}</div></div>
+          <div class="info" style="margin:2px 0 0">${esc((catData.find(c=>c.id === v.cat_id) || {}).name || "Kategoriyasiz")} · ${v.short ? "Shorts" : "Video"}${v.dur ? " · " + esc(v.dur) : ""}${v.active ? "" : " · yashirin"}</div></div>
       </div>
       <div class="scanrow" style="margin-top:10px">
         <button onclick="vidMove(${v.id},-1)" ${i === 0 ? "disabled" : ""} style="width:44px;height:40px;border:0;border-radius:10px;background:var(--blue-soft);color:var(--blue);font-weight:800">↑</button>
@@ -3764,6 +3791,7 @@ function vidForm(id){
     <b style="font-size:16px">${id == null ? "Yangi video" : "Videoni tahrirlash"}</b>
     <span class="lbl">Nomi</span><input id="vfT" class="xsel" style="padding:0 12px;width:100%" maxlength="80" placeholder="Masalan: Deklaratsiya yaratish" value="${esc(v.title)}">
     <span class="lbl">Qisqa tavsif</span><input id="vfD" class="xsel" style="padding:0 12px;width:100%" maxlength="120" placeholder="Video nima haqida" value="${esc(v.descr)}">
+    <span class="lbl">Kategoriya</span><select id="vfC" class="xsel" style="padding:0 12px;width:100%"><option value="">— kategoriyasiz —</option>${catData.map(c=>`<option value="${c.id}" ${v.cat_id === c.id ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>
     <span class="lbl">YouTube havolasi</span><input id="vfU" class="xsel" style="padding:0 12px;width:100%" inputmode="url" autocapitalize="off" placeholder="https://youtu.be/..." value="${esc(v.url)}">
     <span class="lbl">Davomiyligi (ixtiyoriy)</span><input id="vfR" class="xsel" style="padding:0 12px;width:100%" maxlength="8" placeholder="0:52" value="${esc(v.dur)}">
     <label style="display:flex;gap:8px;align-items:center;margin:12px 2px 0;font-weight:600"><input type="checkbox" id="vfA" ${v.active !== false ? "checked" : ""}> Mijozlarga ko'rsatish</label>
@@ -3775,7 +3803,7 @@ function vidForm(id){
 }
 async function vidSave(id){
   try{
-    await rpc("admin_video_save", {p_token:token, p_id:id, p_title:$("vfT").value, p_descr:$("vfD").value, p_url:$("vfU").value, p_dur:$("vfR").value, p_active:$("vfA").checked});
+    await rpc("admin_video_save", {p_token:token, p_id:id, p_title:$("vfT").value, p_descr:$("vfD").value, p_url:$("vfU").value, p_dur:$("vfR").value, p_active:$("vfA").checked, p_cat:$("vfC").value ? Number($("vfC").value) : null});
     $("vidForm").innerHTML = ""; toast("Saqlandi"); await loadVids();
   }catch(e){ handleErr(e); }
 }
