@@ -939,6 +939,16 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <span class="st"><b>Video qo'llanmalar <span id="vidCnt" style="color:var(--muted);font-weight:700"></span></b><small>YouTube havolasi bilan darsliklarni qo'shish</small></span>
       <span class="ch">›</span>
     </button>
+    <button class="setrow" onclick="openOfr()">
+      <span class="si" style="background:#0B4DB5"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h4"/></svg></span>
+      <span class="st"><b>Ommaviy oferta <span id="ofrCnt" style="color:var(--muted);font-weight:700"></span></b><small>PDF yuklash va mijozlar roziligi jurnali</small></span>
+      <span class="ch">›</span>
+    </button>
+    <button class="setrow" onclick="openSoc()">
+      <span class="si" style="background:#229ED9"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="6" r="2.6"/><circle cx="18" cy="18" r="2.6"/><path d="M8.3 10.8l7.4-3.6M8.3 13.2l7.4 3.6"/></svg></span>
+      <span class="st"><b>Ijtimoiy tarmoqlar <span id="socCnt" style="color:var(--muted);font-weight:700"></span></b><small>Telegram, Instagram va boshqalar (mijoz Profilida ko'rinadi)</small></span>
+      <span class="ch">›</span>
+    </button>
     <button class="setrow" onclick="openTx()">
       <span class="si" style="background:#F26A00"><svg viewBox="0 0 24 24"><path d="M5 16l1.5-5.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 16M4 16h16v3h-2v-1.5H6V19H4zM9 6h6l1 3H8z"/></svg></span>
       <span class="st"><b>Taksi: uyga yetkazish <span id="txCnt" style="color:var(--muted);font-weight:700"></span></b><small>Taksichilar, narx, ulushingiz va buyurtmalar</small></span>
@@ -1015,6 +1025,49 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <div id="catList" style="margin-top:10px"></div>
     </div>
     <div id="vidList"></div>
+  </div>
+</main>
+
+<main id="ofr" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Ommaviy oferta</b>
+  </div>
+  <div class="wrap" style="padding-bottom:40px">
+    <div class="scanbox" style="margin-bottom:12px">
+      <div id="ofrDoc" class="info">Yuklanmoqda…</div>
+      <input type="file" id="ofrFile" accept="application/pdf,.pdf" style="display:none" onchange="ofrUpload(this)">
+      <label style="display:flex;gap:8px;align-items:center;margin:12px 2px 0;font-weight:600"><input type="checkbox" id="ofrReask"> Yangi versiya: barcha mijozdan qayta rozilik so'rash</label>
+      <div class="scanrow" style="margin-top:10px">
+        <button onclick="$('ofrFile').click()" style="flex:1;height:46px;border:0;border-radius:12px;background:var(--blue);color:#fff;font-weight:800" id="ofrUpBtn">PDF yuklash</button>
+        <button onclick="ofrView()" id="ofrViewBtn" style="height:46px;padding:0 16px;border:0;border-radius:12px;background:var(--blue-soft);color:var(--blue);font-weight:700">Ko'rish</button>
+        <button onclick="ofrDel()" id="ofrDelBtn" style="width:46px;height:46px;border:0;border-radius:12px;background:#FDECEC;color:#C62828;font-weight:800">✕</button>
+      </div>
+      <div class="info" style="margin-top:8px">Mijoz ro'yxatdan o'tishda belgi qo'ymaguncha tugma ishlamaydi. Oferta yuklanmaguncha belgi talab qilinmaydi. Birinchi marta yuklaganingizda mavjud mijozlarga ilovada rozilik oynasi chiqadi.</div>
+    </div>
+    <div class="scanbox">
+      <div style="display:flex;align-items:center;gap:8px"><b style="font-size:16px;flex:1">Rozilik jurnali</b><span class="chip" id="ofrStat"></span></div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        <button class="chip" data-f="all" onclick="ofrFilter('all')" style="border:0;cursor:pointer">Hammasi</button>
+        <button class="chip" data-f="yes" onclick="ofrFilter('yes')" style="border:0;cursor:pointer">Rozi bo'lgan</button>
+        <button class="chip" data-f="no" onclick="ofrFilter('no')" style="border:0;cursor:pointer">Rozilik yo'q</button>
+      </div>
+      <input id="ofrQ" class="xsel" style="padding:0 12px;width:100%;margin-top:10px" placeholder="Qidirish: ism, kod yoki telefon" oninput="ofrDraw()">
+      <div id="ofrList" style="margin-top:10px"></div>
+    </div>
+  </div>
+</main>
+
+<main id="soc" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Ijtimoiy tarmoqlar</b>
+    <button class="chip" style="border:0;cursor:pointer" onclick="socForm(null)">+ Qo'shish</button>
+  </div>
+  <div class="wrap" style="padding-bottom:40px">
+    <div class="info" style="margin-bottom:10px">Mijoz ilovasida Profil → «Ijtimoiy tarmoqlar» da ko'rinadi. Havola: https://t.me/... yoki @nom (Telegram), sayt manzili, yoki telefon raqam.</div>
+    <div id="socForm"></div>
+    <div id="socList"></div>
   </div>
 </main>
 
@@ -3814,6 +3867,113 @@ async function vidDel(id){
 async function vidMove(id, dir){
   try{ await rpc("admin_video_move", {p_token:token, p_id:id, p_dir:dir}); await loadVids(); }catch(e){ handleErr(e); }
 }
+/* ====== Ommaviy oferta ====== */
+let ofrLog = [], ofrF = "all", ofrInfo = null;
+const tzFmt = s => { if(!s) return ""; const d = new Date(s); const f = new Intl.DateTimeFormat("en-GB", {timeZone:"Asia/Tashkent", day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false}).formatToParts(d).reduce((a,p)=>(a[p.type]=p.value,a), {}); return `${f.day}.${f.month}.${f.year} ${f.hour === "24" ? "00" : f.hour}:${f.minute}:${f.second}`; };
+async function openOfr(){ show("ofr"); ofrFilter("all", true); await loadOfr(); }
+async function loadOfr(){
+  try{
+    ofrInfo = await rpc("admin_oferta_info", {p_token:token});
+    const d = ofrInfo.doc;
+    $("ofrDoc").innerHTML = d ? `<b style="font-size:15px;color:var(--text)">${esc(d.name)}</b><br>Versiya ${d.version} · yuklangan: ${tzFmt(d.updated_at)} · ${Math.round(d.size*0.75/1024)} KB` : "Oferta hali yuklanmagan";
+    $("ofrUpBtn").textContent = d ? "Yangi PDF bilan almashtirish" : "PDF yuklash";
+    $("ofrViewBtn").style.display = $("ofrDelBtn").style.display = d ? "" : "none";
+    $("ofrStat").textContent = ofrInfo.accepted + " / " + ofrInfo.customers;
+    const c = $("ofrCnt"); if(c) c.textContent = d ? "· " + ofrInfo.accepted + "/" + ofrInfo.customers : "";
+    ofrLog = await rpc("admin_oferta_log", {p_token:token}) || [];
+    ofrDraw();
+  }catch(e){ handleErr(e); }
+}
+function ofrFilter(f, quiet){
+  ofrF = f;
+  document.querySelectorAll("#ofr [data-f]").forEach(b=>{ const on = b.dataset.f === f; b.style.background = on ? "var(--blue)" : ""; b.style.color = on ? "#fff" : ""; });
+  if(!quiet) ofrDraw();
+}
+function ofrDraw(){
+  const q = ($("ofrQ").value || "").trim().toLowerCase();
+  const cur = ofrInfo && ofrInfo.doc ? ofrInfo.doc.version : null;
+  const rows = ofrLog.filter(x=>{
+    if(ofrF === "yes" && !x.at) return false;
+    if(ofrF === "no" && x.at) return false;
+    return !q || (x.name + " " + x.code + " " + x.phone).toLowerCase().includes(q);
+  });
+  $("ofrList").innerHTML = rows.length ? rows.map(x=>`<div class="item" style="margin-bottom:6px"><div class="row1"><span class="chip" style="background:#E8F0FD;color:#0B4DB5;font-weight:800">${esc(x.code)}</span><b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.name)}</b></div>
+    <div class="chips"><span class="chip">+${esc(x.phone)}</span>${x.at ? `<span class="chip" style="background:#D3F2E0;color:#127A45">✓ ${tzFmt(x.at)}</span>${cur && x.version !== cur ? `<span class="chip" style="background:#FFF1DF;color:#B24F00">eski versiya ${x.version}</span>` : ""}` : `<span class="chip" style="background:#FDE8E8;color:#C62828">Rozilik yo'q</span>`}</div></div>`).join("") : `<div class="info">Hech narsa topilmadi</div>`;
+}
+function ofrUpload(inp){
+  const f = inp.files && inp.files[0]; inp.value = "";
+  if(!f) return;
+  if(!/\.pdf$/i.test(f.name) && f.type !== "application/pdf"){ toast("Faqat PDF fayl", true); return; }
+  if(f.size > 4*1024*1024){ toast("Fayl 4 MB dan oshmasin", true); return; }
+  const rd = new FileReader();
+  rd.onload = async ()=>{
+    const b64 = String(rd.result).split(",")[1] || "";
+    if(!atob(b64.slice(0,8)).startsWith("%PDF")){ toast("Bu PDF fayl emas", true); return; }
+    try{
+      await rpc("admin_oferta_save", {p_token:token, p_name:f.name, p_data:b64, p_reask:$("ofrReask").checked});
+      $("ofrReask").checked = false; toast("Oferta saqlandi"); await loadOfr();
+    }catch(e){ handleErr(e); }
+  };
+  rd.readAsDataURL(f);
+}
+async function ofrView(){
+  try{
+    const r = await rpc("admin_oferta_file", {p_token:token});
+    if(!r || !r.data){ toast("Oferta yo'q", true); return; }
+    const bin = atob(r.data), u = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i] = bin.charCodeAt(i);
+    window.open(URL.createObjectURL(new Blob([u], {type:"application/pdf"})), "_blank");
+  }catch(e){ handleErr(e); }
+}
+async function ofrDel(){
+  if(!confirm("Ofertani o'chirasizmi? Mijozlardan rozilik talab qilinmay qoladi (jurnal saqlanadi).")) return;
+  try{ await rpc("admin_oferta_delete", {p_token:token}); toast("O'chirildi"); await loadOfr(); }catch(e){ handleErr(e); }
+}
+
+/* ====== Ijtimoiy tarmoqlar ====== */
+const SOC_KINDS = {telegram:"Telegram", instagram:"Instagram", facebook:"Facebook", youtube:"YouTube", tiktok:"TikTok", site:"Rasmiy sayt", phone:"Telefon", link:"Boshqa havola"};
+let socData = [];
+async function openSoc(){ show("soc"); $("socForm").innerHTML = ""; await loadSoc(); }
+async function loadSoc(){
+  try{
+    socData = await rpc("admin_social_list", {p_token:token}) || [];
+    const c = $("socCnt"); if(c) c.textContent = socData.length ? "· " + socData.length + " ta" : "";
+    $("socList").innerHTML = socData.length ? socData.map((x,i)=>`<div class="scanbox" style="margin-bottom:8px;${x.active ? "" : "opacity:.55"}">
+      <div style="min-width:0"><b style="font-size:15px">${esc(x.title)}</b> <span class="chip">${esc(SOC_KINDS[x.kind] || x.kind)}</span>${x.active ? "" : ' <span class="chip">yashirin</span>'}
+        <div class="info" style="margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(x.url)}</div></div>
+      <div class="scanrow" style="margin-top:10px">
+        <button onclick="socMove(${x.id},-1)" ${i === 0 ? "disabled" : ""} style="width:44px;height:40px;border:0;border-radius:10px;background:var(--blue-soft);color:var(--blue);font-weight:800">↑</button>
+        <button onclick="socMove(${x.id},1)" ${i === socData.length-1 ? "disabled" : ""} style="width:44px;height:40px;border:0;border-radius:10px;background:var(--blue-soft);color:var(--blue);font-weight:800">↓</button>
+        <button onclick="socForm(${x.id})" style="flex:1;height:40px;border:0;border-radius:10px;background:var(--blue);color:#fff;font-weight:700">Tahrirlash</button>
+        <button onclick="socDel(${x.id})" style="width:44px;height:40px;border:0;border-radius:10px;background:#FDECEC;color:#C62828;font-weight:800">✕</button>
+      </div></div>`).join("") : `<div class="info">Hozircha tarmoq yo'q. «+ Qo'shish» ni bosing.</div>`;
+  }catch(e){ handleErr(e); }
+}
+function socForm(id){
+  const v = id == null ? {kind:"telegram", title:"Telegram", url:"", active:true} : socData.find(x=>x.id === id) || {};
+  $("socForm").innerHTML = `<div class="scanbox" style="margin-bottom:12px;border:1.5px solid var(--blue)">
+    <b style="font-size:16px">${id == null ? "Yangi tarmoq" : "Tahrirlash"}</b>
+    <span class="lbl">Turi (belgisi)</span><select id="sfK" class="xsel" style="padding:0 12px;width:100%" onchange="if(!$('sfT').dataset.m)$('sfT').value=SOC_KINDS[this.value]">${Object.keys(SOC_KINDS).map(k=>`<option value="${k}" ${v.kind === k ? "selected" : ""}>${SOC_KINDS[k]}</option>`).join("")}</select>
+    <span class="lbl">Nomi (mijoz ko'radi)</span><input id="sfT" class="xsel" style="padding:0 12px;width:100%" maxlength="40" oninput="this.dataset.m=1" value="${esc(v.title)}" ${id != null ? 'data-m="1"' : ""}>
+    <span class="lbl">Havola</span><input id="sfU" class="xsel" style="padding:0 12px;width:100%" inputmode="url" autocapitalize="off" placeholder="https://t.me/kanal" value="${esc(v.url)}">
+    <label style="display:flex;gap:8px;align-items:center;margin:12px 2px 0;font-weight:600"><input type="checkbox" id="sfA" ${v.active !== false ? "checked" : ""}> Mijozlarga ko'rsatish</label>
+    <div class="scanrow" style="margin-top:12px">
+      <button onclick="socSave(${id == null ? "null" : id})" style="flex:1;height:46px;border:0;border-radius:12px;background:#127A45;color:#fff;font-weight:800">Saqlash</button>
+      <button onclick="$('socForm').innerHTML=''" style="height:46px;padding:0 18px;border:0;border-radius:12px;background:var(--blue-soft);color:var(--blue);font-weight:700">Bekor</button>
+    </div></div>`;
+  $("socForm").scrollIntoView({behavior:"smooth", block:"start"});
+}
+async function socSave(id){
+  try{
+    await rpc("admin_social_save", {p_token:token, p_id:id, p_kind:$("sfK").value, p_title:$("sfT").value, p_url:$("sfU").value, p_active:$("sfA").checked});
+    $("socForm").innerHTML = ""; toast("Saqlandi"); await loadSoc();
+  }catch(e){ handleErr(e); }
+}
+async function socDel(id){
+  if(!confirm("Tarmoqni o'chirasizmi?")) return;
+  try{ await rpc("admin_social_delete", {p_token:token, p_id:id}); toast("O'chirildi"); await loadSoc(); }catch(e){ handleErr(e); }
+}
+async function socMove(id, dir){ try{ await rpc("admin_social_move", {p_token:token, p_id:id, p_dir:dir}); await loadSoc(); }catch(e){ handleErr(e); } }
+
 async function openRegs(){ show("regs"); await loadRegs(); }
 async function loadRegs(){
   try{

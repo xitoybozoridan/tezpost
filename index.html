@@ -110,6 +110,36 @@
   .menu .mi svg{width:22px;height:22px;stroke:var(--blue);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
   .menu .arrow{margin-left:auto;color:var(--muted);font-size:22px}
   .menu .danger{color:var(--danger)}
+  .ofchk{display:none;align-items:flex-start;gap:10px;margin-top:12px;font-size:14px;line-height:1.45;color:var(--text);cursor:pointer}
+  .ofchk input{width:22px;height:22px;flex:none;margin:1px 0 0;accent-color:var(--blue)}
+  .ofchk a{color:var(--blue);font-weight:700;text-decoration:underline}
+  #authBtn:disabled,#noTgBtn:disabled{opacity:.45}
+  #oferta{padding:0 0 30px}
+  #ofBody{padding:8px 12px 0;display:flex;flex-direction:column;gap:10px;align-items:center}
+  #ofBody canvas{width:100%;height:auto;background:#fff;border-radius:6px;box-shadow:0 2px 12px rgba(11,77,181,.14)}
+  .ofmsg{padding:40px 20px;text-align:center;color:var(--muted);font-weight:600}
+  .ofdl{display:block;margin:6px 14px 0;text-align:center;padding:12px;border-radius:12px;background:var(--blue-soft);color:var(--blue);font-weight:700;text-decoration:none}
+  #ofGate{position:fixed;inset:0;z-index:40;background:rgba(5,20,60,.6);display:none;align-items:center;justify-content:center;padding:20px}
+  #ofGate.show{display:flex}
+  #ofGate .box{width:100%;max-width:420px;background:var(--card);border-radius:22px;padding:22px 18px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  #ofGBtn:disabled{opacity:.45}
+  #ofGate h3{margin:0 0 6px;font-size:19px}
+  #ofGate p{margin:0 0 6px;color:var(--muted);font-size:14px;line-height:1.5}
+  .socs{max-width:520px;width:100%;background:var(--card);border-radius:30px 30px 0 0;padding:0 0 calc(env(safe-area-inset-bottom) + 18px);animation:up .25s ease both;position:relative;overflow:hidden}
+  .socs .hd{padding:26px 20px 18px;background:linear-gradient(135deg,#EAF2FF,#CFE0FF 60%,#B8D2FF);color:#0E1B3D}
+  [data-theme=dark] .socs .hd{background:linear-gradient(135deg,#17264A,#10306B);color:#E8EEFC}
+  .socs .hd:before{content:"";position:absolute;left:50%;top:8px;width:46px;height:5px;border-radius:3px;background:rgba(14,27,61,.25);transform:translateX(-50%)}
+  .socs h3{margin:0;font-size:24px;line-height:1.15;font-weight:800;padding-right:44px}
+  .socs .hd p{margin:6px 0 0;font-size:14px;opacity:.75}
+  .socs .x{position:absolute;right:14px;top:18px;width:38px;height:38px;border-radius:50%;border:0;background:#fff;color:#0E1B3D;font-size:18px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  .socg{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 14px 0;max-height:52vh;overflow:auto}
+  .socg a{display:flex;align-items:center;gap:8px;padding:9px 8px;border:1.5px solid var(--line);border-radius:18px;text-decoration:none;color:var(--text);font-weight:700;font-size:13px;min-width:0;background:var(--card)}
+  .socg a:active{transform:scale(.97)}
+  .socg a b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .socg .si{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none}
+  .socg .si svg{width:20px;height:20px;fill:#fff;stroke:none}
+  .socg .ar{color:var(--muted);font-size:15px}
+  .socmsg{padding:24px 18px;text-align:center;color:var(--muted);font-weight:600;grid-column:1/3}
   .menu .danger .mi{background:#FDECEA}
   .menu .danger .mi svg{stroke:var(--danger)}
   .ver{text-align:center;color:var(--muted);font-size:13px;margin:22px 0}
@@ -621,6 +651,7 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
     </div>
     <label class="field" id="aCodeRow" style="display:none;margin-top:10px"><span>Telegram kod</span>
       <input id="aCode" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="one-time-code"></label>
+    <label class="ofchk" id="ofRow"><input type="checkbox" id="ofChk" onchange="updAuthBtns()"><span><a onclick="event.preventDefault();openOferta('auth')">Ommaviy oferta</a> shartlariga roziman</span></label>
     <div class="msg" id="authMsg"></div>
     <button class="btn-save btn-orange" id="authBtn" onclick="submitAuth()">Kirish</button>
     <button id="noTgBtn" onclick="submitNoTg()" style="display:none;margin-top:10px;width:100%;background:transparent;border:1.5px solid #E67E22;color:#E67E22;border-radius:12px;padding:12px;font-weight:700;font-size:15px">Telegram'siz so'rov yuborish</button>
@@ -702,6 +733,13 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
   <div id="vdet" style="padding-top:10px"></div>
 </main>
 
+<!-- ===== OFERTA ===== -->
+<main id="oferta" class="screen">
+  <div class="vhead"><button class="link back" onclick="closeOferta()"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Orqaga</button><h2 style="margin:6px 4px 8px;font-size:22px">Ommaviy oferta</h2></div>
+  <div id="ofBody"><div class="ofmsg">Yuklanmoqda…</div></div>
+  <a class="ofdl" id="ofDl" style="display:none" target="_blank" rel="noopener">PDF faylni alohida ochish</a>
+</main>
+
 <!-- ===== PROFIL ===== -->
 <main id="profile" class="screen pad-nav">
   <section class="p-hero">
@@ -714,6 +752,8 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
   <div class="menu">
     <button onclick="editName()"><span class="mi"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span>Ismni o'zgartirish<span class="arrow">›</span></button>
     <button onclick="editPass()"><span class="mi"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>Parolni o'zgartirish<span class="arrow">›</span></button>
+    <button onclick="openOferta('profile')"><span class="mi"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>Ommaviy oferta<span class="arrow">›</span></button>
+    <button onclick="openSoc()"><span class="mi"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="6" r="2.6"/><circle cx="18" cy="18" r="2.6"/><path d="M8.3 10.8l7.4-3.6M8.3 13.2l7.4 3.6"/></svg></span>Ijtimoiy tarmoqlar<span class="arrow">›</span></button>
     <button class="danger" onclick="logout()"><span class="mi"><svg viewBox="0 0 24 24"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></svg></span>Chiqish</button>
   </div>
   <div class="ver">TezPost Cargo</div>
@@ -824,6 +864,24 @@ try{var _t=localStorage.getItem("tp_theme");if(_t==="dark")document.documentElem
     <div class="msg" id="sheetMsg"></div>
     <button class="btn-save" id="sheetOk"></button>
     <button class="cancel" onclick="closeSheet()">Bekor qilish</button>
+  </div>
+</div>
+
+<div id="ofGate">
+  <div class="box">
+    <h3>Ommaviy oferta</h3>
+    <p>Ilovadan foydalanishni davom ettirish uchun ommaviy oferta shartlariga rozilik bildiring.</p>
+    <label class="ofchk" style="display:flex"><input type="checkbox" id="ofGChk" onchange="$('ofGBtn').disabled=!this.checked"><span><a onclick="event.preventDefault();openOferta('gate')">Ommaviy oferta</a> bilan tanishdim va shartlariga roziman</span></label>
+    <div class="msg" id="ofGMsg"></div>
+    <button class="btn-save btn-orange" id="ofGBtn" disabled onclick="ofGateOk()" style="margin-top:12px">Davom etish</button>
+    <button class="cancel" onclick="logout();$('ofGate').classList.remove('show')" style="width:100%;margin-top:6px;border:0;background:none;color:var(--muted);font-weight:600;padding:10px">Hisobdan chiqish</button>
+  </div>
+</div>
+<div class="sheet-back" id="socBack" onclick="if(event.target===this)closeSoc()">
+  <div class="socs">
+    <button class="x" onclick="closeSoc()" aria-label="Yopish">✕</button>
+    <div class="hd"><h3>Bizni kuzatib boring</h3><p>Yangiliklar va aksiyalar haqida birinchi bo'ling.</p></div>
+    <div class="socg" id="socG"></div>
   </div>
 </div>
 
@@ -943,7 +1001,99 @@ function setMode(m){
   $("noTgBtn").style.display = m==="reg" ? "block" : "none";
   $("aPass").autocomplete = m==="reg" ? "new-password" : "current-password";
   $("authMsg").textContent = "";
+  updAuthBtns();
 }
+/* ====== Ommaviy oferta ====== */
+let ofReq = true, ofFrom = "profile", ofGatePending = false, ofCache = null, ofDoc = null;
+function updAuthBtns(){
+  const need = mode==="reg" && ofReq, on = need && !$("ofChk").checked;
+  $("ofRow").style.display = need ? "flex" : "none";
+  if(!busy){ $("authBtn").disabled = on; $("noTgBtn").disabled = on; }
+}
+async function loadOfMeta(){
+  try{ const m = await rpc("oferta_meta", {}); ofReq = !!(m && m.has); }catch(e){}
+  updAuthBtns();
+}
+async function checkOferta(){
+  if(!token) return;
+  try{
+    const r = await rpc("oferta_status", {p_token:token});
+    if(r && r.has && !r.accepted){ $("ofGChk").checked = false; $("ofGBtn").disabled = true; $("ofGMsg").textContent = ""; $("ofGate").classList.add("show"); }
+  }catch(e){}
+}
+async function ofGateOk(){
+  if(!$("ofGChk").checked) return;
+  const b = $("ofGBtn"); b.disabled = true;
+  try{ await rpc("oferta_accept", {p_token:token}); $("ofGate").classList.remove("show"); toast("Rozilik qabul qilindi"); }
+  catch(e){ if(e.session){ $("ofGate").classList.remove("show"); handleErr(e); } else { $("ofGMsg").textContent = e.message; b.disabled = false; } }
+}
+function b64bytes(b64){ const bin = atob(b64), u = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i] = bin.charCodeAt(i); return u; }
+const PDFJS = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/";
+let pdfLib = null;
+async function loadPdfLib(){
+  if(pdfLib) return pdfLib;
+  const lib = await import(PDFJS + "pdf.min.mjs");
+  lib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.mjs";
+  return (pdfLib = lib);
+}
+async function openOferta(from){
+  ofFrom = from || "profile";
+  if(ofFrom === "gate"){ ofGatePending = true; $("ofGate").classList.remove("show"); ofFrom = "home"; }
+  $("ofDl").style.display = "none";
+  $("ofBody").innerHTML = '<div class="ofmsg">Yuklanmoqda…</div>';
+  show("oferta");
+  try{
+    if(!ofCache){ ofCache = await rpc("oferta_get", {}); }
+    if(!ofCache || !ofCache.has){ $("ofBody").innerHTML = '<div class="ofmsg">Oferta hali joylanmagan</div>'; return; }
+    const bytes = b64bytes(ofCache.data);
+    const url = URL.createObjectURL(new Blob([bytes], {type:"application/pdf"}));
+    const dl = $("ofDl"); dl.href = url; dl.download = ofCache.name || "oferta.pdf"; dl.style.display = "block";
+    try{
+      const lib = await loadPdfLib();
+      const doc = await lib.getDocument({data: bytes.slice()}).promise;
+      const box = $("ofBody"); box.innerHTML = "";
+      const w = Math.min(box.clientWidth || 360, 900), dpr = Math.min(window.devicePixelRatio || 1, 2);
+      for(let i=1; i<=doc.numPages; i++){
+        if(!$("oferta").classList.contains("active")) break;
+        const pg = await doc.getPage(i), v0 = pg.getViewport({scale:1}), sc = (w / v0.width) * dpr, v = pg.getViewport({scale:sc});
+        const cv = document.createElement("canvas"); cv.width = Math.floor(v.width); cv.height = Math.floor(v.height);
+        box.appendChild(cv);
+        await pg.render({canvasContext:cv.getContext("2d"), viewport:v}).promise;
+      }
+    }catch(e){
+      $("ofBody").innerHTML = '<div class="ofmsg">PDF ilova ichida ochilmadi. Pastdagi tugma bilan oching.</div>';
+    }
+  }catch(e){ $("ofBody").innerHTML = '<div class="ofmsg">' + esc(e.message || "Yuklanmadi") + '</div>'; }
+}
+function closeOferta(){
+  if(ofGatePending){ ofGatePending = false; show(token ? "home" : "auth"); $("ofGate").classList.add("show"); return; }
+  show(ofFrom === "auth" ? "auth" : (token ? ofFrom : "auth"));
+}
+
+/* ====== Ijtimoiy tarmoqlar ====== */
+const SOC_ICO = {
+  telegram:["#229ED9",'<path d="M21.5 3.5L2.8 10.7c-.9.4-.9 1.2-.2 1.4l4.8 1.5 1.8 5.5c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3-14.3c.3-1.3-.5-1.9-1.4-1.5zM8.3 13.2l9.3-5.9c.4-.3.8-.1.5.2l-7.600 6.900-.3 3.100z"/>'],
+  instagram:["linear-gradient(45deg,#F9A03F,#E1306C 55%,#833AB4)",'<path d="M8 3h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3zm4 2.500a4.500 4.500 0 1 1 0 9 4.500 4.500 0 0 1 0-9zm0 2a2.500 2.500 0 1 0 0 5 2.500 2.500 0 0 0 0-5zM17 6.200a1.100 1.100 0 1 1 0 2.200 1.100 1.100 0 0 1 0-2.200z"/>'],
+  facebook:["#1877F2",'<path d="M14 8.500V7c0-.7.2-1 1.100-1H17V3h-2.600C11.700 3 10.500 4.500 10.500 6.800V8.500H8V12h2.500v9H14v-9h2.800l.4-3.500z"/>'],
+  youtube:["#FF0033",'<path d="M21.600 7.200a2.500 2.500 0 0 0-1.800-1.800C18.200 5 12 5 12 5s-6.200 0-7.800.4A2.500 2.500 0 0 0 2.400 7.200C2 8.800 2 12 2 12s0 3.200.4 4.800a2.500 2.500 0 0 0 1.800 1.800C5.800 19 12 19 12 19s6.200 0 7.800-.4a2.500 2.500 0 0 0 1.800-1.800c.4-1.600.4-4.800.4-4.800s0-3.200-.4-4.800zM10 15V9l5.200 3z"/>'],
+  tiktok:["#111",'<path d="M16.600 3h-3v12.200a2.600 2.600 0 1 1-2.600-2.600c.3 0 .5 0 .8.100V9.600a5.700 5.700 0 1 0 4.800 5.600V9a6.800 6.800 0 0 0 4 1.300V7.300a4 4 0 0 1-4-4.300z"/>'],
+  site:["#2A5BE8",'<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.900 9h-3a15.500 15.500 0 0 0-1.400-6A8 8 0 0 1 18.900 11zM12 4c.9 1 1.700 3.200 2 7h-4c.3-3.800 1.100-6 2-7zM9.500 5a15.500 15.500 0 0 0-1.400 6h-3A8 8 0 0 1 9.500 5zM5.100 13h3c.1 2.200.6 4.300 1.400 6a8 8 0 0 1-4.400-6zM12 20c-.9-1-1.700-3.200-2-7h4c-.3 3.800-1.100 6-2 7zm2.500-1c.8-1.700 1.300-3.800 1.400-6h3a8 8 0 0 1-4.400 6z"/>'],
+  phone:["#127A45",'<path d="M6.600 3h3l1.400 4.200-2 1.400a11 11 0 0 0 5.400 5.400l1.400-2L20 13.400v3a2.600 2.600 0 0 1-2.800 2.600A15.500 15.500 0 0 1 4 5.800 2.600 2.600 0 0 1 6.600 3z"/>'],
+  link:["#5A6B8C",'<path d="M10.600 13.400a3.500 3.500 0 0 0 5 0l3-3a3.500 3.500 0 0 0-5-5l-1 1 1.400 1.400 1-1a1.500 1.500 0 0 1 2.200 2.200l-3 3a1.500 1.500 0 0 1-2.200 0zm2.800-2.800a3.500 3.500 0 0 0-5 0l-3 3a3.500 3.500 0 0 0 5 5l1-1-1.400-1.400-1 1a1.500 1.500 0 0 1-2.200-2.200l3-3a1.500 1.500 0 0 1 2.200 0z"/>']
+};
+let socData = store.get("tp_soc", []);
+function socHtml(list){
+  return list.length ? list.map(x=>{ const k = SOC_ICO[x.kind] || SOC_ICO.link;
+    return `<a href="${esc(x.url)}" target="_blank" rel="noopener"><span class="si" style="background:${k[0]}"><svg viewBox="0 0 24 24">${k[1]}</svg></span><b>${esc(x.title)}</b><span class="ar">↗</span></a>`; }).join("")
+    : '<div class="socmsg">Hozircha tarmoq qo\'shilmagan</div>';
+}
+async function openSoc(){
+  $("socG").innerHTML = socHtml(socData);
+  $("socBack").classList.add("show");
+  try{ const r = await rpc("social_list", {}); if(Array.isArray(r)){ socData = r; store.set("tp_soc", r); $("socG").innerHTML = socHtml(r); } }catch(e){}
+}
+function closeSoc(){ $("socBack").classList.remove("show"); }
+
 function toggleEye(btn){
   const i = btn.parentElement.querySelector("input");
   i.type = i.type === "password" ? "text" : "password";
@@ -1043,16 +1193,17 @@ async function submitNoTg(){
   if(name.length < 2){ msg.textContent = "Ismingizni kiriting"; return; }
   if(digits.length !== 9){ msg.textContent = "Telefon raqamni to'liq kiriting (9 ta raqam)"; return; }
   if(pass.length < 6){ msg.textContent = "Parol kamida 6 ta belgidan iborat bo'lsin"; return; }
+  if(ofReq && !$("ofChk").checked){ msg.textContent = "Oferta shartlariga rozilik bildiring"; return; }
   setBusy($("noTgBtn"), true, "Telegram'siz so'rov yuborish");
   try{
-    const r = await rpc("reg_request_submit", {p_phone:"998"+digits, p_password:pass, p_name:name});
+    const r = await rpc("reg_request_submit", {p_phone:"998"+digits, p_password:pass, p_name:name, p_consent:!!ofReq});
     if(r && r.error) throw new Error(r.error);
     regStore(r.token); regPhone = "998"+digits;
     $("aPass").value = "";
     msg.textContent = "So'rov yuborildi. Admin tasdiqlagach shu yerda ma'lumot chiqadi";
     checkRegReq();
   }catch(e){ msg.textContent = e.message; }
-  finally{ setBusy($("noTgBtn"), false, "Telegram'siz so'rov yuborish"); }
+  finally{ setBusy($("noTgBtn"), false, "Telegram'siz so'rov yuborish"); updAuthBtns(); }
 }
 
 async function submitAuth(){
@@ -1065,6 +1216,7 @@ async function submitAuth(){
   if(mode==="reg" && name.length < 2){ msg.textContent = "Ismingizni kiriting"; return; }
   if(digits.length !== 9){ msg.textContent = "Telefon raqamni to'liq kiriting (9 ta raqam)"; return; }
   if(pass.length < 6){ msg.textContent = "Parol kamida 6 ta belgidan iborat bo'lsin"; return; }
+  if(mode==="reg" && ofReq && !$("ofChk").checked){ msg.textContent = "Oferta shartlariga rozilik bildiring"; return; }
   // 1-bosqich (ro'yxatdan o'tish): Telegram bot orqali tasdiqlash so'rovi
   if(mode==="reg" && $("aCodeRow").style.display !== "block"){
     if(tgPoll){ msg.textContent = "Telegram botda raqamingizni tasdiqlang. Kod shu yerda chiqadi"; return; }
@@ -1083,7 +1235,7 @@ async function submitAuth(){
       msg.textContent = "Telegram botni oching va «Raqamni yuborish» ni bosing. Kod shu yerda chiqadi";
       tgStop(); tgPoll = setInterval(tgCheck, 2000);
     }catch(e){ msg.textContent = e.message || "Telegram so'rovi yaratilmadi"; }
-    finally{ setBusy($("authBtn"), false, "Ro'yxatdan o'tish"); }
+    finally{ setBusy($("authBtn"), false, "Ro'yxatdan o'tish"); updAuthBtns(); }
     return;
   }
   const label = mode==="reg" ? "Ro'yxatdan o'tish" : "Kirish";
@@ -1102,6 +1254,7 @@ async function submitAuth(){
       : await rpc("login_customer", {p_phone:phone, p_password:pass});
     if(r && r.error){ msg.textContent = r.error; return; }
     token = r.token; me = {name:r.name, phone:r.phone};
+    if(mode === "reg" && ofReq){ try{ await rpc("oferta_accept", {p_token:token}); }catch(e){} }
     if(mode !== "reg") regDone();
     store.set("tp_token", token); store.set("tp_me", me);
     declarations = []; store.set("tp_decl", []);
@@ -1114,7 +1267,7 @@ async function submitAuth(){
 
 function enterApp(){
   $("helloName").textContent = (me && me.name || "").split(" ")[0];
-  renderList(); show("home"); loadList(); checkUnread(); refreshAddr(); loadTxCard();
+  renderList(); show("home"); loadList(); checkUnread(); refreshAddr(); loadTxCard(); checkOferta();
 }
 function forceLogout(){
   token = null; me = null; declarations = [];
@@ -1833,11 +1986,13 @@ window.addEventListener("popstate", ()=>{
 });
 function handleBack(){            // true = ilova ichida ishlandi (history'ni qayta to'ldiramiz)
   if($("exitBack").classList.contains("show")){ $("exitBack").classList.remove("show"); return true; }
+  if($("ofGate").classList.contains("show")) return true;
   if($("lightbox").classList.contains("show")){ closeLightbox(); return true; }
   if($("notifBack").classList.contains("show")){ closeNotif(); return true; }
   const sb = document.querySelector(".sheet-back.show"); if(sb){ sb.classList.remove("show"); return true; }
   const cur = document.querySelector(".screen.active"), id = cur ? cur.id : "auth";
   if(id === "video"){ show("videos"); return true; }
+  if(id === "oferta"){ closeOferta(); return true; }
   if(id !== "home" && id !== "auth" && token){ go("home"); return true; }
   $("exitBack").classList.add("show");   // bosh sahifada: tasdiq so'raymiz (history asosiy holatda qoladi)
   return false;
@@ -1854,6 +2009,7 @@ setTimeout(()=>{ const sp = $("splash"); if(sp){ sp.classList.add("out"); setTim
 
 /* ====== Boshlash ====== */
 if(!CONFIGURED) $("setupWarn").style.display = "block";
+loadOfMeta();
 if(token && me){ enterApp(); } else { setMode("login"); show("auth"); checkRegReq(); }
 setInterval(() => { if(!token) checkRegReq(); }, 30000);
 
