@@ -805,13 +805,13 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
   </div>
   <div class="wrap" style="padding-bottom:30px">
     <div class="scanbox">
-      <div class="hoinfo" style="margin:0 0 10px;line-height:1.5">iPost faylidagi yuklarning <b>holati</b> va <b>og'irligini</b> TezPost'ga bir tugma bilan o'tkazadi. Faqat mijoz ilovaga qo'shgan trek-kodlar yangilanadi, qolganlari mijoz qo'shganda avtomatik yangilanadi.</div>
-      <span class="lbl">1. iPost Excel faylini tanlang (.xlsx yoki .csv)</span>
+      <div class="hoinfo" style="margin:0 0 10px;line-height:1.5">Tez-Tez faylidagi yuklarning <b>holati</b> va <b>og'irligini</b> TezPost'ga bir tugma bilan o'tkazadi. Faqat mijoz ilovaga qo'shgan trek-kodlar yangilanadi, qolganlari mijoz qo'shganda avtomatik yangilanadi.</div>
+      <span class="lbl">1. Tez-Tez Excel faylini tanlang (.xlsx yoki .csv)</span>
       <label class="btn" style="display:block;text-align:center;line-height:46px;height:46px;cursor:pointer;background:linear-gradient(180deg,#FF9322,#F26A00);box-shadow:none">Fayl tanlash<input type="file" id="xlFile" accept=".xlsx,.csv,.txt" style="display:none" onchange="xlLoad(this)"></label>
       <div class="scanstat"><span id="xlInfo">Fayl tanlanmagan</span></div>
       <div id="xlStep2" style="display:none">
         <span class="lbl" style="margin-top:12px">2. Mijoz kodini yozing (bo'sh qoldirsangiz, fayldagi hamma yuk)</span>
-        <div class="scanrow"><input id="xlCode" inputmode="numeric" autocomplete="off" placeholder="Masalan: 41124" oninput="xlRun()" onkeydown="if(event.key==='Enter')xlRun()"></div>
+        <div class="scanrow"><input id="xlCode" inputmode="text" autocapitalize="characters" autocomplete="off" placeholder="Masalan: FAR13372" oninput="xlRun()" onkeydown="if(event.key==='Enter')xlRun()"></div>
         <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;color:var(--blue);font-size:14px">Ustunlar (avtomatik tanlangan, xato bo'lsa o'zgartiring)</summary>
           <div class="xgrid" style="margin-top:8px">
             <div class="xf"><span class="lbl">Mijoz kodi ustuni</span><select id="xlCol" class="field xsel" onchange="xlRun()"></select></div>
@@ -3421,7 +3421,7 @@ async function xlLoad(inp){
     xl.head = Array.from(rows[hi], c=>String(c??"").trim()); xl.rows = rows.slice(hi+1); xl.name = f.name.replace(/\.[^.]+$/,"");
     const cols = Math.max(xl.head.length, ...xl.rows.slice(0,200).map(r=>r.length));
     for(let i=0;i<cols;i++) if(!xl.head[i]) xl.head[i] = "Ustun " + (i+1);
-    let ci = xl.head.findIndex(h=>/mijoz\s*kod|клиент|customer|client\s*(id|code|kod)|kod/i.test(h)); if(ci < 0) ci = 0;
+    let ci = xl.head.findIndex(h=>/tez\s*id|mijoz\s*kod|клиент|customer|client\s*(id|code|kod)|kod/i.test(h)); if(ci < 0) ci = 0;
     $("xlCol").innerHTML = xl.head.map((h,i)=>`<option value="${i}" ${i===ci?"selected":""}>${esc(h)}</option>`).join("");
     let si = xl.head.findIndex(h=>/holat|status|статус|state/i.test(h)); if(si < 0) si = Math.min(1, cols-1);
     $("xlStatCol").innerHTML = '<option value="-1">— holat bo\'yicha ajratmaslik —</option>' + xl.head.map((h,i)=>`<option value="${i}" ${i===si?"selected":""}>${esc(h)}</option>`).join("");
@@ -3478,7 +3478,16 @@ const xe = v => String(v ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F
 const colName = i => { let s = "", n = i + 1; while(n > 0){ const m = (n-1) % 26; s = String.fromCharCode(65+m) + s; n = Math.floor((n-1)/26); } return s; };
 const XL_ST = [["","⏭ O'tkazib yuborish"],["china","Xitoy omborida"],["transit","Jo'natildi"],["sort","Saralanmoqda"],["uz","Punktga yetkazilmoqda"],["pickup","Topshirish punktida"],["done","Mijozga topshirildi"]];
 function xlGuess(v){
-  const t = String(v).toLowerCase();
+  const t = String(v).toLowerCase().replace(/[’‘`ʻʼ]/g,"'");
+  // Tez-Tez holatlari
+  if(/kutilmoqda|musodara|yo.qolgan|yoqolgan/.test(t)) return "";
+  if(/mijozga topshirildi/.test(t)) return "done";
+  if(/^stellaj/.test(t)) return "pickup";
+  if(/tarqatish nuqtasi/.test(t)) return "uz";
+  if(/toshkent omboridan/.test(t)) return "uz";
+  if(/toshkent ombori/.test(t)) return "sort";
+  if(/^xorij ombor/.test(t)) return "china";
+  if(/^jo.natildi/.test(t)) return "transit";
   if(/topshiril|delivered|выдан|получен|completed|yakun|tasdiq|received by/.test(t)) return "done";
   if(/punktda|pickup|pick-up|ready|готов к выдаче|на пункте|в пункте|olib ket/.test(t)) return "pickup";
   if(/saralan|sorting|sorted|сортир|sort/.test(t)) return "sort";
