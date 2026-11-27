@@ -700,7 +700,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <span class="lbl">Narxlar ($ / kg)</span>
       <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
         <div style="flex:1;min-width:120px"><span class="lbl" style="margin:0 0 4px">Mijozga (sotish)</span><input id="rtSell" inputmode="decimal" class="xsel" style="padding:0 12px"></div>
-        <div style="flex:1;min-width:120px"><span class="lbl" style="margin:0 0 4px">iPost'ga (sizdan)</span><input id="rtCost" inputmode="decimal" class="xsel" style="padding:0 12px"></div>
+        <div style="flex:1;min-width:120px"><span class="lbl" style="margin:0 0 4px">Tez-Tez'ga (sizdan)</span><input id="rtCost" inputmode="decimal" class="xsel" style="padding:0 12px"></div>
         <div style="flex:1;min-width:140px"><span class="lbl" style="margin:0 0 4px">Dollar kursi (so'm)</span><input id="rtUsd" inputmode="numeric" class="xsel" style="padding:0 12px" placeholder="12000"></div>
         <button class="go" style="height:46px;padding:0 18px;border:0;border-radius:14px;background:linear-gradient(180deg,#FF9322,#F26A00);color:#fff;font-weight:800" onclick="saveRates()">Saqlash</button>
       </div>
@@ -961,7 +961,7 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
     </button>
     <button class="setrow" onclick="openReport()">
       <span class="si"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>
-      <span class="st"><b>Hisobot va foyda</b><small>Kg, summa, iPost to'lovi, foyda, qarzdorlar va narxlar</small></span>
+      <span class="st"><b>Hisobot va foyda</b><small>Kg, summa, Tez-Tez to'lovi, foyda, qarzdorlar va narxlar</small></span>
       <span class="ch">›</span>
     </button>
     <button class="setrow" onclick="openXl()">
@@ -3335,7 +3335,7 @@ async function loadReport(){
       <div class="kpi big"><small>Sof foyda</small><b>${somN(profit)}</b></div>
       <div class="kpi"><small>Jami og'irlik</small><b>${kgf(r.kg)} kg</b></div>
       <div class="kpi"><small>Mijozlardan (sotish)</small><b>${somN(r.revenue_uzs)}</b></div>
-      <div class="kpi"><small>iPost'ga to'lov</small><b>${somN(r.cost_uzs)}</b></div>
+      <div class="kpi"><small>Tez-Tez'ga to'lov</small><b>${somN(r.cost_uzs)}</b></div>
       <div class="kpi"><small>To'langan</small><b style="color:#127A45">${somN(r.paid_uzs)}</b></div>
       <div class="kpi ${Number(r.debt_uzs)?"warn":""}"><small>To'lanmagan (qarz)</small><b>${somN(r.debt_uzs)}</b></div>
       <div class="kpi"><small>Og'irligi kiritilgan</small><b>${r.weighed} / ${r.cargos}</b></div></div>
@@ -4423,7 +4423,7 @@ async function expReport(pdf){
     const cust = [...map.values()].sort((a,b)=>b.uzs-a.uzs);
     const profit = Number(rep.revenue_uzs) - Number(rep.cost_uzs);
     const sumHead = ["Ko'rsatkich","Qiymat"];
-    const sumRows = [["Davr", expPeriodName()], ["Sof foyda (so'm)", profit], ["Jami og'irlik (kg)", Number(rep.kg||0)], ["Mijozlardan (so'm)", Number(rep.revenue_uzs||0)], ["iPost'ga to'lov (so'm)", Number(rep.cost_uzs||0)], ["To'langan (so'm)", Number(rep.paid_uzs||0)], ["Qarz (so'm)", Number(rep.debt_uzs||0)]];
+    const sumRows = [["Davr", expPeriodName()], ["Sof foyda (so'm)", profit], ["Jami og'irlik (kg)", Number(rep.kg||0)], ["Mijozlardan (so'm)", Number(rep.revenue_uzs||0)], ["Tez-Tez'ga to'lov (so'm)", Number(rep.cost_uzs||0)], ["To'langan (so'm)", Number(rep.paid_uzs||0)], ["Qarz (so'm)", Number(rep.debt_uzs||0)]];
     const custHead = ["Mijoz kodi","Ismi","Telefon","Yuklar soni","Og'irlik (kg)","Summa ($)","Summa (so'm)","To'langan (so'm)","Qarz (so'm)"];
     const custRows = cust.map(m => [m.code, m.name, m.phone, m.n, +m.kg.toFixed(2), +m.usd.toFixed(2), m.uzs, m.paid, m.debt]);
     const stamp = ymd(new Date());
