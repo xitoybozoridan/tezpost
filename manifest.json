@@ -4,7 +4,7 @@
   "short_name": "TezPost",
   "description": "Xitoydan O'zbekistonga yuk yuborish: deklaratsiya yaratish va yuklarni kuzatish",
   "lang": "uz",
-  "start_url": "./",
+  "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

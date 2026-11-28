@@ -949,6 +949,16 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       <span class="st"><b>Ijtimoiy tarmoqlar <span id="socCnt" style="color:var(--muted);font-weight:700"></span></b><small>Telegram, Instagram va boshqalar (mijoz Profilida ko'rinadi)</small></span>
       <span class="ch">›</span>
     </button>
+    <button class="setrow" onclick="openPwr()">
+      <span class="si" style="background:#C62828"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2.500"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+      <span class="st"><b>Parol tiklash <span id="pwCnt" style="color:var(--muted);font-weight:700"></span></b><small>Parolni unutgan mijozlar so'rovi va yangi parol qo'yish</small></span>
+      <span class="ch">›</span>
+    </button>
+    <button class="setrow" onclick="openSite()">
+      <span class="si" style="background:#127A45"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.600 2.700 4 5.700 4 9s-1.400 6.300-4 9c-2.600-2.700-4-5.700-4-9s1.400-6.300 4-9z"/></svg></span>
+      <span class="st"><b>Sayt (tezpostcargo.uz)</b><small>Bosh sahifadagi matnlar, tarif, telefon va ilova havolasi</small></span>
+      <span class="ch">›</span>
+    </button>
     <button class="setrow" onclick="openTx()">
       <span class="si" style="background:#F26A00"><svg viewBox="0 0 24 24"><path d="M5 16l1.5-5.5A2 2 0 0 1 8.4 9h7.2a2 2 0 0 1 1.9 1.5L19 16M4 16h16v3h-2v-1.5H6V19H4zM9 6h6l1 3H8z"/></svg></span>
       <span class="st"><b>Taksi: uyga yetkazish <span id="txCnt" style="color:var(--muted);font-weight:700"></span></b><small>Taksichilar, narx, ulushingiz va buyurtmalar</small></span>
@@ -1054,6 +1064,41 @@ html[data-view=pc] .xsy{display:grid;grid-template-columns:repeat(2,1fr);gap:8px
       </div>
       <input id="ofrQ" class="xsel" style="padding:0 12px;width:100%;margin-top:10px" placeholder="Qidirish: ism, kod yoki telefon" oninput="ofrDraw()">
       <div id="ofrList" style="margin-top:10px"></div>
+    </div>
+  </div>
+</main>
+
+<main id="pwr" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Parol tiklash</b>
+    <button class="chip" style="border:0;cursor:pointer" onclick="loadPwr()">⟳</button>
+  </div>
+  <div class="wrap" style="padding-bottom:40px">
+    <div class="info" style="margin-bottom:10px">Mijoz kirish oynasidagi «Parolni unutdingizmi?» orqali so'rov yuboradi. Siz u bilan bog'lanib shaxsini tekshirasiz, so'ng «Yangi parol qo'yish» ni bosasiz. Mijoz hamma qurilmadan chiqariladi va yangi parol bilan kiradi.</div>
+    <div id="pwrList"></div>
+    <div class="scanbox" style="margin-top:14px"><b style="font-size:15px">Boshqa mijoz uchun parol qo'yish</b>
+      <span class="lbl">Telefon yoki mijoz kodi</span>
+      <input id="pwrQ" class="xsel" style="padding:0 12px;width:100%" placeholder="90 123 45 67 yoki TP1001" inputmode="text">
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="pwrFind()">Topish</button>
+      <div id="pwrFound"></div></div>
+  </div>
+</main>
+
+<main id="site" class="screen">
+  <div class="th-top">
+    <button class="bk" onclick="show('settings')" aria-label="Orqaga"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <b style="font-size:17px;flex:1">Sayt matnlari</b>
+    <a class="chip" style="text-decoration:none" href="https://tezpostcargo.uz/" target="_blank" rel="noopener">Saytni ochish</a>
+  </div>
+  <div class="wrap" style="padding-bottom:60px">
+    <div class="info" style="margin-bottom:10px">Bu yerda yozganingiz tezpostcargo.uz bosh sahifasida darhol o'zgaradi. Maydonni bo'sh qoldirsangiz, asl matn qoladi. Ijtimoiy tarmoqlar alohida: Sozlamalar → «Ijtimoiy tarmoqlar».</div>
+    <div class="scanbox" id="siteLockBox"></div>
+    <div id="siteWrap" style="display:none">
+      <div id="siteBody"></div>
+      <button style="margin-top:14px;font-size:13.5px;background:none;border:0;color:var(--blue,#1A56DB);font-weight:800;padding:4px 0" onclick="sitePwChg=!sitePwChg;siteMsg='';sitePwDraw()">Sayt parolini o'zgartirish</button>
+      <div id="sitePwBox"></div>
+      <button style="margin-top:6px;font-size:13.5px;background:none;border:0;color:#C62828;font-weight:800;padding:4px 0" onclick="siteRelock()">Qulflash</button>
     </div>
   </div>
 </main>
@@ -2891,8 +2936,8 @@ function handleErr(e){
   if(e.session){ forceLogout(); toast("Qaytadan kiring", true); }
   else toast(e.message, true);
 }
-function enter(){ show("main"); search(); pollBadge(); checkPay(); checkOrphans(); checkTx(); checkPk(); }
-setInterval(()=>{ if(!document.hidden){ checkPay(); checkTx(); } }, 30000);
+function enter(){ show("main"); search(); pollBadge(); checkPay(); checkOrphans(); checkTx(); checkPk(); checkPwr(); }
+setInterval(()=>{ if(!document.hidden){ checkPay(); checkTx(); checkPwr(); } }, 30000);
 
 /* ====== Qidiruv ====== */
 let timer = null;
@@ -3982,6 +4027,173 @@ async function socDel(id){
   try{ await rpc("admin_social_delete", {p_token:token, p_id:id}); toast("O'chirildi"); await loadSoc(); }catch(e){ handleErr(e); }
 }
 async function socMove(id, dir){ try{ await rpc("admin_social_move", {p_token:token, p_id:id, p_dir:dir}); await loadSoc(); }catch(e){ handleErr(e); } }
+
+/* ====== Parol tiklash ====== */
+async function checkPwr(){ if(!token || !CONFIGURED) return; try{ const r = await rpc("admin_pass_badge", {p_token:token}); const e = $("pwCnt"); if(e) e.textContent = r.n > 0 ? "· " + r.n + " ta kutmoqda" : ""; }catch(e){} }
+let pwrData = [];
+async function openPwr(){ show("pwr"); $("pwrFound").innerHTML = ""; await loadPwr(); }
+async function loadPwr(){
+  try{
+    pwrData = await rpc("admin_pass_requests", {p_token:token}) || [];
+    const n = pwrData.filter(x=>x.status === "new").length, c = $("pwCnt"); if(c) c.textContent = n ? "· " + n + " ta kutmoqda" : "";
+    $("pwrList").innerHTML = pwrData.length ? pwrData.map(x=>`<div class="scanbox" style="margin-bottom:8px;${x.status === "new" ? "border:1.5px solid #E67E22" : "opacity:.6"}">
+      <b style="font-size:16px">${esc(x.customer_name || x.name || "—")}</b> ${x.code ? `<span class="chip">${esc(x.code)}</span>` : ""}
+      ${x.status === "done" ? '<span class="chip">parol qo\'yildi</span>' : x.status === "dismissed" ? '<span class="chip">rad etildi</span>' : ""}
+      <div class="info" style="margin:4px 0 0"><a href="tel:+${esc(x.phone)}">${esc(fmtPhone(x.phone))}</a> · ${esc(when(x.created_at))}</div>
+      ${x.note ? `<div class="info" style="margin:4px 0 0">«${esc(x.note)}»</div>` : ""}
+      ${x.status === "new" ? `<div class="scanrow" style="margin-top:10px">
+        <button onclick="pwrSet(${x.customer_id})" style="flex:1;height:44px;border:0;border-radius:12px;background:#127A45;color:#fff;font-weight:800">Yangi parol qo'yish</button>
+        <button onclick="pwrDismiss(${x.id})" style="width:48px;height:44px;border:0;border-radius:12px;background:#FDECEC;color:#C62828;font-weight:800" aria-label="Rad etish">✕</button></div>` : ""}</div>`).join("")
+      : `<div class="info">Hozircha so'rov yo'q</div>`;
+  }catch(e){ handleErr(e); }
+}
+function pwrGen(){ const d = "23456789"; let p = ""; for(let i = 0; i < 6; i++) p += d[Math.floor(Math.random() * d.length)]; return p; }
+async function pwrSet(cid){
+  if(!cid){ toast("Bu raqam ro'yxatda yo'q", true); return; }
+  const p = prompt("Mijozga qo'yiladigan yangi parol (kamida 6 ta belgi). Tayyor variant:", pwrGen()); if(p === null) return;
+  try{
+    const r = await rpc("admin_customer_set_password", {p_token:token, p_customer:cid, p_new:p.trim()});
+    if(!r.ok){ toast(r.msg || "Xatolik", true); return; }
+    const t = "TezPost Cargo\nTelefon: +" + r.phone + "\nYangi parol: " + p.trim() + "\nKirgach, Profil → Parolni o'zgartirish orqali o'zingiz xohlagan parolni qo'ying.";
+    try{ await navigator.clipboard.writeText(t); toast("Parol qo'yildi. Mijozga yuborish uchun matn nusxalandi"); }catch(e){ prompt("Mijozga yuboring (nusxalang):", t); }
+    $("pwrFound").innerHTML = ""; loadPwr();
+  }catch(e){ handleErr(e); }
+}
+async function pwrDismiss(id){ if(!confirm("So'rovni rad etasizmi?")) return; try{ await rpc("admin_pass_request_dismiss", {p_token:token, p_id:id}); loadPwr(); }catch(e){ handleErr(e); } }
+async function pwrFind(){
+  const q = $("pwrQ").value.trim(); if(!q) return;
+  try{
+    const list = await rpc("admin_customers", {p_token:token, p_q:q}) || [];
+    $("pwrFound").innerHTML = list.length ? list.slice(0, 8).map(c=>`<div class="scanrow" style="margin-top:10px;align-items:center"><div style="flex:1;min-width:0"><b>${esc(c.name)}</b> <span class="chip">${esc(c.code)}</span><div class="info" style="margin:0">${esc(fmtPhone(c.phone))}</div></div><button onclick="pwrSet(${c.id})" style="height:42px;padding:0 14px;border:0;border-radius:12px;background:#127A45;color:#fff;font-weight:800">Parol qo'yish</button></div>`).join("") : `<div class="info" style="margin-top:10px">Mijoz topilmadi</div>`;
+  }catch(e){ handleErr(e); }
+}
+
+/* ====== Sayt matnlari (tezpostcargo.uz) ====== */
+const SITE_DEF = {
+  hero_title:"Xitoydan O'zbekistonga yuk tashish",
+  hero_lead:"Buyurtmangizni Xitoy omboriga yuboring, yo'ldagi har bir bosqichni ilovada kuzating va yukni punktdan kod bilan oling.",
+  cta_label:"Ilovani ochish",
+  steps_title:"To'rt qadamda yukingiz qo'lingizda", steps_sub:"Hammasi bitta ilovada: ro'yxatdan o'tish, manzil, kuzatuv va to'lov.",
+  steps:[
+    {t:"Ilovada ro'yxatdan o'ting", d:"Telefon raqam va parol bilan kirasiz. Tasdiqlash Telegram bot orqali bo'ladi."},
+    {t:"Xitoy manzilini oling", d:"Ilovadagi «Xitoy manzilingiz» bo'limidan qabul qiluvchi, telefon va manzilni nusxalab, Taobao, Pinduoduo yoki 1688 buyurtmangizga qo'ying."},
+    {t:"Trek-kodni deklaratsiya qiling", d:"Buyurtmangiz trek-kodi va tovar turini ilovaga kiriting. Yuk Xitoy omboriga kelgach, holati yangilanadi."},
+    {t:"Kuzating va punktdan oling", d:"Har bir holat o'zgarganda ovozli xabar keladi. Punktda «Yuk olish kodi»ni aytsangiz bo'ldi."}],
+  tarif_title:"Tarif", tarif_sub:"Narx kilogrammga hisoblanadi. To'lovni so'mda, ilova ichida qilasiz.",
+  price:"6.5$", price_unit:"/ kg",
+  price_line1:"Avto tarif. Yetib borish muddati 14–18 kun.", price_line2:"Avia tarif uchun narxni ilovadagi Yordam chatidan so'rang.",
+  perks:["Yo'lda yukingiz holati har bosqichda yangilanadi","Dollar kursi ilovada ko'rinib turadi, summa so'mda chiqadi","Ko'p yukni bitta kod bilan birdan olasiz"],
+  feat_title:"Ilovada nimalar bor", feat_sub:"Telefoningizdagi ilovadan hammasini boshqarasiz.",
+  feats:[
+    {t:"Yuk kuzatuvi", d:"Trek-kod bo'yicha yukingiz qayerda ekanini ko'rasiz."},
+    {t:"Ovozli bildirishnoma", d:"Yuk punktga yetganda yoki javob kelganda telefon xabar beradi."},
+    {t:"Yordam chati", d:"Savolingizni yozasiz, operator ilova ichida javob beradi."},
+    {t:"To'lov so'mda", d:"Har bir yuk uchun summa va umumiy to'lov ro'yxati bir joyda."},
+    {t:"Xitoy manzili", d:"Avto va avia manzillarini bir bosishda nusxalaysiz."},
+    {t:"Uyga yetkazish", d:"Yukni taksi orqali uyingizgacha yetkazib berishni buyurtma qilasiz."}],
+  get_title:"Ilovani oching", get_text:"Android telefonda ilovani o'rnatib oling yoki brauzerning o'zida oching, ikkalasida ham hammasi bir xil ishlaydi.",
+  get_small:"iPhone'da: ilovani Safari'da oching → «Ulashish» → «Bosh ekranga qo'shish».",
+  apk_label:"Android ilovasini yuklab olish", apk_url:"",
+  contact_title:"Aloqa", contact_sub:"Savol bo'lsa, quyidagi manzillardan yozing.", phone:"", footer_text:"© TezPost Cargo"
+};
+const SITE_FIELDS = [
+  ["Bosh ekran", [["hero_title","Sarlavha","t"],["hero_lead","Qisqa tavsif","a"],["cta_label","Asosiy tugma matni","t"]]],
+  ["Qanday ishlaydi", [["steps_title","Bo'lim sarlavhasi","t"],["steps_sub","Izoh","t"],["steps","Qadamlar (har qator: Sarlavha | Tavsif)","L"]]],
+  ["Tarif", [["tarif_title","Bo'lim sarlavhasi","t"],["tarif_sub","Izoh","t"],["price","Narx (masalan 6.5$)","t"],["price_unit","Birligi (masalan / kg)","t"],["price_line1","Narx ostidagi 1-qator","t"],["price_line2","Narx ostidagi 2-qator (masalan avia)","t"],["perks","Yonidagi afzalliklar (har qatorda bittadan)","P"]]],
+  ["Ilovadagi imkoniyatlar", [["feat_title","Bo'lim sarlavhasi","t"],["feat_sub","Izoh","t"],["feats","Imkoniyatlar (har qator: Sarlavha | Tavsif)","L"]]],
+  ["Ilovani yuklab olish", [["get_title","Sarlavha","t"],["get_text","Matn","a"],["get_small","Kichik izoh (iPhone)","t"],["apk_label","Yuklash tugmasi matni","t"],["apk_url","Ilova havolasi (Play Market yoki APK fayl manzili)","u"]]],
+  ["Aloqa va pastki qism", [["contact_title","Sarlavha","t"],["contact_sub","Izoh","t"],["phone","Aloqa telefoni (+998901234567)","p"],["footer_text","Pastki yozuv","t"]]]
+];
+let siteCur = {};
+let sitePass = null, siteHas = null, siteMsg = "", sitePwChg = false;
+async function openSite(){
+  sitePass = null; siteMsg = ""; sitePwChg = false; show("site");
+  $("siteWrap").style.display = "none"; $("siteLockBox").style.display = "";
+  try{ const r = await rpc("admin_site_status", {p_token:token}); siteHas = r.has_pass; }catch(e){ handleErr(e); return; }
+  siteLockDraw();
+}
+function siteRelock(msg){
+  sitePass = null; siteMsg = msg || ""; sitePwChg = false;
+  $("siteWrap").style.display = "none"; $("siteLockBox").style.display = ""; siteLockDraw();
+}
+const siteI = (id, ph) => `<input id="${id}" type="password" class="xsel" style="padding:0 12px" placeholder="${ph}" autocomplete="new-password" maxlength="60">`;
+const siteErr = () => siteMsg ? `<div class="hoinfo" style="color:#C62828;margin:8px 0 0;font-weight:700">${esc(siteMsg)}</div>` : "";
+function siteLockDraw(){
+  const box = $("siteLockBox");
+  if(!siteHas){
+    box.innerHTML = `<span class="lbl">Sayt bo'limi</span><div class="hoinfo" style="margin:2px 0 10px">Sayt matnlarini himoyalash uchun parol o'rnating. Parolsiz sayt matnlarini ko'rib ham, o'zgartirib ham bo'lmaydi.</div>
+      <div class="xgrid"><div class="xf"><span class="lbl">Yangi parol (kamida 6 ta belgi)</span>${siteI("siteNew","Yangi parol")}</div><div class="xf"><span class="lbl">Parolni takrorlang</span>${siteI("siteNew2","Takrorlang")}</div></div>${siteErr()}
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="siteSetPass(false)">Parolni o'rnatish</button>`;
+  }else{
+    box.innerHTML = `<span class="lbl">Sayt bo'limi</span><div class="hoinfo" style="margin:2px 0 10px">Ochish uchun Sayt parolini kiriting.</div>
+      <div class="xgrid"><div class="xf">${siteI("sitePw","Sayt paroli")}</div></div>${siteErr()}
+      <button class="btn" style="margin-top:10px;box-shadow:none" onclick="siteUnlock()">Ochish</button>`;
+    const f = $("sitePw"); if(f) f.addEventListener("keydown", e=>{ if(e.key === "Enter") siteUnlock(); });
+  }
+}
+function sitePwDraw(){
+  $("sitePwBox").innerHTML = sitePwChg ? `<div class="scanbox" style="margin-top:8px"><div class="xgrid"><div class="xf">${siteI("siteOld","Eski parol")}</div><div class="xf">${siteI("siteNew","Yangi parol (6+ belgi)")}</div></div>${siteErr()}<button class="btn" style="margin-top:8px;box-shadow:none" onclick="siteSetPass(true)">Almashtirish</button></div>` : "";
+}
+async function siteUnlock(pw){
+  pw = pw || ($("sitePw") && $("sitePw").value); if(!pw) return;
+  try{
+    const r = await rpc("admin_site_get", {p_token:token, p_lock:pw});
+    if(r.ok === false){ siteMsg = r.msg; siteHas = r.has_pass; siteLockDraw(); return; }
+    sitePass = pw; siteMsg = ""; siteCur = r.site || {};
+    $("siteLockBox").style.display = "none"; $("siteWrap").style.display = ""; drawSite(); sitePwDraw();
+  }catch(e){ handleErr(e); }
+}
+async function siteSetPass(change){
+  const n1 = $("siteNew").value, n2 = change ? n1 : $("siteNew2").value;
+  if(n1 !== n2){ siteMsg = "Parollar bir xil emas"; change ? sitePwDraw() : siteLockDraw(); return; }
+  try{
+    const r = await rpc("admin_site_setpass", {p_token:token, p_old: change ? $("siteOld").value : "", p_new:n1});
+    if(!r.ok){ siteMsg = r.msg; change ? sitePwDraw() : siteLockDraw(); return; }
+    toast(change ? "Parol almashtirildi" : "Parol o'rnatildi. Endi uni eslab qoling"); siteHas = true; siteMsg = "";
+    if(change){ sitePass = n1; sitePwChg = false; sitePwDraw(); } else { siteUnlock(n1); }
+  }catch(e){ handleErr(e); }
+}
+function siteVal(k, kind){
+  const v = (siteCur[k] !== undefined && siteCur[k] !== null && siteCur[k] !== "" && !(Array.isArray(siteCur[k]) && !siteCur[k].length)) ? siteCur[k] : SITE_DEF[k];
+  if(kind === "L") return (v || []).map(x => (x.t || "") + " | " + (x.d || "")).join("\n");
+  if(kind === "P") return (v || []).join("\n");
+  return v || "";
+}
+function drawSite(){
+  $("siteBody").innerHTML = SITE_FIELDS.map(([h, fs]) => `<div class="scanbox" style="margin-bottom:12px"><b style="font-size:16px">${esc(h)}</b>` + fs.map(([k, lbl, kind]) => {
+    const v = esc(siteVal(k, kind)), st = 'class="xsel" style="padding:10px 12px;width:100%;height:auto;min-height:44px"';
+    const inp = (kind === "a" || kind === "L" || kind === "P") ? `<textarea id="sf_${k}" ${st} rows="${kind === "a" ? 3 : 6}">${v}</textarea>` : `<input id="sf_${k}" ${st} value="${v}" ${kind === "u" ? 'inputmode="url" autocapitalize="off"' : ""} ${kind === "p" ? 'inputmode="tel"' : ""}>`;
+    return `<span class="lbl">${esc(lbl)}</span>${inp}`;
+  }).join("") + `</div>`).join("") + `<div class="scanrow"><button onclick="siteSave()" style="flex:1;height:48px;border:0;border-radius:12px;background:#127A45;color:#fff;font-weight:800">Saqlash</button>
+    <button onclick="siteReset()" style="height:48px;padding:0 16px;border:0;border-radius:12px;background:#FDECEC;color:#C62828;font-weight:700">Asl holatga</button></div>`;
+}
+function siteCollect(){
+  const o = {};
+  SITE_FIELDS.forEach(([h, fs]) => fs.forEach(([k, lbl, kind]) => {
+    const raw = $("sf_" + k).value;
+    if(kind === "L") o[k] = raw.split("\n").map(l => l.trim()).filter(Boolean).map(l => { const i = l.indexOf("|"); return i < 0 ? {t:l, d:""} : {t:l.slice(0, i).trim(), d:l.slice(i + 1).trim()}; });
+    else if(kind === "P") o[k] = raw.split("\n").map(l => l.trim()).filter(Boolean);
+    else o[k] = raw.trim();
+  }));
+  return o;
+}
+async function siteSave(){
+  try{
+    const o = siteCollect();
+    if(o.apk_url && !/^(https?:\/\/|[\w./-]+$)/i.test(o.apk_url)){ toast("Ilova havolasi https:// bilan boshlansin", true); return; }
+    const r = await rpc("admin_site_save", {p_token:token, p_json:JSON.stringify(o), p_lock:sitePass});
+    if(r.ok === false){ if(/parol/i.test(r.msg)) siteRelock(r.msg); else toast(r.msg, true); return; }
+    siteCur = o; toast("Saqlandi. Sayt yangilandi");
+  }catch(e){ handleErr(e); }
+}
+async function siteReset(){
+  if(!confirm("Sayt matnlari asl holatiga qaytarilsinmi?")) return;
+  try{
+    const r = await rpc("admin_site_reset", {p_token:token, p_lock:sitePass});
+    if(r.ok === false){ siteRelock(r.msg); return; }
+    siteCur = {}; drawSite(); toast("Asl holatga qaytarildi");
+  }catch(e){ handleErr(e); }
+}
 
 async function openRegs(){ show("regs"); await loadRegs(); }
 async function loadRegs(){
