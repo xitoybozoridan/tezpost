@@ -1279,7 +1279,7 @@ async function submitAuth(){
 
 function enterApp(){
   $("helloName").textContent = (me && me.name || "").split(" ")[0];
-  renderList(); show("home"); loadList(); checkUnread(); refreshAddr(); loadTxCard(); checkOferta(); loadCode();
+  renderList(); show("home"); loadList(); checkUnread(); refreshAddr(); loadTxCard(); checkOferta(); loadCode(); setTimeout(initPush, 1500);
 }
 function forceLogout(){
   token = null; me = null; declarations = [];
@@ -1288,6 +1288,7 @@ function forceLogout(){
 }
 async function logout(){
   const t = token;
+  try{ const f = store.get("tp_fcm", ""); if(t && f) await rpc("unregister_device", {p_token:t, p_fcm:f}); }catch(e){}
   try{ if(t) await rpc("logout_customer", {p_token:t}); }catch(e){}
   forceLogout(); toast("Hisobdan chiqdingiz");
 }
@@ -2033,6 +2034,24 @@ function bindNative(){
   }catch(e){}
 }
 bindNative(); setTimeout(bindNative, 600); setTimeout(bindNative, 2000);
+
+/* ====== Push-bildirishnoma (native ilova) ====== */
+async function initPush(){
+  const P = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
+  if(!P || !token) return;
+  try{
+    if(!initPush.l){
+      initPush.l = true;
+      P.addListener("registration", t=>{ store.set("tp_fcm", t.value); if(token) rpc("register_device", {p_token:token, p_fcm:t.value, p_platform:"android"}).catch(()=>{}); });
+      P.addListener("pushNotificationReceived", n=>{ try{ sndRecv(); }catch(e){} checkUnread(); toast((n && n.title) || "Yangi xabar"); });
+      P.addListener("pushNotificationActionPerformed", a=>{ const d = a && a.notification && a.notification.data; if(d && d.type === "chat") openChat(); else openNotif(); });
+    }
+    try{ await P.createChannel({id:"tezpost", name:"TezPost xabarlari", description:"Yuk holati va yordam javoblari", sound:"tezpost.wav", importance:5, visibility:1, vibration:true, lights:true, lightColor:"#0B4DB5"}); }catch(e){}
+    let perm = await P.checkPermissions();
+    if(perm.receive !== "granted") perm = await P.requestPermissions();
+    if(perm.receive === "granted") await P.register();
+  }catch(e){}
+}
 
 /* ====== Tepadan tortib yangilash (faqat turgan ekran) ====== */
 async function fetchVideos(){
