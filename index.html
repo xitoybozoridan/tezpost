@@ -2036,21 +2036,24 @@ function bindNative(){
 bindNative(); setTimeout(bindNative, 600); setTimeout(bindNative, 2000);
 
 /* ====== Push-bildirishnoma (native ilova) ====== */
+const PUSH_DEBUG = true; /* sinovdan keyin false qiling */
 async function initPush(){
   const P = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
   if(!P || !token) return;
   try{
     if(!initPush.l){
       initPush.l = true;
-      P.addListener("registration", t=>{ store.set("tp_fcm", t.value); if(token) rpc("register_device", {p_token:token, p_fcm:t.value, p_platform:"android"}).catch(()=>{}); });
+      P.addListener("registrationError", e=>{ if(PUSH_DEBUG) alert("Push xato: "+JSON.stringify(e)); });
+      P.addListener("registration", t=>{ if(PUSH_DEBUG) alert("FCM token: "+t.value); store.set("tp_fcm", t.value); if(token) rpc("register_device", {p_token:token, p_fcm:t.value, p_platform:"android"}).catch(()=>{}); });
       P.addListener("pushNotificationReceived", n=>{ try{ sndRecv(); }catch(e){} checkUnread(); toast((n && n.title) || "Yangi xabar"); });
       P.addListener("pushNotificationActionPerformed", a=>{ const d = a && a.notification && a.notification.data; if(d && d.type === "chat") openChat(); else openNotif(); });
     }
     try{ await P.createChannel({id:"tezpost", name:"TezPost xabarlari", description:"Yuk holati va yordam javoblari", sound:"tezpost.wav", importance:5, visibility:1, vibration:true, lights:true, lightColor:"#0B4DB5"}); }catch(e){}
     let perm = await P.checkPermissions();
     if(perm.receive !== "granted") perm = await P.requestPermissions();
+    if(PUSH_DEBUG) alert("Push ruxsat: "+perm.receive);
     if(perm.receive === "granted") await P.register();
-  }catch(e){}
+  }catch(e){ if(PUSH_DEBUG) alert("Push catch: "+e); }
 }
 
 /* ====== Tepadan tortib yangilash (faqat turgan ekran) ====== */
