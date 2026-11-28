@@ -590,7 +590,7 @@
   .navadd .fring{position:absolute;inset:-5px;border-radius:50%;border:2px solid rgba(47,123,234,.55);animation:qring 2.6s ease-out infinite}
   [data-theme=dark] .navadd .fab{border-color:var(--card)}
   [data-theme=dark] .nav .npill{background:linear-gradient(160deg,#27407A,#1E3566);box-shadow:0 3px 10px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
-  html,body{overflow-x:hidden}
+  html,body{overflow-x:clip}
   .screen.active.sl-r{animation:slr .34s cubic-bezier(.2,.8,.2,1) both}
   .screen.active.sl-l{animation:sll .34s cubic-bezier(.2,.8,.2,1) both}
   @keyframes slr{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
@@ -2036,24 +2036,22 @@ function bindNative(){
 bindNative(); setTimeout(bindNative, 600); setTimeout(bindNative, 2000);
 
 /* ====== Push-bildirishnoma (native ilova) ====== */
-const PUSH_DEBUG = true; /* sinovdan keyin false qiling */
 async function initPush(){
   const P = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
   if(!P || !token) return;
   try{
     if(!initPush.l){
       initPush.l = true;
-      P.addListener("registrationError", e=>{ if(PUSH_DEBUG) alert("Push xato: "+JSON.stringify(e)); });
-      P.addListener("registration", t=>{ if(PUSH_DEBUG) alert("FCM token: "+t.value); store.set("tp_fcm", t.value); if(token) rpc("register_device", {p_token:token, p_fcm:t.value, p_platform:"android"}).catch(()=>{}); });
+      P.addListener("registration", t=>{ store.set("tp_fcm", t.value); if(token) rpc("register_device", {p_token:token, p_fcm:t.value, p_platform:"android"}).catch(()=>{}); });
       P.addListener("pushNotificationReceived", n=>{ try{ sndRecv(); }catch(e){} checkUnread(); toast((n && n.title) || "Yangi xabar"); });
       P.addListener("pushNotificationActionPerformed", a=>{ const d = a && a.notification && a.notification.data; if(d && d.type === "chat") openChat(); else openNotif(); });
     }
-    try{ await P.createChannel({id:"tezpost", name:"TezPost xabarlari", description:"Yuk holati va yordam javoblari", sound:"tezpost.wav", importance:5, visibility:1, vibration:true, lights:true, lightColor:"#0B4DB5"}); }catch(e){}
+    try{ await P.deleteChannel({id:"tezpost"}); }catch(e){}
+    try{ await P.createChannel({id:"tezpost2", name:"TezPost xabarlari", description:"Yuk holati va yordam javoblari", sound:"tezpost.wav", importance:5, visibility:1, vibration:true, lights:true, lightColor:"#0B4DB5"}); }catch(e){}
     let perm = await P.checkPermissions();
     if(perm.receive !== "granted") perm = await P.requestPermissions();
-    if(PUSH_DEBUG) alert("Push ruxsat: "+perm.receive);
     if(perm.receive === "granted") await P.register();
-  }catch(e){ if(PUSH_DEBUG) alert("Push catch: "+e); }
+  }catch(e){}
 }
 
 /* ====== Tepadan tortib yangilash (faqat turgan ekran) ====== */
