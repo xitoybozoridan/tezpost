@@ -2038,6 +2038,7 @@ bindNative(); setTimeout(bindNative, 600); setTimeout(bindNative, 2000);
 /* ====== Push-bildirishnoma (native ilova) ====== */
 async function initPush(){
   const P = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
+  alert("1) initPush: plugin="+(!!P)+" token="+(!!token)+" cap="+(!!window.Capacitor));
   if(!P || !token) return;
   try{
     if(!initPush.l){
@@ -2046,13 +2047,14 @@ async function initPush(){
       P.addListener("pushNotificationReceived", n=>{ try{ sndRecv(); }catch(e){} checkUnread(); toast((n && n.title) || "Yangi xabar"); });
       P.addListener("pushNotificationActionPerformed", a=>{ const d = a && a.notification && a.notification.data; if(d && d.type === "chat") openChat(); else openNotif(); });
     }
+    alert("2) listener ok");
     try{ await P.deleteChannel({id:"tezpost"}); }catch(e){ alert("del xato: "+e); }
-    try{ await P.createChannel({id:"tezpost2", name:"TezPost xabarlari", description:"Yuk holati va yordam javoblari", sound:"tezpost.wav", importance:5, visibility:1, vibration:true, lights:true, lightColor:"#0B4DB5"}); }catch(e){ alert("createChannel xato: "+e); }
+    try{ await P.createChannel({id:"tezpost2", name:"TezPost xabarlari", description:"Yuk holati va yordam javoblari", sound:"tezpost.wav", importance:5, visibility:1, vibration:true, lights:true, lightColor:"#0B4DB5"}); alert("3) kanal yaratildi"); }catch(e){ alert("createChannel xato: "+e); }
     try{ const L = await P.listChannels(); alert("Kanallar: "+JSON.stringify((L.channels||[]).map(c=>c.id+":"+c.sound))); }catch(e){ alert("list xato: "+e); }
     let perm = await P.checkPermissions();
     if(perm.receive !== "granted") perm = await P.requestPermissions();
     if(perm.receive === "granted") await P.register();
-  }catch(e){}
+  }catch(e){ alert("initPush catch: "+e+" "+(e&&e.message)); }
 }
 
 /* ====== Tepadan tortib yangilash (faqat turgan ekran) ====== */
